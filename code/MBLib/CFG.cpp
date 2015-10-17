@@ -1,6 +1,8 @@
 
 #include "CFG.hpp"
 
+CFG::CFG() {}
+
 CFG::CFG(TiXmlDocument& doc) {
 	TiXmlElement* root = doc.RootElement();
 	assert(root != nullptr);

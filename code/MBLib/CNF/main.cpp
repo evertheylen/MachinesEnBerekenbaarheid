@@ -14,7 +14,7 @@ int main() {
 	TiXmlDocument doc_cfg;
 	doc_cfg.LoadFile("CNF/CFGS/CFG.xml");
 	CFG cfg_1(doc_cfg);
-	find_nullable_symbols(cfg_1);
+	eliminate_epsilon_productions(cfg_1);
 }
 
 
