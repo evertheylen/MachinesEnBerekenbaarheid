@@ -13,8 +13,8 @@ dependencies["build_exec"] = [
 
 #include <iostream>
 
-#include "MBLib/CFG.hpp"
-#include "libs/tinyxml/tinyxml.h"
+#include "../MBLib/CFG.hpp"
+#include "../libs/tinyxml/tinyxml.h"
 
 #define ENSURE_ARGCOUNT(k) if (argc < k) { std::cout << "Not enough arguments." << std::endl; return 1; }
 

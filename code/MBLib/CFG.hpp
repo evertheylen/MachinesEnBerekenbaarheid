@@ -21,7 +21,7 @@ dependencies["objects"] = [
 
 #include <cassert>
 
-#include "libs/tinyxml/tinyxml.h"
+#include "../libs/tinyxml/tinyxml.h"
 
 
 class CFG {
