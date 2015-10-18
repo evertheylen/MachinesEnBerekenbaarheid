@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import subprocess # call
-import shlex  # splitting for call
 
 import os  # listdir, path, getcwd
 import argparse
@@ -9,13 +8,12 @@ import glob  # glob.glob
 
 import pdb  # debugging, pdb.set_trace()
 
-# bake_me scripts can put global data in here
-global global_data
-global_data = {
-    "collections": [],
-    "extensions": [],
-    "print_commands": False,
-}
+import copy
+import csv
+
+import datetime
+MAX_DATE = datetime.datetime(9999, 12, 31)
+MIN_DATE = datetime.datetime(1,1,1)
 
 global all_units
 # key is location!!
@@ -56,6 +54,8 @@ def rgb(f, b=black):
 
 def rgbtext(s, f=red, b=black):
     return rgb(f,b) + s + endc
+
+
 
 # -------------------------------------------------------
 # Logging
@@ -112,13 +112,153 @@ class BuildError(BakeError):
         return rgbtext(("Error while building todo '{s.todo}'." + (" ("+self.info+")" if self.info != "" else "")).format(s=self), red)
 
 
+# ------------------------------------------------------
+# Database
+
+# the 'database' is actually a csv, like this:
+# A,worker,action,file1,file2
+# B,worker,action,file3,file4
+
+class Database:
+    def __init__(self, filename):
+        self.filename = filename
+        self.values = {}
+        if os.path.isfile(filename):
+            with open(filename) as f:
+                reader = csv.reader(f, delimiter=' ', quotechar='|')
+                for row in reader:
+                    if len(row) > 3:
+                        self.values[(row[0],row[1],row[2])] = row[3:]
+        
+    def write(self):
+        with open(self.filename, 'w') as f:
+            writer = csv.writer(f, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            for k,v in self.values.items():
+                writer.writerow(list(k) + v)
+    
+    @classmethod
+    def tuplify(cls, todo):
+        return (todo.unit.name, todo.worker.shortname, todo.action)
+    
+    def get_row(self, todo):
+        return self.values[Database.tuplify(todo)]
+    
+    def set_row(self, todo, files):
+        if files is not None:
+            self.values[Database.tuplify(todo)] = files
+    
+    def __contains__(self, todo):
+        return Database.tuplify(todo) in self.values 
+    
+    def append_row(self, todo, extra_files):
+        t = Database.tuplify(todo)
+        if t in self.values:
+            self.values[t].append(extra_files)
+        else:
+            self.values[t] = extra_files
+    
+        
+    
+# ------------------------------------------------------
+# Config
+
+class ConfigDict(dict):
+    pass
+
+
+def isConfig(e):
+    return isinstance(e, ConfigDict)
+
+class Config:  
+    def __getitem__(self, key):
+        for invlayer in self.inv_layers():
+            if key in invlayer:
+                inve = invlayer[key]
+                if isConfig(inve):
+                    return NestedConfig(self, key)
+        
+        for layer in self.layers():
+            if key in layer:
+                return layer[key]
+        
+        raise KeyError(key)
+    
+    def keys(self):
+        kys = set()
+        for layer in self.layers():
+            kys.update(layer.keys())
+        yield from kys
+    
+    __iter__ = keys
+    
+    def items(self):
+        for k in self.keys():
+            yield (k, self[k])
+    
+    def values(self):
+        for k in self.keys():
+            yield self[k]
+    
+    def layers_empty(self):
+        for i in self.layers:
+            return False
+        return True
+
+
+class NestedConfig(Config):
+    def __init__(self, parent, parentkey, toplayers=[]):
+        self.parent = parent
+        self.parentkey = parentkey
+        self.toplayers = toplayers
+    
+    def layers(self):
+        yield from self.toplayers
+        for parentlayer in self.parent.layers():
+            if self.parentkey in parentlayer:
+                yield parentlayer[self.parentkey]
+    
+    def inv_layers(self):
+        yield from inverse_from(self.toplayers)
+        for parentlayer in self.parent.inv_layers():
+            if self.parentkey in parentlayer:
+                yield parentlayer[self.parentkey]
+    
+    def new_extra_layer(self, extra):
+        return NestedConfig(self.parent, self.parentkey, [extra] + self.toplayers)
+        
+
+class HardConfig(Config):
+    def __init__(self, real_layers):
+        self.real_layers = real_layers
+    
+    def layers(self):
+        yield from self.real_layers
+    
+    def inv_layers(self):
+        yield from inverse_from(self.real_layers)
+        
+    def add_low_priority(self, layer):
+        self.real_layers.append(layer)
+    
+    def add_high_priority(self, layer):
+        self.real_layers.insert(0, layer)
+    
+    def new_extra_layer(self, extra):
+        return HardConfig([extra] + self.real_layers)
+
+
 
 # ------------------------------------------------------
 # Utilities
 
+def inverse_from(l):
+    i = len(l)-1
+    while i >= 0:
+        yield l[i]
+        i -= 1
+
+
 def call(s, writer):
-    if global_data["print_commands"]:
-        writer.writeline(">> " + s)
     # if shell=True, it is recommended to pass the command as a string, rather than as a list
     p = subprocess.Popen(s, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     while True:
@@ -169,25 +309,43 @@ def exec_file(location, loc=locals()):
     return False
 
 
+def dates_from_files(filenames):
+    for fn in filenames:
+        if os.path.isfile(fn):
+            yield datetime.datetime.fromtimestamp(os.path.getmtime(fn))
+        else:
+            yield MIN_DATE
 
 
 # -----------------------------------------------------------
 # Units
 
-def create_unit(uname):
-    uloc = os.path.abspath(uname)
+def create_unit(uname, config):
+    if uname.startswith("@"):
+        collection = True
+        uloc = os.path.abspath(uname[1:])
+    else:
+        collection = False
+        uloc = os.path.abspath(uname)
+    
+    # TODO weirdness ensues when trying to define the same dir as both collection and unit
     if uloc in all_units:
         return all_units[uloc]
     else:
-        u = Unit(uname)
-        u.scan()
+        if collection:
+            u = CollectionUnit(uname, config)
+        else:
+            u = Unit(uname)
+        u.scan(config)
         all_units[u.location] = u
         return u
+
 
 # not an actual unit
 class BaseUnit:
     def __init__(self, name):
         self.name = name
+
 
 class Unit(BaseUnit):
     def __init__(self, name):
@@ -200,7 +358,6 @@ class Unit(BaseUnit):
         }
         self.worker = None
         self.deps = {}  # for each action, certain deps
-        # worker and deps have special meaning
         
         self.files = None
     
@@ -210,7 +367,11 @@ class Unit(BaseUnit):
     def __hash__(self):
         return hash(self.location)
     
-    def scan(self):
+    def scan(self, config):
+        self.parse_bakeme(config)
+        self.parse_deps(config)
+    
+    def parse_bakeme(self, config):
         # checks all files for baker-related stuff
         # these files are either bake_me.py or marked comments
         # within sources with the proper extension
@@ -223,11 +384,10 @@ class Unit(BaseUnit):
                 self.files.append(bake_me_loc)
         except Exception as e:
             raise ConfigError(bake_me_loc, "whatever", str(e))
-            #print("hello is:", global_data["hello"] if "hello" in global_data else "?????")
         
         # then, check all files
         for fname in os.listdir(self.location):
-            if there_exists(global_data["extensions"], lambda e: fname.endswith(e)):
+            if there_exists(config["extensions"], lambda e: fname.endswith(e)):
                 f_loc = os.path.join(self.location, fname)
                 self.files.append(f_loc)
                 f = open(f_loc)
@@ -244,21 +404,22 @@ class Unit(BaseUnit):
                 try:
                     exec(bake_code, globals(), self.data)
                 except Exception as e:
-                    raise ConfigError(floc, "[bake me]", str(e))
+                    raise ConfigError(f_loc, "[bake me]", str(e))
                 
                 f.close()
-        
-        
+    
+    def parse_deps(self, config):
         self.worker = workers[self.data["worker"]]
         # TODO check for legit action?
         for action in self.data["dependencies"]:
             self.deps[action] = set()
             for dep in self.data["dependencies"][action]:
-                # format (regex): "unit>(worker)?>(action)?"
+                # format (regex): "unit>(worker)?>action"
                 parts = dep.split(">")
-                assert len(parts) == 3  # TODO shouldn't assert, raise exception instead
+                if len(parts) != 3:
+                    raise ConfigError("dependency %s"%dep, "bake_me code for %s"*self.name)
                 dname, dworker_s, daction = tuple(parts)
-                dunit = create_unit(dname)
+                dunit = create_unit(dname, config)
                 dworker = workers[dworker_s]  # this can be None, but should be fixed by the Todo's
                 # daction remains daction
                 self.deps[action].add(Dependency(dunit, dworker, daction))
@@ -269,10 +430,54 @@ class Unit(BaseUnit):
             print("  - Action "+action)
             for dep in self.deps[action]:
                 print("     - " + str(dep))
-       
-       
+    
+    def get_deps(self, action):
+        if action in self.deps:
+            return self.deps[action]
+        else:
+            return []
+    
+    def get_files(self):
+        yield from self.files
+    
 
-
+class CollectionUnit(Unit):
+    def __init__(self, name, config):
+        assert name.startswith("@")
+        self.name = name
+        self.worker = None
+        self.location = os.path.abspath(name[1:])
+        self.subunits = []
+        self.data = {}
+        
+        if name in config["collections"]:
+            for subname in config["collections"][name]:
+                self.subunits.append(create_unit(subname, config))
+        else:
+            for reld in os.listdir(self.location):
+                d = os.path.abspath(os.path.join(self.location, reld))
+                if os.path.isdir(d):
+                    self.subunits.append(create_unit(os.path.relpath(d, os.getcwd()), config))
+        
+    def scan(self, config):
+        # nothing to scan
+        # TODO (hard): find a solution so you can add layers to the config for subunits
+        pass
+    
+    def list_deps(self):
+        print("\nCollection unit %s, containing units: %s"%(self.name, ", ".join([s.name for s in self.subunits])))
+    
+    def get_deps(self, action):
+        deps = []
+        for s in self.subunits:
+            deps.append(Dependency(s, None, action))
+        return deps
+    
+    def get_files(self):
+        for s in self.subunits:
+            yield from s.get_files()
+        
+        
 # -------------------------------------------------------------------------------
 # Dependencies and Todo's
 
@@ -305,8 +510,8 @@ class Todo(Dependency):
         
         # a Dependency may contain null values or empty string for worker/action...
         self.deps = set()
-        if self.action in self.unit.deps:
-            self.build_deps(self.unit.deps[self.action])
+        if len(self.unit.get_deps(self.action)) > 0:
+            self.build_deps(self.unit.get_deps(self.action))
         
         # also allow extra deps based on the worker and action
         self.build_deps(self.worker.extra_deps(self))        
@@ -327,18 +532,54 @@ class Todo(Dependency):
             d.list_deps(writer)
         writer.untab()
     
-    def do(self, writer):
+    def do(self, database, writer):
+        # return True if we have actually performed work
+        
+        # check whether we already did this one before, this run of baker.py
         if self.done:
             writer.writeline(rgbtext("Already done '" + str(self)+"'", green))
-            return
+            return False
+        
+        deps_redone = False
         if len(self.deps) > 0:
             writer.writeline(rgbtext("Dependencies of Todo '" + str(self)+"':", cyan))
             writer.tab()
             for d in self.deps:
-                d.do(writer)
+                deps_redone = deps_redone or d.do(database, writer)
             writer.untab()
+        
+        # check whether our unit is a collection
+        if isinstance(self.unit, CollectionUnit):
+            writer.writeline(rgbtext("No need to perform %s on the collection '%s'."%(self.action, self.unit.name), cyan))
+            return False
+        
+        if not deps_redone:
+            # check whether we did this one before, during some previous run of baker.py
+            # basically, we have to redo this todo if and only if
+            #    max(dates(input_files)) > min(dates(output_files_prev_run))
+            input_files = self.worker.input_files(self)
+            if self in database:
+                output_files_prev_run = database.get_row(self)
+                # no input files?
+                max_input = max(dates_from_files(input_files)) if len(input_files) > 0 else MIN_DATE
+                # no output files, but it is in the database? no need to redo
+                min_output = min(dates_from_files(input_files)) if len(output_files_prev_run) > 00 else MAX_DATE
+                if max(dates_from_files(input_files)) > min(dates_from_files(output_files_prev_run)):
+                    return self.actually_do(writer, database)
+                else:
+                    writer.writeline(rgbtext("Already (previously) done '" + str(self) +"'", green))
+                    return False
+            else:
+                # output files not in database: todo has never been executed before
+                return self.actually_do(writer, database)
+        else:
+            # deps redone, we redo this one too
+            return self.actually_do(writer, database)
+                
+    
+    def actually_do(self, writer, database):
         writer.writeline(rgbtext("Performing Todo '" + str(self)+"'", cyan))
-        self.worker.do(self, writer)
+        database.set_row(self, self.worker.do(self, writer))
         self.done = True
 
 
@@ -349,20 +590,8 @@ def create_todo(dep):
         return all_todos[t]
     all_todos[t] = t
     return t
-
-
-def passthrough(u):
-    if len(u.files) == 0:
-        subs = set()
-        # 'passthrough', all subfolders with actual files are selected
-        for d in os.listdir(u.location):
-            if os.path.isdir(d):
-                subu = create_unit(d)
-                subs.update(passthrough(subu))
-    else:
-        return set([u])
-
-        
+    
+    
 def pick_nonempty_todo(high, low):  # ... priority
     # worker and action of low may be taken if high is empty for those attributes
     # high must always have a unit ofc
@@ -377,16 +606,22 @@ class RootTodo(Todo):
         self.deps = set()
         self.build_deps([Dependency(u, None, "") for u in cmd_units])
     
-    def do(self, writer):
+    def do(self, database, writer):
+        fails = []
         for d in self.deps:
+            writer.indent = 0
             try:
-                d.do(writer)
+                d.do(database, writer)
             except BuildError as e:
                 writer.indent = 0
                 writer.writeline(str(e))
+                fails.append(d.unit.name)
             writer.writeline("")
         
-        writer.writeline("All done!")
+        if len(fails) == 0:
+            writer.writeline("All done!")
+        else:
+            writer.writeline("All done, but these units you specified failed: %s"%(", ".join(fails)))
 
 
 
@@ -405,14 +640,19 @@ class Worker:
         return set([])  # by returns nothing
     
     def do(self, todo):
-        # by default does nothing
-        pass
-
+        # by default does nothing, returns no output files
+        # NOTE however, that if the worker actually did something but produced no output files,
+        # you should return None instead of []
+        return []
+    
+    def input_files(self, todo):
+        return list(todo.unit.get_files())  # by default returns all files
+                                            # always works, but less performant
 
 class EasyWorker(Worker):
     def do(self, todo, writer):
         if todo.action in self.actions:
-            self.actions[todo.action](self, todo, writer)
+            return self.actions[todo.action](self, todo, writer)
         else:
             writer.writeline("Ignoring action %s on %s"%(todo.action,todo.unit.name))
 
@@ -421,6 +661,7 @@ class EasyWorker(Worker):
 
 class GccCompiler(EasyWorker):
     shortname = "gcc"
+    needs_config = "gcc_config"
     
     def __init__(self, config):
         self.__dict__.update(config)
@@ -439,6 +680,7 @@ class GccCompiler(EasyWorker):
         return extra
     
     def build_objects(self, todo, writer):
+        output_files = []
         includes = set([os.getcwd()])
         for d in todo.all_deps():
             if d.action == "headers":
@@ -454,8 +696,12 @@ class GccCompiler(EasyWorker):
             filename = drop_ext(source)
             objloc = os.path.join(todo.unit.location, filename+".o")
             check_call(self.cmd_object.format(s=self, source=source, objloc=objloc, include=include), writer, todo)
+            output_files.append(objloc)
+        
+        return output_files
         
     def build_exec(self, todo, writer):
+        output_files = []
         # typical gcc call for executables:
         #  g++ -O3 -std=c++11 -I /include/me -o exec obj.o obj2.o obj3.o
         #  --> produces exec
@@ -471,8 +717,11 @@ class GccCompiler(EasyWorker):
             objects = " ".join(objects)
             execloc = os.path.join(todo.unit.location, executable)
             check_call(self.cmd_exec.format(s=self, execloc=execloc, objects=objects), writer, todo)
+            output_files.append(execloc)
         else:
             raise ConfigError(todo.unit.name, "executable", "name of the resulting executable")
+        
+        return output_files
     
     actions = {
         "build_objects": build_objects,
@@ -482,6 +731,7 @@ class GccCompiler(EasyWorker):
 
 class Maintenance(EasyWorker):
     shortname = "maintenance"
+    needs_config = "maintenance_config"
     
     def __init__(self, config):
         if "dirty_files" not in config:
@@ -492,6 +742,7 @@ class Maintenance(EasyWorker):
         for regex in self.dirty_files:
             for l in glob.glob(os.path.join(todo.unit.location, regex)):
                 os.remove(l)
+        return []
     
     def clean_all(self, todo, writer):
         self.clean(todo, writer)
@@ -500,6 +751,7 @@ class Maintenance(EasyWorker):
             loc = os.path.join(todo.unit.location, exe)
             if os.path.isfile(loc):
                 os.remove(loc)
+        return []
     
     actions = {
         "clean": clean,
@@ -514,10 +766,16 @@ class Maintenance(EasyWorker):
 
 to_be_configured_workers = {
     "": None,  # default
-    "gcc": (GccCompiler, "gcc_config"),
-    "maintenance": (Maintenance, "maintenance_config"),
     "gtester": Worker,
 }
+
+auto_config = [GccCompiler, Maintenance]
+
+for w in auto_config:
+    if hasattr(w, "needs_config"):
+        to_be_configured_workers[w.shortname] = (w, w.needs_config)
+    else:
+        to_be_configured_workers[w.shortname] = w
 
 global workers
 workers = {}
@@ -541,15 +799,23 @@ def main():
     parser.add_argument("action", metavar="A", type=str, help="The action the worker should perform")
     parser.add_argument("units", metavar="U", type=str, nargs="+", help="A unit (given by relative path) to use")
     # TODO other actions
-    parser.add_argument("--worker", metavar="C", type=str, help="worker to use", choices=to_be_configured_workers.keys(), default="DEFAULT_BY_ACTION")
+    parser.add_argument("--worker", metavar="W", type=str, help="worker to use", choices=to_be_configured_workers.keys(), default="DEFAULT_BY_ACTION")
     parser.add_argument("--list-deps", action="store_true", help="simply list the dependencies of all units concerned", default=False)
     
     args = parser.parse_args()
     
     writer = IndentWriter()
     
-    if not exec_file("bake_project.py", global_data):
+    project_config = {}
+    if not exec_file("bake_project.py", project_config):
         raise ConfigError("this directory", "bake_project.py", "an empty file works too")
+    
+    # NOTE this is different from the original Baker
+    #default_config = {}
+    #assert exec_file("default.py", default_config)
+    config = HardConfig([project_config])
+    
+    db = Database(".baking_database")
     
     # parse workers
     for k, t in to_be_configured_workers.items():
@@ -558,7 +824,7 @@ def main():
                 workers[k] = t[0]() if t[0] is not None else None
             else:
                 try:
-                    workers[k] = t[0](global_data[t[1]])
+                    workers[k] = t[0](config[t[1]])
                 except KeyError:
                     raise ConfigError("bake_project.py", t[1])
         else:
@@ -566,22 +832,10 @@ def main():
     
     cmd_units = set()
     
-    for uname in args.units:
-        if uname.startswith("@"):
-            colname = uname[1:]
-            if colname not in global_data["collections"]:
-                u = create_unit(colname)
-                cmd_units.add(u)
-                pt = passthrough(u)
-                cmd_units.update(pt)
-            else:
-                for sub_uname in global_data["collections"][colname]:
-                    subu = create_unit(sub_uname)
-                    cmd_units.add(subu)
-        else:
-            u = create_unit(uname)
-            cmd_units.add(u)
-    
+    for uname in args.units:   
+        u = create_unit(uname, config)
+        cmd_units.add(u)
+
     
     if args.list_deps:
         for u in all_units.values():
@@ -597,8 +851,9 @@ def main():
         default_action = args.action
         
         root = RootTodo(default_worker, default_action, cmd_units)
-        root.do(writer)
+        root.do(db, writer)
         #root.list_deps()
+        db.write()
         
         
 

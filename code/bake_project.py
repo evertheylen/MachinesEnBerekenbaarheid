@@ -1,19 +1,20 @@
 
-extensions = [".cpp", ".hpp", ".h", ".test"]
+collections = ConfigDict({
+    "@execs": ["MBExec"],
+    "@all": ["@MBLib", "MBExec"]
+})
 
-collections = {
-    "all": ["MBLib"]
-}
-
-gcc_config = {
-    "mode": "g",
-    "std": "c++11",
-    "extra": "-Wall"
-}
-
-maintenance_config = {
-    "dirty_files": ["*.o"]
-}
+extensions =  [".cpp", ".cc", ".hpp", ".hh", ".h", ".test"]
 
 print_commands = False
 
+gcc_config = ConfigDict({
+    "mode": "g3",
+    "std": "c++11",
+    "extra": "-Wall",
+    "input": ["*.cpp", "*.cc", "*.hpp", "*.h", "*.hh"]
+})
+
+maintenance_config = ConfigDict({
+    "dirty_files": ["*.o"]
+})

@@ -9,7 +9,7 @@
 #define CNF_CNF_HPP_
 
 #include <set>
-#include "../CFG.hpp"
+#include "MBLib/CFG/CFG.hpp"
 #include <vector>
 #include <utility>
 #include <string>

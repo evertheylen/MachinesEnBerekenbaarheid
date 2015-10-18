@@ -14,6 +14,11 @@ install_manifest.txt
 
 *.gv
 
+*.d
+
+# Bakerrrr
+.baking_database
+
 # Binary images, don't want that!
 *.jpeg
 *.jpg
@@ -27,6 +32,7 @@ install_manifest.txt
 *.kdev4
 .kdev4
 *.kate-swp
+.kdev_include_paths
 
 # Compiled Object files
 *.slo

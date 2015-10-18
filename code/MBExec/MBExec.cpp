@@ -4,7 +4,7 @@
 executable = "MBExec"
 
 dependencies["build_exec"] = [
-	"MBLib>>build_objects",
+	"@MBLib>>build_objects",
 	"libs/tinyxml>>build_objects"
 ]
 
@@ -13,8 +13,9 @@ dependencies["build_exec"] = [
 
 #include <iostream>
 
-#include "../MBLib/CFG.hpp"
-#include "../libs/tinyxml/tinyxml.h"
+#include "MBLib/CFG/CFG.hpp"
+#include "MBLib/CNF/CNF.hpp"
+#include "libs/tinyxml/tinyxml.h"
 
 #define ENSURE_ARGCOUNT(k) if (argc < k) { std::cout << "Not enough arguments." << std::endl; return 1; }
 
@@ -34,6 +35,13 @@ int main(int argc, char** argv) {
 		doc.LoadFile();
 		CFG G(doc);
 		G.to_xml(std::string(argv[3]));
+	} else if (action == "CNF") {
+		ENSURE_ARGCOUNT(3);
+		TiXmlDocument doc_cfg(argv[2]);
+		doc_cfg.LoadFile();
+		CFG cfg(doc_cfg);
+		CFG cleaned_up_cfg = eliminate_useless_symbols(eliminate_unit_pairs(eliminate_epsilon_productions(cfg))); // Step one for cnf: clean up grammar.
+		std::cout << cleaned_up_cfg << std::endl;
 	} else {
 		std::cout << "We don't know that action, sorry.\n";
 	}

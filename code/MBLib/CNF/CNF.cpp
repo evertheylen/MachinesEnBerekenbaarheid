@@ -4,7 +4,7 @@
  *  Created on: 17 Oct 2015
  *      Author: stijn
  */
-#include "../CFG.hpp"
+#include "MBLib/CFG/CFG.hpp"
 #include "CNF.hpp"
 #include <set>
 #include <map>
