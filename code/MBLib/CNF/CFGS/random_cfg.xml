@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<CFG>
+	<Variables>
+        SAB
+        <StartSymbol>S</StartSymbol>
+	</Variables>
+	<Terminals>
+	    ab$
+	</Terminals>
+	<Productions>
+        <Rule LHS="S" RHS= "ASA|aB"/>
+		<Rule LHS="A" RHS= "B|S"/>
+		<Rule LHS="B" RHS= "b|$"/>
+	</Productions>
+</CFG>

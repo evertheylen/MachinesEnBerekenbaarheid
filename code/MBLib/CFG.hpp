@@ -31,6 +31,8 @@ public:
 	std::map<char, std::set<std::string>> P;	// Productions
 	char S;							// Start symbol, \in V
 	
+	static constexpr const char* EPSILON = "$";
+
 	CFG();
 	CFG(TiXmlDocument& doc);
 	

@@ -12,9 +12,10 @@
 
 int main() {
 	TiXmlDocument doc_cfg;
-	doc_cfg.LoadFile("CNF/CFGS/CFG.xml");
+	doc_cfg.LoadFile("CNF/CFGS/random_cfg.xml");
 	CFG cfg_1(doc_cfg);
-	eliminate_epsilon_productions(cfg_1);
+	CFG result = eliminate_useless_symbols(eliminate_unit_pairs(eliminate_epsilon_productions(cfg_1)));
+	std::cout << result << std::endl;
 }
 
 

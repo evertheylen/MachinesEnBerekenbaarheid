@@ -2,6 +2,7 @@
 #include "CFG.hpp"
 
 #include <memory>
+#include <string>
 
 CFG::CFG() {}
 
