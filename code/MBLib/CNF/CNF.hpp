@@ -33,4 +33,8 @@ std::set<char> find_reachable_symbols(const CFG& input_cfg);
 
 CFG eliminate_useless_symbols(const CFG& input_cfg);
 
+CFG long_rules_to_only_variables(const CFG& input_cfg);
+
+CFG break_long_bodies(const CFG& input_cfg);
+
 #endif /* CNF_CNF_HPP_ */

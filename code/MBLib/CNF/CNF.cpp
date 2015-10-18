@@ -14,7 +14,9 @@
 #include <utility>
 
 CFG CNF(const CFG& input_cfg) {
+	CFG result_cfg = eliminate_useless_symbols(eliminate_unit_pairs(eliminate_epsilon_productions(input_cfg))); // Cleanup the grammar.
 
+	return result_cfg;
 }
 
 std::set<char> find_nullable_symbols(const CFG& input_cfg) {
@@ -256,4 +258,22 @@ CFG eliminate_useless_symbols(const CFG& input_cfg) {
 	}
 
 	return result_cfg;
+}
+
+CFG long_rules_to_only_variables(const CFG& input_cfg) {
+	for (auto iter: input_cfg.P) {
+		for (auto rule: iter.second) {
+			if (rule.length() >= 2) {
+				for (unsigned int i = 0; i < rule.length(); i++) {
+					if (input_cfg.T.find(rule.at(i)) != input_cfg.T.end()) { // If a terminal appears in a body of length >= 2.
+
+					}
+				}
+			}
+		}
+	}
+}
+
+CFG break_long_bodies(const CFG& input_cfg) {
+
 }
