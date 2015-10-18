@@ -1,6 +1,8 @@
 
 #include "CFG.hpp"
 
+#include <memory>
+
 CFG::CFG(TiXmlDocument& doc) {
 	TiXmlElement* root = doc.RootElement();
 	assert(root != nullptr);
@@ -63,11 +65,45 @@ std::ostream& operator<< (std::ostream& out, CFG& G) {
 
 void CFG::to_xml(std::string filename) {
 	TiXmlDocument doc;
-	TiXmlDeclaration decl("1.0", "", "");
-	TiXmlElement root("CFG");
+	TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "", "");
+	TiXmlElement* root = new TiXmlElement("CFG");
 	
-	doc.LinkEndChild(&decl);
-	doc.LinkEndChild(&root);
+	TiXmlElement* vars = new TiXmlElement("Variables");
+	std::string varstring;
+	for (char c: V) varstring += c;
+	TiXmlText* vartext = new TiXmlText(varstring);
+	vars->LinkEndChild(vartext);
+	
+	TiXmlElement* startsymbol = new TiXmlElement("StartSymbol");
+	TiXmlText* symboltext = new TiXmlText(std::string(1, S));
+	startsymbol->LinkEndChild(symboltext);
+	vars->LinkEndChild(startsymbol);
+	
+	root->LinkEndChild(vars);
+	
+	TiXmlElement* terminals = new TiXmlElement("Terminals");
+	std::string termstring;
+	for (char c: T) termstring += c;
+	TiXmlText* termtext = new TiXmlText(termstring);
+	terminals->LinkEndChild(termtext);
+	
+	root->LinkEndChild(terminals);
+	
+	TiXmlElement* productions = new TiXmlElement("Productions");
+	for (auto iter: P) {
+		char head = iter.first;
+		for (std::string body: iter.second) {
+			TiXmlElement* rule = new TiXmlElement("Rule");
+			rule->SetAttribute("LHS", std::string(1, head));
+			rule->SetAttribute("RHS", body);
+			productions->LinkEndChild(rule);
+		}
+	}
+	
+	root->LinkEndChild(productions);
+	
+	doc.LinkEndChild(decl);
+	doc.LinkEndChild(root);
 	
 	doc.SaveFile(filename);
 }
