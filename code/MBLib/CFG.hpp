@@ -31,6 +31,7 @@ public:
 	std::map<char, std::set<std::string>> P;	// Productions
 	char S;							// Start symbol, \in V
 	
+	CFG();
 	CFG(TiXmlDocument& doc);
 	
 	friend std::ostream& operator<< (std::ostream& out, CFG& G);
