@@ -265,7 +265,7 @@ def escape_path(s):
     
 
 def call(s, writer):
-    print(">>", s)
+    # print(">>", s)
     # if shell=True, it is recommended to pass the command as a string, rather than as a list
     p = subprocess.Popen(s, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     while True:
