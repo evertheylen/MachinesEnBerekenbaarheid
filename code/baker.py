@@ -671,6 +671,7 @@ class EasyWorker(Worker):
             return self.actions[todo.action](self, todo, writer)
         else:
             writer.writeline("Ignoring action %s on %s"%(todo.action,todo.unit.name))
+            return []
 
 
 # --- Actual workers ---
