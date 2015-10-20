@@ -563,8 +563,8 @@ class Todo(Dependency):
                 # no input files?
                 max_input = max(dates_from_files(input_files)) if len(input_files) > 0 else MIN_DATE
                 # no output files, but it is in the database? no need to redo
-                min_output = min(dates_from_files(input_files)) if len(output_files_prev_run) > 00 else MAX_DATE
-                if max(dates_from_files(input_files)) > min(dates_from_files(output_files_prev_run)):
+                min_output = min(dates_from_files(output_files_prev_run)) if len(output_files_prev_run) > 0 else MAX_DATE
+                if max_input > min_output:
                     return self.actually_do(writer, database)
                 else:
                     writer.writeline(rgbtext("Already (previously) done '" + str(self) +"'", green))
@@ -581,6 +581,7 @@ class Todo(Dependency):
         writer.writeline(rgbtext("Performing Todo '" + str(self)+"'", cyan))
         database.set_row(self, self.worker.do(self, writer))
         self.done = True
+        return True
 
 
 # creates only unique todos
