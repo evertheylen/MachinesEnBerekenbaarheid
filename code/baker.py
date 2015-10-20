@@ -61,13 +61,18 @@ def rgbtext(s, f=red, b=black):
 # Logging
 
 class IndentWriter:
-    def __init__(self):
+    def __init__(self, debug):
+        self.debug = debug
         self.indent = 0
         self.byte_cache = []
         
     def writeline(self, l):
         self.byte_cache.clear()
         print(self.indent*"  " + l)
+    
+    def debugline(self, l):
+        if self.debug:
+            self.writeline("DBG: " + l)
     
     def writebytes(self, b):
         s = b.decode("utf-8")[:-1]
@@ -265,7 +270,7 @@ def escape_path(s):
     
 
 def call(s, writer):
-    # print(">>", s)
+    writer.debugline(">> " + s)
     # if shell=True, it is recommended to pass the command as a string, rather than as a list
     p = subprocess.Popen(s, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     while True:
@@ -533,13 +538,14 @@ class Todo(Dependency):
             yield from d.all_deps()
     
     def list_deps(self, writer):
-        writer.writeline(indent*"  " + "- " + str(self))
+        writer.writeline("- " + str(self))
         writer.tab()
         for d in self.deps:
             d.list_deps(writer)
         writer.untab()
     
     def do(self, database, writer):
+        writer.debugline("--> do " + str(self))
         # return True if we have actually performed work
         
         # check whether we already did this one before, this run of baker.py
@@ -552,7 +558,9 @@ class Todo(Dependency):
             writer.writeline(rgbtext("Dependencies of Todo '" + str(self)+"':", cyan))
             writer.tab()
             for d in self.deps:
-                deps_redone = deps_redone or d.do(database, writer)
+                writer.debugline("calling do " + str(d))
+                status = d.do(database, writer)
+                deps_redone = deps_redone or status
             writer.untab()
         
         # check whether our unit is a collection
@@ -673,8 +681,8 @@ class GccCompiler(EasyWorker):
     
     def __init__(self, config):
         self.__dict__.update(config)
-        self.cmd_object = "g++ -{s.mode} -std={s.std} -c {source} -o {objloc} {include} {s.extra}"
-        self.cmd_exec = "g++ -{s.mode} -std={s.std} -o {execloc} {objects} {s.extra}"
+        self.cmd_object = "clang++ -{s.mode} -std={s.std} -c {source} -o {objloc} {include} {s.extra}"
+        self.cmd_exec = "clang++ -{s.mode} -std={s.std} -o {execloc} {objects} {s.extra}"
     
     def extra_deps(self, todo):
         extra = set()
@@ -810,10 +818,11 @@ def main():
     # TODO other actions
     parser.add_argument("--worker", metavar="W", type=str, help="worker to use", choices=to_be_configured_workers.keys(), default="DEFAULT_BY_ACTION")
     parser.add_argument("--list-deps", action="store_true", help="simply list the dependencies of all units concerned", default=False)
+    parser.add_argument("--debug", action="store_true", help="show extra debug info", default=False)
     
     args = parser.parse_args()
     
-    writer = IndentWriter()
+    writer = IndentWriter(args.debug)
     
     project_config = {}
     if not exec_file("bake_project.py", project_config):
@@ -860,8 +869,9 @@ def main():
         default_action = args.action
         
         root = RootTodo(default_worker, default_action, cmd_units)
+        if (writer.debug):
+            root.list_deps(writer)
         root.do(db, writer)
-        #root.list_deps()
         db.write()
         
         
