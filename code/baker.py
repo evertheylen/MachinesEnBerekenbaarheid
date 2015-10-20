@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import subprocess # call
 
@@ -257,8 +257,15 @@ def inverse_from(l):
         yield l[i]
         i -= 1
 
+def escape_path(s):
+    #TODO possibly replace more stuff than a space
+    # windows support?
+    news = s.replace(" ", "\\ ")
+    return news
+    
 
 def call(s, writer):
+    print(">>", s)
     # if shell=True, it is recommended to pass the command as a string, rather than as a list
     p = subprocess.Popen(s, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     while True:
@@ -687,7 +694,7 @@ class GccCompiler(EasyWorker):
             if d.action == "headers":
                 includes.add(d.unit.location)
         
-        include = " ".join(["-I %s/"%i for i in includes])
+        include = " ".join(["-I %s/"%(escape_path(i)) for i in includes])
         
         # typical gcc call for objects:
         #  g++ -O3 -std=c++11 -I /include/me -c obj.cpp
@@ -696,7 +703,8 @@ class GccCompiler(EasyWorker):
         for source in glob.glob(os.path.join(todo.unit.location, "*.cpp")):
             filename = drop_ext(source)
             objloc = os.path.join(todo.unit.location, filename+".o")
-            check_call(self.cmd_object.format(s=self, source=source, objloc=objloc, include=include), writer, todo)
+            check_call(self.cmd_object.format(s=self, source=escape_path(source), objloc=escape_path(objloc),
+                                               include=include), writer, todo)
             output_files.append(objloc)
         
         return output_files
@@ -715,9 +723,9 @@ class GccCompiler(EasyWorker):
                     # dependencies should've already been built
                     objects.update(glob.glob(os.path.join(d.unit.location, "*.o")))
             
-            objects = " ".join(objects)
+            objects = " ".join([escape_path(o) for o in objects])
             execloc = os.path.join(todo.unit.location, executable)
-            check_call(self.cmd_exec.format(s=self, execloc=execloc, objects=objects), writer, todo)
+            check_call(self.cmd_exec.format(s=self, execloc=escape_path(execloc), objects=objects), writer, todo)
             output_files.append(execloc)
         else:
             raise ConfigError(todo.unit.name, "executable", "name of the resulting executable")
