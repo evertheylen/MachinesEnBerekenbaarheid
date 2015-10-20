@@ -14,7 +14,7 @@ dependencies["build_exec"] = [
 #include <iostream>
 
 #include "MBLib/CFG/CFG.hpp"
-//#include "MBLib/CNF/CNF.hpp"
+#include "MBLib/CNF/CNF.hpp"
 #include "libs/tinyxml/tinyxml.h"
 
 #define ENSURE_ARGCOUNT(k) if (argc < k) { std::cout << "Not enough arguments." << std::endl; return 1; }
@@ -36,14 +36,14 @@ int main(int argc, char** argv) {
 		s_CFG G(doc);
 		G.to_xml(std::string(argv[3]));
 	} 
-	/*else if (action == "CNF") {
+	else if (action == "CNF") {
 		ENSURE_ARGCOUNT(3);
 		TiXmlDocument doc_cfg(argv[2]);
 		doc_cfg.LoadFile();
-		CFG cfg(doc_cfg);
-		CFG cleaned_up_cfg = eliminate_useless_symbols(eliminate_unit_pairs(eliminate_epsilon_productions(cfg))); // Step one for cnf: clean up grammar.
+		s_CFG cfg(doc_cfg);
+		s_CFG cleaned_up_cfg = eliminate_useless_symbols(eliminate_unit_pairs(eliminate_epsilon_productions(cfg))); // Step one for cnf: clean up grammar.
 		std::cout << cleaned_up_cfg << std::endl;
-	}*/ 
+	} 
 	else {
 		std::cout << "We don't know that action, sorry.\n";
 	}

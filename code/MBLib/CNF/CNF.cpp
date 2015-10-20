@@ -13,13 +13,13 @@
 #include <iostream>
 #include <utility>
 
-s_CFG CNF(const s_CFG& input_cfg) {
-	s_CFG result_cfg = eliminate_useless_symbols(eliminate_unit_pairs(eliminate_epsilon_productions(input_cfg))); // Cleanup the grammar.
+template <typename CFG_Type> CFG_Type CNF(const CFG_Type& input_cfg) {
+	CFG_Type result_cfg = eliminate_useless_symbols(eliminate_unit_pairs(eliminate_epsilon_productions(input_cfg))); // Cleanup the grammar.
 
 	return result_cfg;
 }
 
-std::set<char> find_nullable_symbols(const s_CFG& input_cfg) {
+template <typename CFG_Type> std::set<char> find_nullable_symbols(const CFG_Type& input_cfg) {
 	std::set<char> nullable_symbols;
 	for (auto iter : input_cfg.P) {
 		for (auto rule : iter.second) {
@@ -56,8 +56,8 @@ std::set<char> find_nullable_symbols(const s_CFG& input_cfg) {
 	return nullable_symbols;
 }
 
-s_CFG eliminate_epsilon_productions(const s_CFG& input_cfg) {
-	s_CFG result_cfg = input_cfg;
+template <typename CFG_Type> CFG_Type  eliminate_epsilon_productions(const CFG_Type& input_cfg) {
+	CFG_Type result_cfg = input_cfg;
 	std::set<char> nullable_symbols = find_nullable_symbols(input_cfg);
 	for (auto iter : input_cfg.P) {
 		for (auto rule : iter.second) {
@@ -113,7 +113,7 @@ std::string delete_nullables(std::string rule, int count,
 	}
 }
 
-std::set<std::pair<char, char>> find_unit_pairs(const s_CFG& input_cfg) {
+template <typename CFG_Type> std::set<std::pair<char, char>> find_unit_pairs(const CFG_Type& input_cfg) {
 	std::set<std::pair<char, char>> unit_pairs;
 	for (auto variable : input_cfg.V) {
 		unit_pairs.insert(std::pair<char, char>(variable, variable));
@@ -141,8 +141,8 @@ std::set<std::pair<char, char>> find_unit_pairs(const s_CFG& input_cfg) {
 	return unit_pairs;
 }
 
-s_CFG eliminate_unit_pairs(const s_CFG& input_cfg) {
-	s_CFG result_cfg = input_cfg;
+template <typename CFG_Type> CFG_Type eliminate_unit_pairs(const CFG_Type& input_cfg) {
+	CFG_Type result_cfg = input_cfg;
 	result_cfg.P.clear();
 	std::set<std::pair<char, char>> unit_pairs = find_unit_pairs(input_cfg);
 	for (auto pair : unit_pairs) {
@@ -169,7 +169,7 @@ s_CFG eliminate_unit_pairs(const s_CFG& input_cfg) {
 	return result_cfg;
 }
 
-std::set<char> find_generating_symbols(const s_CFG& input_cfg) {
+template <typename CFG_Type> std::set<char> find_generating_symbols(const CFG_Type& input_cfg) {
 	std::set<char> generating_symbols;
 	for (char terminal : input_cfg.T) {
 		generating_symbols.insert(terminal);
@@ -202,7 +202,7 @@ std::set<char> find_generating_symbols(const s_CFG& input_cfg) {
 	return generating_symbols;
 }
 
-std::set<char> find_reachable_symbols(const s_CFG& input_cfg) {
+template <typename CFG_Type> std::set<char> find_reachable_symbols(const CFG_Type& input_cfg) {
 	std::set<char> reachable_symbols;
 	reachable_symbols.insert(input_cfg.S);
 
@@ -227,8 +227,8 @@ std::set<char> find_reachable_symbols(const s_CFG& input_cfg) {
 	return reachable_symbols;
 }
 
-s_CFG eliminate_useless_symbols(const s_CFG& input_cfg) {
-	s_CFG result_cfg = input_cfg;
+template <typename CFG_Type> CFG_Type eliminate_useless_symbols(const CFG_Type& input_cfg) {
+	CFG_Type result_cfg = input_cfg;
 	std::set<char> generating_symbols = find_generating_symbols(input_cfg);
 
 	for (char variable : input_cfg.V) {
@@ -260,7 +260,7 @@ s_CFG eliminate_useless_symbols(const s_CFG& input_cfg) {
 	return result_cfg;
 }
 
-s_CFG long_rules_to_only_variables(const s_CFG& input_cfg) {
+template <typename CFG_Type> CFG_Type long_rules_to_only_variables(const CFG_Type& input_cfg) {
 	for (auto iter: input_cfg.P) {
 		for (auto rule: iter.second) {
 			if (rule.length() >= 2) {
@@ -274,6 +274,6 @@ s_CFG long_rules_to_only_variables(const s_CFG& input_cfg) {
 	}
 }
 
-s_CFG break_long_bodies(const s_CFG& input_cfg) {
+template <typename CFG_Type> CFG_Type break_long_bodies(const s_CFG& input_cfg) {
 
 }
