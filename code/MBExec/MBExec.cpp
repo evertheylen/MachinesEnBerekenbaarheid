@@ -4,6 +4,7 @@
 executable = "MBExec"
 
 dependencies["build_exec"] = [
+    "MBLib/CNF>>build_objects",
 	"MBLib/CFG>>build_objects",
 	"libs/tinyxml>>build_objects"
 ]
