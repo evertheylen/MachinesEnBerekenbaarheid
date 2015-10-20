@@ -17,7 +17,8 @@ install_manifest.txt
 *.d
 
 # Bakerrrr
-.baking_database
+*.baking_database
+*.headers_baked
 
 # Binary images, don't want that!
 *.jpeg

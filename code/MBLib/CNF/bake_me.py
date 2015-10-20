@@ -1,4 +1,4 @@
 
-dependencies["build_objects"] = [
+dependencies["headers"] = [
     "MBLib/CFG>>headers"
 ]

@@ -3,13 +3,14 @@
 
 [bake me]
 
-dependencies["objects"] = [
+dependencies["headers"] = [
 	"libs/tinyxml>>headers"
 ]
 
 [stop baking]
 
 */
+
 
 #ifndef H_CFG
 #define H_CFG
@@ -35,7 +36,6 @@ std::string to_string<std::vector<std::string>>(std::vector<std::string> input);
 
 template <>
 std::string to_string<std::string>(std::string input);
-
 
 template <typename ID_T>
 class CFG {

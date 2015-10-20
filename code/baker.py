@@ -26,7 +26,10 @@ all_todos = {}
 # to retrieve the value already in there, so we don't create the same Todo
 # (as defined by __eq__) two times (different objects in memory)
 
-
+hard_debug = False
+def dbg_print(*args):
+    if hard_debug:
+        print(*args)
 
 # ----------------------------------------------------
 # COLORS YAY
@@ -69,6 +72,7 @@ class IndentWriter:
     def writeline(self, l):
         self.byte_cache.clear()
         print(self.indent*"  " + l)
+        
     
     def debugline(self, l):
         if self.debug:
@@ -132,7 +136,7 @@ class Database:
             with open(filename) as f:
                 reader = csv.reader(f, delimiter=' ', quotechar='|')
                 for row in reader:
-                    if len(row) > 3:
+                    if len(row) >= 3:
                         self.values[(row[0],row[1],row[2])] = row[3:]
         
     def write(self):
@@ -322,6 +326,7 @@ def exec_file(location, loc=locals()):
 
 
 def dates_from_files(filenames):
+    #print("dates_from_files got " + repr(filenames))
     for fn in filenames:
         if os.path.isfile(fn):
             yield datetime.datetime.fromtimestamp(os.path.getmtime(fn))
@@ -511,6 +516,12 @@ class Dependency:
     def __hash__(self):
         return hash((self.unit, self.worker, self.action))
 
+NOT_DONE = 0   # do this.
+UNCHANGED = 1  # dep not changed since previous run
+JUST_DID = 2   # dep has changed since previous run, so redo parents
+
+def done(status):
+    return status != NOT_DONE
 
 class Todo(Dependency):
     def __init__(self, dep):
@@ -518,15 +529,20 @@ class Todo(Dependency):
         self.worker = dep.worker
         self.action = dep.action
         
-        self.done = False
+        self.status = NOT_DONE
         
         # a Dependency may contain null values or empty string for worker/action...
         self.deps = set()
-        if len(self.unit.get_deps(self.action)) > 0:
-            self.build_deps(self.unit.get_deps(self.action))
+        init_deps = self.unit.get_deps(self.action)
+        if len(init_deps) > 0:
+            self.build_deps(init_deps)
         
         # also allow extra deps based on the worker and action
-        self.build_deps(self.worker.extra_deps(self))        
+        extra_deps = self.worker.extra_deps(self)
+        dbg_print("Getting extra deps for", self)
+        dbg_print("     =", repr(extra_deps))
+        self.build_deps(extra_deps)
+        
     
     def build_deps(self, deps):
         for d in deps:
@@ -534,6 +550,9 @@ class Todo(Dependency):
     
     def all_deps(self):
         yield self
+        yield from self.all_deps_without_self()
+    
+    def all_deps_without_self(self):
         for d in self.deps:
             yield from d.all_deps()
     
@@ -549,31 +568,40 @@ class Todo(Dependency):
         # return True if we have actually performed work
         
         # check whether we already did this one before, this run of baker.py
-        if self.done:
+        if done(self.status):
             writer.writeline(rgbtext("Already done '" + str(self)+"'", green))
-            return False
+            return self.status
         
-        deps_redone = False
+        rebuild = False
         if len(self.deps) > 0:
             writer.writeline(rgbtext("Dependencies of Todo '" + str(self)+"':", cyan))
             writer.tab()
             for d in self.deps:
                 writer.debugline("calling do " + str(d))
                 status = d.do(database, writer)
-                deps_redone = deps_redone or status
+                writer.debugline("sssstatus is " + str(status))
+                # we need to rebuild when our deps have changed
+                if status == JUST_DID:
+                    assert(d.status == JUST_DID)
+                    rebuild = True
+                    writer.debugline("rebuild me pleeeeease")
             writer.untab()
+        else:
+            writer.debugline("no deps apparently")
         
         # check whether our unit is a collection
         if isinstance(self.unit, CollectionUnit):
             writer.writeline(rgbtext("No need to perform %s on the collection '%s'."%(self.action, self.unit.name), cyan))
-            return False
+            self.status = JUST_DID if rebuild else UNCHANGED
+            return self.status
         
-        if not deps_redone:
+        if not rebuild:
             # check whether we did this one before, during some previous run of baker.py
             # basically, we have to redo this todo if and only if
             #    max(dates(input_files)) > min(dates(output_files_prev_run))
             input_files = self.worker.input_files(self)
             if self in database:
+                writer.debugline("in database")
                 output_files_prev_run = database.get_row(self)
                 # no input files?
                 max_input = max(dates_from_files(input_files)) if len(input_files) > 0 else MIN_DATE
@@ -583,20 +611,25 @@ class Todo(Dependency):
                     return self.actually_do(writer, database)
                 else:
                     writer.writeline(rgbtext("Already (previously) done '" + str(self) +"'", green))
-                    return False
+                    self.status = UNCHANGED
+                    return UNCHANGED
             else:
                 # output files not in database: todo has never been executed before
+                writer.debugline("not in database")
                 return self.actually_do(writer, database)
         else:
-            # deps redone, we redo this one too
+            # deps rebuilt, we redo this one too
+            writer.debugline("deps rebuilt, we rebuilt this one too")
             return self.actually_do(writer, database)
                 
     
     def actually_do(self, writer, database):
         writer.writeline(rgbtext("Performing Todo '" + str(self)+"'", cyan))
-        database.set_row(self, self.worker.do(self, writer))
-        self.done = True
-        return True
+        output = self.worker.do(self, writer)
+        writer.debugline(("output = " + ", ".join(output)) if output is not None else "output = None")
+        database.set_row(self, output)
+        self.status = JUST_DID
+        return JUST_DID
 
 
 # creates only unique todos
@@ -653,7 +686,7 @@ class Worker:
     
     def extra_deps(self, todo):
         # extra dependencies implicitly given by the action
-        return set([])  # by returns nothing
+        return set()  # by returns nothing
     
     def do(self, todo):
         # by default does nothing, returns no output files
@@ -690,10 +723,28 @@ class GccCompiler(EasyWorker):
         if todo.action == "build_exec":
             extra.add(Dependency(todo.unit, todo.worker, "build_objects"))
             for d in todo.deps:
+                dbg_print("exec has dep", d)
                 if d.action == "build_objects":
                     for subd in d.all_deps():
                         if subd.action == "headers":
                             extra.add(Dependency(subd.unit, subd.worker, "build_objects"))
+        
+        elif todo.action == "headers":
+            dbg_print("recursively adding headers")
+            for d in todo.all_deps_without_self():
+                dbg_print(" -> dep", d)
+                if d.action == "headers":
+                    extra.add(d)
+            
+        elif todo.action == "build_objects":
+            extra.add(Dependency(todo.unit, todo.worker, "headers"))
+            
+            # difficult one: if a todo is to be turned into an executable, for every object it depends upon,
+            # it must also depend on it's headers.
+            if "build_exec" in todo.unit.deps:
+                for dep_obj in todo.unit.deps["build_exec"]:
+                    extra.add(Dependency(dep_obj.unit, todo.worker, "headers"))
+            
         return extra
     
     def build_objects(self, todo, writer):
@@ -741,11 +792,35 @@ class GccCompiler(EasyWorker):
         
         return output_files
     
+    def headers(self, todo, writer):
+        loc = os.path.join(todo.unit.location, ".headers_baked")
+        f = open(loc, "w")
+        f.close()
+        return [loc]
+    
+    
+    #def input_files(self, todo):
+        #files = list(todo.unit.get_files())
+        #print("pre files are", repr(files))
+        #if todo.action == "build_objects" or todo.action == "build_exec":
+            ## add all header files too, referenced in some way
+            #for d in todo.all_deps():
+                #if d.action == "headers":
+                    #files.extend(self.find_headers(d))
+        #print("files are", repr(files))
+        #return files
+    
+    def find_headers(self, todo):
+        files = []
+        for ext in self.headers_globs:
+            files.extend(glob.glob(os.path.join(todo.unit.location, ext)))
+        return files
+    
     actions = {
         "build_objects": build_objects,
         "build_exec": build_exec,
+        "headers": headers,
     }
-
 
 class Maintenance(EasyWorker):
     shortname = "maintenance"
@@ -820,6 +895,7 @@ def main():
     parser.add_argument("--worker", metavar="W", type=str, help="worker to use", choices=to_be_configured_workers.keys(), default="DEFAULT_BY_ACTION")
     parser.add_argument("--list-deps", action="store_true", help="simply list the dependencies of all units concerned", default=False)
     parser.add_argument("--debug", action="store_true", help="show extra debug info", default=False)
+    parser.add_argument("--trace", action="store_true", help="python debugger set_trace()", default=False)
     
     args = parser.parse_args()
     
@@ -872,7 +948,11 @@ def main():
         root = RootTodo(default_worker, default_action, cmd_units)
         if (writer.debug):
             root.list_deps(writer)
-        root.do(db, writer)
+        if (args.trace):
+            pdb.set_trace()
+        else:
+            root.do(db, writer)
+        
         db.write()
         
         

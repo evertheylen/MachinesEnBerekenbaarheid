@@ -4,11 +4,11 @@
 executable = "MBExec"
 
 dependencies["build_exec"] = [
-    "MBLib/CNF>>build_objects",
 	"MBLib/CFG>>build_objects",
 	"MBLib/CNF>>build_objects",
 	"libs/tinyxml>>build_objects"
 ]
+
 
 [stop baking] */
 
@@ -23,7 +23,6 @@ dependencies["build_exec"] = [
 
 int main(int argc, char** argv) {
 	ENSURE_ARGCOUNT(2);
-	
 	std::string action = argv[1];
 	if (action == "parse_CFG") {
 		ENSURE_ARGCOUNT(3);

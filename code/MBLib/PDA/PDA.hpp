@@ -3,6 +3,9 @@
 
 [bake me]
 
+dependencies["headers"] = [
+	"MBLib/CFG>>headers"
+]
 
 [stop baking] */
 
