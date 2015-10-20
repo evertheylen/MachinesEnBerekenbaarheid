@@ -6,6 +6,7 @@ executable = "MBExec"
 dependencies["build_exec"] = [
     "MBLib/CNF>>build_objects",
 	"MBLib/CFG>>build_objects",
+	"MBLib/CNF>>build_objects",
 	"libs/tinyxml>>build_objects"
 ]
 
@@ -42,7 +43,7 @@ int main(int argc, char** argv) {
 		TiXmlDocument doc_cfg(argv[2]);
 		doc_cfg.LoadFile();
 		s_CFG cfg(doc_cfg);
-		s_CFG cleaned_up_cfg = eliminate_useless_symbols(eliminate_unit_pairs(eliminate_epsilon_productions(cfg))); // Step one for cnf: clean up grammar.
+		s_CFG cleaned_up_cfg = CNF(cfg); // Step one for cnf: clean up grammar.
 		std::cout << cleaned_up_cfg << std::endl;
 	} 
 	else {

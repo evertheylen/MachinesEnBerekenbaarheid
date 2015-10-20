@@ -54,31 +54,33 @@ public:
 	CFG(std::set<ID_T> _V, std::set<ID_T> _T, ID_T _S):
 			V(_V), T(_T), S(_S) {}
 	
-	
 	template <typename _ID_T>
-	friend std::ostream& operator<< (std::ostream& out, CFG<_ID_T>& G) {
-		out << "Variables = {";
-		for (_ID_T var: G.V) {
-			out << var << ", ";
-		}
-		
-		out << "}\nTerminals = {";
-		for (_ID_T term: G.T) {
-			out << term << ", ";
-		}
-		
-		out << "}\nProductions = {\n";
-		for (auto iter: G.P) {
-			for (auto rule: iter.second) {
-				out << "  " << to_string(iter.first) << " --> " << to_string(rule) << "\n";
-			}
-		}
-		
-		out << "}\nStart symbol = " << G.S << "\n";
-		return out;
-	}
+	friend std::ostream& operator<< (std::ostream& out, CFG<_ID_T>& G);
 	
 };
+
+template <typename _ID_T>
+std::ostream& operator<< (std::ostream& out, CFG<_ID_T>& G) {
+	out << "Variables = {";
+	for (_ID_T var: G.V) {
+		out << var << ", ";
+	}
+	
+	out << "}\nTerminals = {";
+	for (_ID_T term: G.T) {
+		out << term << ", ";
+	}
+	
+	out << "}\nProductions = {\n";
+	for (auto iter: G.P) {
+		for (auto rule: iter.second) {
+			out << "  " << to_string(iter.first) << " --> " << to_string(rule) << "\n";
+		}
+	}
+	
+	out << "}\nStart symbol = " << G.S << "\n";
+	return out;
+}
 
 
 

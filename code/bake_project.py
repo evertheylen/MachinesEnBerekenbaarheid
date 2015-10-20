@@ -6,7 +6,7 @@ collections = ConfigDict({
 
 extensions =  [".cpp", ".cc", ".hpp", ".hh", ".h", ".test"]
 
-print_commands = False
+print_commands = True
 
 gcc_config = ConfigDict({
     "mode": "g3",
