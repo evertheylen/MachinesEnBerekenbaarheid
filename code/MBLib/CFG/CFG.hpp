@@ -4,7 +4,8 @@
 [bake me]
 
 dependencies["headers"] = [
-	"libs/tinyxml>>headers"
+	"libs/tinyxml>>headers",
+	"MBLib/common>>headers",
 ]
 
 [stop baking]
@@ -24,18 +25,9 @@ dependencies["headers"] = [
 #include <cassert>
 
 #include "libs/tinyxml/tinyxml.h"
+#include "MBLib/common/common.hpp"
 
-template <typename T>
-std::string to_string(T input) {
-	return std::to_string(input);
-}
 
-// Concatenate strings
-template <>
-std::string to_string<std::vector<std::string>>(std::vector<std::string> input);
-
-template <>
-std::string to_string<std::string>(std::string input);
 
 template <typename ID_T>
 class CFG {
@@ -61,17 +53,10 @@ public:
 
 template <typename ID_T>
 std::ostream& operator<< (std::ostream& out, CFG<ID_T>& G) {
-	out << "Variables = {";
-	for (ID_T var: G.V) {
-		out << var << ", ";
-	}
+	out << "Variables = " << G.V << "\n";
+	out << "Terminals = " << G.T << "\n";
 	
-	out << "}\nTerminals = {";
-	for (ID_T term: G.T) {
-		out << term << ", ";
-	}
-	
-	out << "}\nProductions = {\n";
+	out << "Productions = {\n";
 	for (auto iter: G.P) {
 		for (auto rule: iter.second) {
 			out << "  " << to_string(iter.first) << " --> " << to_string(rule) << "\n";
