@@ -129,18 +129,18 @@ CFG_Type eliminate_epsilon_productions(const CFG_Type& input_cfg) {
 				}
 				for (std::vector<int>::iterator it = position_nullables.begin();
 						it != position_nullables.end(); it++) {
-					std::cout << "Deleting nullables for: ";
+					/*std::cout << "Deleting nullables for: ";
 					for (int i = 0; i < rule.size(); i++) {
 						std::cout << rule.at(i);
 					}std::cout << std::endl << "Nullable symbols: ";
 					for (auto c: nullable_symbols) {
 						std::cout << c << ", ";
-					}std::cout << std::endl;
+					}std::cout << std::endl;*/
 					std::vector<typename CFG_Type::ID_Type> new_rule = delete_nullables<CFG_Type>(rule, i, position_nullables, it);
-					std::cout << "Result: ";
+					/*std::cout << "Result: ";
 					for (int i = 0; i < new_rule.size(); i++) {
 						std::cout << new_rule.at(i);
-					}std::cout << std::endl;
+					}std::cout << std::endl;*/
 					if (result_cfg.P.find(iter.first)->second.find(new_rule)
 							== result_cfg.P.find(iter.first)->second.end()) { // If the new rule isnt in there yet.
 						result_cfg.P.find(iter.first)->second.insert(new_rule);
@@ -303,22 +303,62 @@ CFG_Type eliminate_useless_symbols(const CFG_Type& input_cfg) {
 
 template <typename CFG_Type>
 CFG_Type long_rules_to_only_variables(const CFG_Type& input_cfg) {
-	for (auto iter: input_cfg.P) {
+	CFG_Type result_cfg = input_cfg;
+	typename CFG_Type::ID_Type terminal;
+	typename CFG_Type::ID_Type variable;
+	bool break_loops = false;
+	for (auto iter: result_cfg.P) {
 		for (auto rule: iter.second) {
 			if (rule.size() >= 2) {
+				std::cout << "Long rule:";
 				for (unsigned int i = 0; i < rule.size(); i++) {
-					if (input_cfg.T.find(rule.at(i)) != input_cfg.T.end()) { // If a terminal appears in a body of length >= 2.
-
+					std::cout << rule.at(i);
+					if (result_cfg.T.find(rule.at(i)) != result_cfg.T.end()) { // If a terminal appears in a body of length >= 2.
+						variable = "_" + rule.at(i); // Replace terminal by variable.
+						terminal = rule.at(i);
+						break_loops = true;
+						std::cout << "Found terminal in long string.";
+						for (auto iter2: result_cfg.P) {
+							for (auto rule2: iter2.second) {
+								for (unsigned int j = 0; j < rule2.size(); j++) {
+									if (rule2.at(j) == terminal) {
+										rule2.at(j) = variable;
+									}
+								}
+							}
+						}
+						if (result_cfg.P.find(variable) == result_cfg.P.end()) {
+							result_cfg.P.insert({variable, std::set<std::vector<typename CFG_Type::ID_Type>>()});
+						}
+						result_cfg.P.find(variable)->second.insert({terminal});
 					}
 				}
+				std::cout << std::endl;
 			}
 		}
 	}
-	return input_cfg;
+	/*					}
+						if (break_loops) {
+							break;
+						}
+					}
+				}
+				if (break_loops) {
+					break;
+				}
+			}
+			if (break_loops) {
+				break;
+			}
+		}
+		if (replaced) {
+*/
+	return result_cfg;
 }
 
 template <typename CFG_Type> CFG_Type break_long_bodies(const CFG_Type& input_cfg) {
-	return input_cfg;
+	CFG_Type result_cfg = input_cfg;
+	return result_cfg;
 }
 
 
@@ -326,6 +366,7 @@ template <typename CFG_Type> CFG_Type break_long_bodies(const CFG_Type& input_cf
 template <typename CFG_Type>
 CFG_Type CNF(const CFG_Type& input_cfg) {
 	CFG_Type result_cfg = eliminate_useless_symbols(eliminate_unit_pairs(eliminate_epsilon_productions(input_cfg))); // Cleanup the grammar.
+	result_cfg = long_rules_to_only_variables(result_cfg);
 	return result_cfg;
 }
 
