@@ -692,7 +692,7 @@ class Worker:
         # by default does nothing, returns no output files
         # NOTE however, that if the worker actually did something but produced no output files,
         # you should return None instead of []
-        return []
+        return None
     
     def input_files(self, todo):
         return list(todo.unit.get_files())  # by default returns all files
@@ -835,7 +835,7 @@ class Maintenance(EasyWorker):
         for regex in self.dirty_files:
             for l in glob.glob(os.path.join(todo.unit.location, regex)):
                 os.remove(l)
-        return []
+        return None
     
     def clean_all(self, todo, writer):
         self.clean(todo, writer)
@@ -844,7 +844,7 @@ class Maintenance(EasyWorker):
             loc = os.path.join(todo.unit.location, exe)
             if os.path.isfile(loc):
                 os.remove(loc)
-        return []
+        return None
     
     actions = {
         "clean": clean,

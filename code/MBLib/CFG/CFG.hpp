@@ -33,6 +33,7 @@ template <typename ID_T>
 class CFG {
 public:
 	typedef ID_T ID_Type;
+	typedef std::vector<ID_T> String;
 	
 	std::set<ID_T> V;										// Variables
 	std::set<ID_T> T;  										// Terminals
@@ -43,6 +44,45 @@ public:
 	
 	CFG(std::set<ID_T> _V, std::set<ID_T> _T, ID_T _S):
 			V(_V), T(_T), S(_S) {}
+	
+	bool is_epsilon(String s) {
+		return s.empty();
+	}
+	
+	bool is_variable(ID_T symbol) {
+		auto m = V.find(symbol);
+		return m != V.end();
+	}
+	
+	bool is_terminal(ID_T symbol) {
+		auto m = T.find(symbol);
+		return m != T.end();
+	}
+	
+	std::set<String> get_bodies(ID_T var) {
+		assert(is_variable(var));
+		auto m = P.find(var);
+		if (m == P.end()) {
+			return std::set<String>();  // empty set
+		} else {
+			return m.second;
+		}
+	}
+	
+	void set_bodies(ID_T var, std::set<String> bodies) {
+		assert(is_variable(var));
+		P[var] = bodies;
+	}
+	
+	void add_production(ID_T var, String new_body) {
+		assert(is_variable(var));
+		auto m = P.find(var);
+		if (m == P.end()) {
+			P[var] = {new_body};
+		} else {
+			m.second.insert(new_body);
+		}
+	}
 	
 	//template <typename _ID_T>
 	//friend std::ostream& operator<< (std::ostream& out, CFG<ID_T>& G);
