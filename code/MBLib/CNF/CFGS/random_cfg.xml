@@ -10,6 +10,6 @@
 	<Productions>
         <Rule LHS="S" RHS= "ASA|aB"/>
 		<Rule LHS="A" RHS= "B|S"/>
-		<Rule LHS="B" RHS= "b|$"/>
+		<Rule LHS="B" RHS= "b|"/>
 	</Productions>
 </CFG>
