@@ -52,6 +52,7 @@ s_CFG::s_CFG(TiXmlDocument& doc) {
 }
 
 std::string s_CFG::create_variable(const std::string& name) {
+	assert(!this->is_variable(name));
 	this->V.insert(name);
 	return name;
 }
