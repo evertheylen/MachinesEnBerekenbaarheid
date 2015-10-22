@@ -52,6 +52,9 @@ std::set<typename CFG_Type::ID_Type> find_nullable_symbols(const CFG_Type& input
 			}
 		}
 	}
+	for (auto symbol: nullable_symbols) {
+		std::cout << "Nullable symbol: " << symbol << std::endl;
+	}
 	return nullable_symbols;
 }
 
@@ -73,13 +76,17 @@ std::vector<typename CFG_Type::ID_Type> delete_nullables(std::vector<typename CF
 	} else {
 		return rule;
 	}*/
+	//std::cout << "OLD Rule?: ";
+	for (int i = 0; i < rule.size(); i++) {
+		std::cout << rule.at(i);
+	}std::cout << std::endl;
 	if (count >= 0) {
 	    std::vector<typename CFG_Type::ID_Type> new_rule;
 	    for (int i = 0; i < *it; i++) {
 	        new_rule.push_back(rule.at(i));
 	    }
 	    if (*it + 1 < rule.size()) {
-	        for (int i = *it+1; i < rule.size() -1; i++) {
+	        for (int i = *it+1; i < rule.size(); i++) { // Changed this from rule.size() - 1 to rule.size()
 	            new_rule.push_back(rule.at(i));   
             }
 	    }
@@ -92,6 +99,10 @@ std::vector<typename CFG_Type::ID_Type> delete_nullables(std::vector<typename CF
 	    count--;
 	    return delete_nullables<CFG_Type>(new_rule, count, position, new_it);
 	} else {
+		std::cout << "NEW Rule: ";
+		for (int i = 0; i < rule.size(); i++) {
+			std::cout << rule.at(i);
+		}std::cout << std::endl;
 	    return rule;
 	}
 }
@@ -103,7 +114,7 @@ CFG_Type eliminate_epsilon_productions(const CFG_Type& input_cfg) {
 	for (auto iter : input_cfg.P) {
 		for (auto rule : iter.second) {
 			if (input_cfg.is_epsilon(rule)) {		// delete rules with epsilon body.
-				result_cfg.P[iter.first].erase(rule);
+				result_cfg.P.find(iter.first)->second.erase(rule);
 			}
 			std::vector<int> position_nullables;
 			for (unsigned int i = 0; i < rule.size(); i++) {
@@ -119,15 +130,16 @@ CFG_Type eliminate_epsilon_productions(const CFG_Type& input_cfg) {
 				for (std::vector<int>::iterator it = position_nullables.begin();
 						it != position_nullables.end(); it++) {
 					std::vector<typename CFG_Type::ID_Type> new_rule = delete_nullables<CFG_Type>(rule, i, position_nullables, it);
-					if (result_cfg.P[iter.first].find(new_rule)
-							== result_cfg.P[iter.first].end()) { // If the new rule isnt in there yet.
-						result_cfg.P[iter.first].insert(new_rule);
+					if (result_cfg.P.find(iter.first)->second.find(new_rule)
+							== result_cfg.P.find(iter.first)->second.end()) { // If the new rule isnt in there yet.
+						result_cfg.P.find(iter.first)->second.insert(new_rule);
 					}
 				}
 			}
 		}
 	}
-	//std::cout << result_cfg;
+	std::cout << "Eliminated epsilons\n";
+	std::cout << result_cfg;
 	//result_cfg.T.erase(*s_CFG::EPSILON); // Remove the epsilon out of the list of terminals because WE KILLED THEM ALL ;) TODO Change if epsilon becomes an element of T
 	return result_cfg;
 }
@@ -143,7 +155,7 @@ std::set<std::pair<typename CFG_Type::ID_Type, typename CFG_Type::ID_Type>> find
 	while (added) {
 		added = false;
 		for (auto pair : unit_pairs) {
-			auto iter = input_cfg.P[pair.second];
+			auto iter = input_cfg.P.find(pair.second)->second;
 			for (auto rule : iter) {
 				if (rule.size() == 1
 						&& input_cfg.V.find(rule.at(0)) != input_cfg.V.end()) {	// If the rule is a unit production
@@ -167,17 +179,17 @@ CFG_Type eliminate_unit_pairs(const CFG_Type& input_cfg) {
 	for (auto pair : unit_pairs) {
 		//std::cout << "pair: " << pair.first << ", " << pair.second << std::endl;
 		typename CFG_Type::ID_Type new_head = pair.first;
-		auto iter = input_cfg.P[pair.second];
+		auto iter = input_cfg.P.find(pair.second)->second;
 		//std::cout << "New rules:\n";
 		for (auto rule : iter) {
 			if (rule.size() != 1
 					|| input_cfg.V.find(rule.at(0)) == input_cfg.V.end()) { // If the rule is not a variable only (this will create a new unit production).
-				if (result_cfg.P[new_head] == result_cfg.P.end()) {
+				if (result_cfg.P.find(new_head) == result_cfg.P.end()) {
 					result_cfg.P.insert({new_head, std::set<std::vector<typename CFG_Type::ID_Type>>()});
 				}
-				if (result_cfg.P[new_head].find(rule)
-						== result_cfg.P[new_head].end()) { // if the rule doesn't exist yet.
-					result_cfg.P[new_head].insert(rule);
+				if (result_cfg.P.find(new_head)->second.find(rule)
+						== result_cfg.P.find(new_head)->second.end()) { // if the rule doesn't exist yet.
+					result_cfg.P.find(new_head)->second.insert(rule);
 					//std::cout << pair.first << " --> " << rule << std::endl;
 				}
 			}
@@ -230,7 +242,7 @@ std::set<typename CFG_Type::ID_Type> find_reachable_symbols(const CFG_Type& inpu
 		added = false;
 		for (typename CFG_Type::ID_Type reachable_symbol : reachable_symbols) {
 			if (input_cfg.T.find(reachable_symbol) == input_cfg.T.end()) {
-				auto rules = input_cfg.P[reachable_symbol];
+				auto rules = input_cfg.P.find(reachable_symbol)->second;
 				for (auto rule : rules) {
 					for (unsigned int i = 0; i < rule.size(); i++) {
 						if (reachable_symbols.find(rule.at(i))
@@ -259,7 +271,7 @@ CFG_Type eliminate_useless_symbols(const CFG_Type& input_cfg) {
 	}
 
 	if (generating_symbols.find(input_cfg.S) == generating_symbols.end()) {
-		//result_cfg.S = *s_CFG::EPSILON;
+		//result_cfg.S = *s_CFG::EPSILON; TODO
 	}
 
 	std::set<typename CFG_Type::ID_Type> reachable_symbols = find_reachable_symbols(result_cfg);
@@ -304,8 +316,8 @@ template <typename CFG_Type> CFG_Type break_long_bodies(const CFG_Type& input_cf
 
 template <typename CFG_Type>
 CFG_Type CNF(const CFG_Type& input_cfg) {
-	CFG_Type result_cfg = eliminate_useless_symbols(eliminate_unit_pairs(eliminate_epsilon_productions(input_cfg))); // Cleanup the grammar.
-	
+	//CFG_Type result_cfg = eliminate_useless_symbols(eliminate_unit_pairs(eliminate_epsilon_productions(input_cfg))); // Cleanup the grammar.
+	CFG_Type result_cfg = eliminate_epsilon_productions(input_cfg);
 	return input_cfg;
 }
 

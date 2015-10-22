@@ -5,12 +5,12 @@
         <StartSymbol>S</StartSymbol>
 	</Variables>
 	<Terminals>
-	    abcdefghij$
+	    abcdefghij
 	</Terminals>
 	<Productions>
-        <Rule LHS="S" RHS= "aSb|baaa|defg|$"/>
+        <Rule LHS="S" RHS= "aSb|baaa|defg|"/>
 		<Rule LHS="T" RHS= "aSb|baaa|defg|V"/>
-		<Rule LHS="U" RHS= "aSb|baaa|defg|$"/>
+		<Rule LHS="U" RHS= "aSb|baaa|defg|"/>
 		<Rule LHS="V" RHS= "SU|ba|a"/>
 	</Productions>
 </CFG>
