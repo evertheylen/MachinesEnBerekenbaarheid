@@ -9,7 +9,7 @@
 	</Terminals>
 	<Productions>
         <Rule LHS="S" RHS= "AB"/>
-		<Rule LHS="A" RHS= "aAA|$"/>
-		<Rule LHS="B" RHS= "bBB|$"/>
+		<Rule LHS="A" RHS= "aAA|"/>
+		<Rule LHS="B" RHS= "bBB|"/>
 	</Productions>
 </CFG>

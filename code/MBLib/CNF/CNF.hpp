@@ -52,9 +52,9 @@ std::set<typename CFG_Type::ID_Type> find_nullable_symbols(const CFG_Type& input
 			}
 		}
 	}
-	for (auto symbol: nullable_symbols) {
+	/*for (auto symbol: nullable_symbols) {
 		std::cout << "Nullable symbol: " << symbol << std::endl;
-	}
+	}*/
 	return nullable_symbols;
 }
 
@@ -76,20 +76,20 @@ std::vector<typename CFG_Type::ID_Type> delete_nullables(std::vector<typename CF
 	} else {
 		return rule;
 	}*/
-	//std::cout << "OLD Rule?: ";
+	/*std::cout << "OLD Rule?: ";
 	for (int i = 0; i < rule.size(); i++) {
 		std::cout << rule.at(i);
-	}std::cout << std::endl;
+	}std::cout << std::endl;*/
 	if (count >= 0) {
 	    std::vector<typename CFG_Type::ID_Type> new_rule;
 	    for (int i = 0; i < *it; i++) {
 	        new_rule.push_back(rule.at(i));
 	    }
-	    if (*it + 1 < rule.size()) {
+	    //if (*it + 1 < rule.size()) {
 	        for (int i = *it+1; i < rule.size(); i++) { // Changed this from rule.size() - 1 to rule.size()
 	            new_rule.push_back(rule.at(i));   
             }
-	    }
+	    //}
 	    std::vector<int>::iterator new_it;
 	    if (it == position.end() - 1) {
 	        new_it = position.begin();
@@ -99,10 +99,10 @@ std::vector<typename CFG_Type::ID_Type> delete_nullables(std::vector<typename CF
 	    count--;
 	    return delete_nullables<CFG_Type>(new_rule, count, position, new_it);
 	} else {
-		std::cout << "NEW Rule: ";
+	/*	std::cout << "NEW Rule: ";
 		for (int i = 0; i < rule.size(); i++) {
 			std::cout << rule.at(i);
-		}std::cout << std::endl;
+		}std::cout << std::endl;*/
 	    return rule;
 	}
 }
@@ -124,12 +124,23 @@ CFG_Type eliminate_epsilon_productions(const CFG_Type& input_cfg) {
 				}
 			}
 			for (unsigned int i = 0; i < position_nullables.size(); i++) {
-				if (i == rule.size() - 1) { // m == k then don't delete the nullables because a new epsilon-rule would be created.
+				if (i == rule.size()-1 ) { // m == k then don't delete the nullables because a new epsilon-rule would be created.
 					break;
 				}
 				for (std::vector<int>::iterator it = position_nullables.begin();
 						it != position_nullables.end(); it++) {
+					std::cout << "Deleting nullables for: ";
+					for (int i = 0; i < rule.size(); i++) {
+						std::cout << rule.at(i);
+					}std::cout << std::endl << "Nullable symbols: ";
+					for (auto c: nullable_symbols) {
+						std::cout << c << ", ";
+					}std::cout << std::endl;
 					std::vector<typename CFG_Type::ID_Type> new_rule = delete_nullables<CFG_Type>(rule, i, position_nullables, it);
+					std::cout << "Result: ";
+					for (int i = 0; i < new_rule.size(); i++) {
+						std::cout << new_rule.at(i);
+					}std::cout << std::endl;
 					if (result_cfg.P.find(iter.first)->second.find(new_rule)
 							== result_cfg.P.find(iter.first)->second.end()) { // If the new rule isnt in there yet.
 						result_cfg.P.find(iter.first)->second.insert(new_rule);
@@ -138,8 +149,6 @@ CFG_Type eliminate_epsilon_productions(const CFG_Type& input_cfg) {
 			}
 		}
 	}
-	std::cout << "Eliminated epsilons\n";
-	std::cout << result_cfg;
 	//result_cfg.T.erase(*s_CFG::EPSILON); // Remove the epsilon out of the list of terminals because WE KILLED THEM ALL ;) TODO Change if epsilon becomes an element of T
 	return result_cfg;
 }
@@ -316,9 +325,8 @@ template <typename CFG_Type> CFG_Type break_long_bodies(const CFG_Type& input_cf
 
 template <typename CFG_Type>
 CFG_Type CNF(const CFG_Type& input_cfg) {
-	//CFG_Type result_cfg = eliminate_useless_symbols(eliminate_unit_pairs(eliminate_epsilon_productions(input_cfg))); // Cleanup the grammar.
-	CFG_Type result_cfg = eliminate_epsilon_productions(input_cfg);
-	return input_cfg;
+	CFG_Type result_cfg = eliminate_useless_symbols(eliminate_unit_pairs(eliminate_epsilon_productions(input_cfg))); // Cleanup the grammar.
+	return result_cfg;
 }
 
 
