@@ -39,8 +39,6 @@ public:
 	std::map<ID_T, std::set<std::vector<ID_T>>> P;	// Productions
 	ID_T S;													// Start symbol, \in V
 	
-	static constexpr const char* EPSILON = "$";
-	
 	CFG() {}
 	
 	CFG(std::set<ID_T> _V, std::set<ID_T> _T, ID_T _S):
