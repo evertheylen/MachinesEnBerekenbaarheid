@@ -45,16 +45,16 @@ public:
 	CFG(std::set<ID_T> _V, std::set<ID_T> _T, ID_T _S):
 			V(_V), T(_T), S(_S) {}
 	
-	bool is_epsilon(String s) {
+	bool is_epsilon(String s) const {
 		return s.empty();
 	}
 	
-	bool is_variable(ID_T symbol) {
+	bool is_variable(ID_T symbol) const {
 		auto m = V.find(symbol);
 		return m != V.end();
 	}
 	
-	bool is_terminal(ID_T symbol) {
+	bool is_terminal(ID_T symbol) const {
 		auto m = T.find(symbol);
 		return m != T.end();
 	}
