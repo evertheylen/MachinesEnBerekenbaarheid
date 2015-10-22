@@ -90,7 +90,7 @@ std::vector<typename CFG_Type::ID_Type> delete_nullables(std::vector<typename CF
 	        new_it = it++;
 	    }
 	    count--;
-	    return delete_nullables(new_rule, count, position, new_it);
+	    return delete_nullables<CFG_Type>(new_rule, count, position, new_it);
 	} else {
 	    return rule;
 	}
@@ -118,7 +118,7 @@ CFG_Type eliminate_epsilon_productions(const CFG_Type& input_cfg) {
 				}
 				for (std::vector<int>::iterator it = position_nullables.begin();
 						it != position_nullables.end(); it++) {
-					std::vector<typename CFG_Type::ID_Type> new_rule = delete_nullables(rule, i, position_nullables, it);
+					std::vector<typename CFG_Type::ID_Type> new_rule = delete_nullables<CFG_Type>(rule, i, position_nullables, it);
 					if (result_cfg.P[iter.first].find(new_rule)
 							== result_cfg.P[iter.first].end()) { // If the new rule isnt in there yet.
 						result_cfg.P[iter.first].insert(new_rule);
