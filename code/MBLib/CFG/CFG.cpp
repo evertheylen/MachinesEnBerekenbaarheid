@@ -51,6 +51,10 @@ s_CFG::s_CFG(TiXmlDocument& doc) {
 	}
 }
 
+std::string s_CFG::create_variable(const std::string& name) {
+	this->V.insert(name);
+	return name;
+}
 
 void s_CFG::to_xml(std::string filename) {
 	TiXmlDocument doc;

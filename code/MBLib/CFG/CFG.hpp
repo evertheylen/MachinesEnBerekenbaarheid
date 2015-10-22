@@ -120,6 +120,8 @@ public:
 	
 	s_CFG(TiXmlDocument& doc);
 	
+	std::string create_variable(const std::string& name);
+	
 	void to_xml(std::string filename);
 };
 
