@@ -44,8 +44,11 @@ public:
 	
 	// ============== Hulpmethodes ==============
 	
-	bool is_epsilon(std::vector<std::string> s);
 	// 'epsilon' is eigenlijk de lege string, dus in de praktijk de lege vector.
+	bool is_epsilon(std::vector<std::string> s);
+	
+	// Variabelen creëren doe je zo (zet het ook direct in V)
+	std::string create_variable(const std::string& name);
 	
 	bool is_variable(std::string symbol);
 	
