@@ -49,8 +49,8 @@ int main(int argc, char** argv) {
 		TiXmlDocument doc_cfg(argv[2]);
 		doc_cfg.LoadFile();
 		s_CFG cfg(doc_cfg);
-		s_CFG cleaned_up_cfg = CNF(cfg); // Step one for cnf: clean up grammar.
-		std::cout << cleaned_up_cfg << std::endl;
+		s_CFG cnf_cfg = CNF(cfg); // Step one for cnf: clean up grammar.
+		std::cout << cnf_cfg << std::endl;
 		
 	} else if (action == "parse_PDA") {
 		PDA<std::string, std::string> P;

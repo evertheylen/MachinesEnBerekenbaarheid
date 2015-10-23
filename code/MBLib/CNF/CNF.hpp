@@ -15,10 +15,12 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <algorithm>
 #include <utility>
 
-template <typename CFG_Type>
-std::set<typename CFG_Type::ID_Type> find_nullable_symbols(const CFG_Type& input_cfg) {
+template<typename CFG_Type>
+std::set<typename CFG_Type::ID_Type> find_nullable_symbols(
+		const CFG_Type& input_cfg) {
 	std::set<typename CFG_Type::ID_Type> nullable_symbols;
 	for (auto iter : input_cfg.P) {
 		for (auto rule : iter.second) {
@@ -53,18 +55,45 @@ std::set<typename CFG_Type::ID_Type> find_nullable_symbols(const CFG_Type& input
 		}
 	}
 	/*for (auto symbol: nullable_symbols) {
-		std::cout << "Nullable symbol: " << symbol << std::endl;
-	}*/
+	 std::cout << "Nullable symbol: " << symbol << std::endl;
+	 }*/
 	return nullable_symbols;
 }
 
-template <typename CFG_Type>
-std::vector<typename CFG_Type::ID_Type> delete_nullables(std::vector<typename CFG_Type::ID_Type> rule, int count, std::vector<int> position, std::vector<int>::iterator it) {
+template<typename CFG_Type>
+std::vector<typename CFG_Type::ID_Type> delete_nullables(
+		std::vector<typename CFG_Type::ID_Type> rule, int count,
+		std::vector<int> position, std::vector<int>::iterator it) {
 	/*if (count >= 0) {
-		std::string new_rule = rule.substr(0, *it);
-		if (*it + 1 < rule.size()) {
-			new_rule += rule.substr(*it + 1, rule.size() - 1);
+	 std::string new_rule = rule.substr(0, *it);
+	 if (*it + 1 < rule.size()) {
+	 new_rule += rule.substr(*it + 1, rule.size() - 1);
+	 }
+	 std::vector<int>::iterator new_it;
+	 if (it == position.end() - 1) {
+	 new_it = position.begin();
+	 } else {
+	 new_it = it++;
+	 }
+	 count--;
+	 return delete_nullables(new_rule, count, position, new_it);
+	 } else {
+	 return rule;
+	 }*/
+	/*std::cout << "OLD Rule?: ";
+	 for (int i = 0; i < rule.size(); i++) {
+	 std::cout << rule.at(i);
+	 }std::cout << std::endl;*/
+	if (count >= 0) {
+		std::vector<typename CFG_Type::ID_Type> new_rule;
+		for (int i = 0; i < *it; i++) {
+			new_rule.push_back(rule.at(i));
 		}
+		//if (*it + 1 < rule.size()) {
+		for (int i = *it + 1; i < rule.size(); i++) { // Changed this from rule.size() - 1 to rule.size()
+			new_rule.push_back(rule.at(i));
+		}
+		//}
 		std::vector<int>::iterator new_it;
 		if (it == position.end() - 1) {
 			new_it = position.begin();
@@ -72,48 +101,24 @@ std::vector<typename CFG_Type::ID_Type> delete_nullables(std::vector<typename CF
 			new_it = it++;
 		}
 		count--;
-		return delete_nullables(new_rule, count, position, new_it);
+		return delete_nullables<CFG_Type>(new_rule, count, position, new_it);
 	} else {
+		/*	std::cout << "NEW Rule: ";
+		 for (int i = 0; i < rule.size(); i++) {
+		 std::cout << rule.at(i);
+		 }std::cout << std::endl;*/
 		return rule;
-	}*/
-	/*std::cout << "OLD Rule?: ";
-	for (int i = 0; i < rule.size(); i++) {
-		std::cout << rule.at(i);
-	}std::cout << std::endl;*/
-	if (count >= 0) {
-	    std::vector<typename CFG_Type::ID_Type> new_rule;
-	    for (int i = 0; i < *it; i++) {
-	        new_rule.push_back(rule.at(i));
-	    }
-	    //if (*it + 1 < rule.size()) {
-	        for (int i = *it+1; i < rule.size(); i++) { // Changed this from rule.size() - 1 to rule.size()
-	            new_rule.push_back(rule.at(i));   
-            }
-	    //}
-	    std::vector<int>::iterator new_it;
-	    if (it == position.end() - 1) {
-	        new_it = position.begin();
-	    } else {
-	        new_it = it++;
-	    }
-	    count--;
-	    return delete_nullables<CFG_Type>(new_rule, count, position, new_it);
-	} else {
-	/*	std::cout << "NEW Rule: ";
-		for (int i = 0; i < rule.size(); i++) {
-			std::cout << rule.at(i);
-		}std::cout << std::endl;*/
-	    return rule;
 	}
 }
 
-template <typename CFG_Type>
+template<typename CFG_Type>
 CFG_Type eliminate_epsilon_productions(const CFG_Type& input_cfg) {
 	CFG_Type result_cfg = input_cfg;
-	std::set<typename CFG_Type::ID_Type> nullable_symbols = find_nullable_symbols(input_cfg);
+	std::set<typename CFG_Type::ID_Type> nullable_symbols =
+			find_nullable_symbols(input_cfg);
 	for (auto iter : input_cfg.P) {
 		for (auto rule : iter.second) {
-			if (input_cfg.is_epsilon(rule)) {		// delete rules with epsilon body.
+			if (input_cfg.is_epsilon(rule)) { // delete rules with epsilon body.
 				result_cfg.P.find(iter.first)->second.erase(rule);
 			}
 			std::vector<int> position_nullables;
@@ -124,23 +129,25 @@ CFG_Type eliminate_epsilon_productions(const CFG_Type& input_cfg) {
 				}
 			}
 			for (unsigned int i = 0; i < position_nullables.size(); i++) {
-				if (i == rule.size()-1 ) { // m == k then don't delete the nullables because a new epsilon-rule would be created.
+				if (i == rule.size() - 1) { // m == k then don't delete the nullables because a new epsilon-rule would be created.
 					break;
 				}
 				for (std::vector<int>::iterator it = position_nullables.begin();
 						it != position_nullables.end(); it++) {
 					/*std::cout << "Deleting nullables for: ";
-					for (int i = 0; i < rule.size(); i++) {
-						std::cout << rule.at(i);
-					}std::cout << std::endl << "Nullable symbols: ";
-					for (auto c: nullable_symbols) {
-						std::cout << c << ", ";
-					}std::cout << std::endl;*/
-					std::vector<typename CFG_Type::ID_Type> new_rule = delete_nullables<CFG_Type>(rule, i, position_nullables, it);
+					 for (int i = 0; i < rule.size(); i++) {
+					 std::cout << rule.at(i);
+					 }std::cout << std::endl << "Nullable symbols: ";
+					 for (auto c: nullable_symbols) {
+					 std::cout << c << ", ";
+					 }std::cout << std::endl;*/
+					std::vector<typename CFG_Type::ID_Type> new_rule =
+							delete_nullables<CFG_Type>(rule, i,
+									position_nullables, it);
 					/*std::cout << "Result: ";
-					for (int i = 0; i < new_rule.size(); i++) {
-						std::cout << new_rule.at(i);
-					}std::cout << std::endl;*/
+					 for (int i = 0; i < new_rule.size(); i++) {
+					 std::cout << new_rule.at(i);
+					 }std::cout << std::endl;*/
 					if (result_cfg.P.find(iter.first)->second.find(new_rule)
 							== result_cfg.P.find(iter.first)->second.end()) { // If the new rule isnt in there yet.
 						result_cfg.P.find(iter.first)->second.insert(new_rule);
@@ -153,11 +160,12 @@ CFG_Type eliminate_epsilon_productions(const CFG_Type& input_cfg) {
 	return result_cfg;
 }
 
-template <typename CFG_Type>
-std::set<std::pair<typename CFG_Type::ID_Type, typename CFG_Type::ID_Type>> find_unit_pairs(const CFG_Type& input_cfg) {
+template<typename CFG_Type>
+std::set<std::pair<typename CFG_Type::ID_Type, typename CFG_Type::ID_Type>> find_unit_pairs(
+		const CFG_Type& input_cfg) {
 	std::set<std::pair<typename CFG_Type::ID_Type, typename CFG_Type::ID_Type>> unit_pairs;
 	for (auto variable : input_cfg.V) {
-		unit_pairs.insert({variable, variable});
+		unit_pairs.insert( { variable, variable });
 	}
 
 	bool added = true;
@@ -168,9 +176,9 @@ std::set<std::pair<typename CFG_Type::ID_Type, typename CFG_Type::ID_Type>> find
 			for (auto rule : iter) {
 				if (rule.size() == 1
 						&& input_cfg.V.find(rule.at(0)) != input_cfg.V.end()) {	// If the rule is a unit production
-					if (unit_pairs.find({pair.first, rule.at(0)})
+					if (unit_pairs.find( { pair.first, rule.at(0) })
 							== unit_pairs.end()) { // If the rule is not in the unit pairs.
-						unit_pairs.insert({pair.first, rule.at(0)});
+						unit_pairs.insert( { pair.first, rule.at(0) });
 						added = true;
 					}
 				}
@@ -180,11 +188,12 @@ std::set<std::pair<typename CFG_Type::ID_Type, typename CFG_Type::ID_Type>> find
 	return unit_pairs;
 }
 
-template <typename CFG_Type>
+template<typename CFG_Type>
 CFG_Type eliminate_unit_pairs(const CFG_Type& input_cfg) {
 	CFG_Type result_cfg = input_cfg;
 	result_cfg.P.clear();
-	std::set<std::pair<typename CFG_Type::ID_Type, typename CFG_Type::ID_Type>> unit_pairs = find_unit_pairs(input_cfg);
+	std::set<std::pair<typename CFG_Type::ID_Type, typename CFG_Type::ID_Type>> unit_pairs =
+			find_unit_pairs(input_cfg);
 	for (auto pair : unit_pairs) {
 		//std::cout << "pair: " << pair.first << ", " << pair.second << std::endl;
 		typename CFG_Type::ID_Type new_head = pair.first;
@@ -194,7 +203,9 @@ CFG_Type eliminate_unit_pairs(const CFG_Type& input_cfg) {
 			if (rule.size() != 1
 					|| input_cfg.V.find(rule.at(0)) == input_cfg.V.end()) { // If the rule is not a variable only (this will create a new unit production).
 				if (result_cfg.P.find(new_head) == result_cfg.P.end()) {
-					result_cfg.P.insert({new_head, std::set<std::vector<typename CFG_Type::ID_Type>>()});
+					result_cfg.P.insert(
+							{ new_head, std::set<
+									std::vector<typename CFG_Type::ID_Type>>() });
 				}
 				if (result_cfg.P.find(new_head)->second.find(rule)
 						== result_cfg.P.find(new_head)->second.end()) { // if the rule doesn't exist yet.
@@ -207,8 +218,9 @@ CFG_Type eliminate_unit_pairs(const CFG_Type& input_cfg) {
 	return result_cfg;
 }
 
-template <typename CFG_Type>
-std::set<typename CFG_Type::ID_Type> find_generating_symbols(const CFG_Type& input_cfg) {
+template<typename CFG_Type>
+std::set<typename CFG_Type::ID_Type> find_generating_symbols(
+		const CFG_Type& input_cfg) {
 	std::set<typename CFG_Type::ID_Type> generating_symbols;
 	for (typename CFG_Type::ID_Type terminal : input_cfg.T) {
 		generating_symbols.insert(terminal);
@@ -241,8 +253,9 @@ std::set<typename CFG_Type::ID_Type> find_generating_symbols(const CFG_Type& inp
 	return generating_symbols;
 }
 
-template <typename CFG_Type>
-std::set<typename CFG_Type::ID_Type> find_reachable_symbols(const CFG_Type& input_cfg) {
+template<typename CFG_Type>
+std::set<typename CFG_Type::ID_Type> find_reachable_symbols(
+		const CFG_Type& input_cfg) {
 	std::set<typename CFG_Type::ID_Type> reachable_symbols;
 	reachable_symbols.insert(input_cfg.S);
 
@@ -267,10 +280,11 @@ std::set<typename CFG_Type::ID_Type> find_reachable_symbols(const CFG_Type& inpu
 	return reachable_symbols;
 }
 
-template <typename CFG_Type>
+template<typename CFG_Type>
 CFG_Type eliminate_useless_symbols(const CFG_Type& input_cfg) {
 	CFG_Type result_cfg = input_cfg;
-	std::set<typename CFG_Type::ID_Type> generating_symbols = find_generating_symbols(input_cfg);
+	std::set<typename CFG_Type::ID_Type> generating_symbols =
+			find_generating_symbols(input_cfg);
 
 	for (typename CFG_Type::ID_Type variable : input_cfg.V) {
 		if (generating_symbols.find(variable) == generating_symbols.end()) { // If a variable isnt generating, then delete it and all of its rules.
@@ -283,7 +297,8 @@ CFG_Type eliminate_useless_symbols(const CFG_Type& input_cfg) {
 		//result_cfg.S = *s_CFG::EPSILON; TODO
 	}
 
-	std::set<typename CFG_Type::ID_Type> reachable_symbols = find_reachable_symbols(result_cfg);
+	std::set<typename CFG_Type::ID_Type> reachable_symbols =
+			find_reachable_symbols(result_cfg);
 
 	for (typename CFG_Type::ID_Type variable : result_cfg.V) {
 		if (reachable_symbols.find(variable) == reachable_symbols.end()) {
@@ -301,74 +316,145 @@ CFG_Type eliminate_useless_symbols(const CFG_Type& input_cfg) {
 	return result_cfg;
 }
 
-template <typename CFG_Type>
+template<typename CFG_Type>
 CFG_Type long_rules_to_only_variables(const CFG_Type& input_cfg) {
 	CFG_Type result_cfg = input_cfg;
 	typename CFG_Type::ID_Type terminal;
 	typename CFG_Type::ID_Type variable;
-	bool break_loops = false;
-	for (auto iter: result_cfg.P) {
-		for (auto rule: iter.second) {
+	std::set<typename CFG_Type::ID_Type> replaced_terminals;
+	for (auto iter : result_cfg.P) {
+		for (auto rule : iter.second) {
 			if (rule.size() >= 2) {
-				std::cout << "Long rule:";
+				/*std::cout << "Long rule:";
+				 for (unsigned int i = 0; i < rule.size(); i++) {
+				 std::cout << rule.at(i);
+				 }
+				 std::cout << std::endl;*/
 				for (unsigned int i = 0; i < rule.size(); i++) {
-					std::cout << rule.at(i);
-					if (result_cfg.T.find(rule.at(i)) != result_cfg.T.end()) { // If a terminal appears in a body of length >= 2.
-						variable = "_" + rule.at(i); // Replace terminal by variable.
+					if (result_cfg.T.find(rule.at(i)) != result_cfg.T.end()
+							&& replaced_terminals.find(rule.at(i))
+									== replaced_terminals.end()) { // If a terminal appears in a body of length >= 2.
+						std::string temp = rule.at(i);
+						std::transform(rule.at(i).begin(), rule.at(i).end(),
+								temp.begin(), toupper);
+						variable = "[_" + temp + "]";
+						result_cfg.V.insert(variable);
 						terminal = rule.at(i);
-						break_loops = true;
-						std::cout << "Found terminal in long string.";
-						for (auto iter2: result_cfg.P) {
-							for (auto rule2: iter2.second) {
-								for (unsigned int j = 0; j < rule2.size(); j++) {
-									if (rule2.at(j) == terminal) {
-										rule2.at(j) = variable;
+						replaced_terminals.insert(terminal);
+						for (auto iter2 : result_cfg.P) {
+							for (auto rule2 : iter2.second) {
+								if (rule2.size() >= 2) {
+									std::vector<typename CFG_Type::ID_Type> new_rule;
+									for (unsigned int j = 0; j < rule2.size();
+											j++) {
+										if (rule2.at(j) == terminal) {
+											new_rule.push_back(variable);
+										} else {
+											new_rule.push_back(rule2.at(j));
+										}
+											/*std::cout << "Found the terminal "
+											 << terminal << " in rule: ";
+											 for (unsigned int k = 0;
+											 k < rule2.size(); k++) {
+											 std::cout << rule2.at(k);
+											 }
+											 std::cout << std::endl;
+											 */
+											/*for (unsigned int k = 0; k < j; k++) {
+												new_rule.push_back(rule2.at(k));
+											}
+											new_rule.push_back(variable);
+											for (unsigned int k = j + 1;
+													k < rule2.size(); k++) {
+												new_rule.push_back(rule2.at(k));
+											}
+											result_cfg.P.find(iter2.first)->second.erase(
+													rule2);
+											result_cfg.P.find(iter2.first)->second.insert(
+													new_rule);
+											*/
 									}
+									result_cfg.P.find(iter2.first)->second.erase(rule2);
+									result_cfg.P.find(iter2.first)->second.insert(new_rule);
 								}
 							}
 						}
-						if (result_cfg.P.find(variable) == result_cfg.P.end()) {
-							result_cfg.P.insert({variable, std::set<std::vector<typename CFG_Type::ID_Type>>()});
-						}
-						result_cfg.P.find(variable)->second.insert({terminal});
+						result_cfg.P.insert(
+								{ variable,
+										std::set<
+												std::vector<
+														typename CFG_Type::ID_Type>>() });
+						result_cfg.P.find(variable)->second.insert(
+								{ terminal });
 					}
 				}
-				std::cout << std::endl;
 			}
 		}
 	}
-	/*					}
-						if (break_loops) {
-							break;
+	return result_cfg;
+}
+
+template<typename CFG_Type> CFG_Type break_long_bodies(
+		const CFG_Type& input_cfg) {
+	CFG_Type result_cfg = input_cfg;
+	int counter = 0;
+	for (auto iter : result_cfg.P) {
+		for (auto rule : iter.second) {
+			std::string variable_begin = "C";
+			if (rule.size() >= 3) {
+				typename CFG_Type::ID_Type head = iter.first;
+				for (unsigned int i = 1; i < rule.size(); i++) {
+					std::string variable;
+					if (i != rule.size() - 1) {
+						variable = "[" + variable_begin + "_"
+								+ std::to_string(counter) + "]";
+					} else {
+						variable = rule.at(rule.size() - 1);
+					}
+					result_cfg.V.insert(variable);
+					std::vector<typename CFG_Type::ID_Type> new_rule;
+					new_rule.push_back(rule.at(i - 1));
+					new_rule.push_back(variable);
+					if (result_cfg.P.find(head) == result_cfg.P.end()) {
+						result_cfg.P.insert(
+								{ head,
+										std::set<
+												std::vector<
+														typename CFG_Type::ID_Type>>() });
+					}
+					if (head == iter.first) {
+						for (auto iter2 : result_cfg.P) {
+							for (auto rule2 : iter2.second) {
+								if (rule2 == rule) {
+									result_cfg.P.find(iter2.first)->second.insert(
+											new_rule);
+									result_cfg.P.find(iter2.first)->second.erase(
+											rule2);
+								}
+							}
 						}
 					}
+					result_cfg.P.find(head)->second.insert(new_rule);
+					head = variable;
+					if (i != rule.size() - 1) {
+						counter++;
+					}
 				}
-				if (break_loops) {
-					break;
-				}
-			}
-			if (break_loops) {
-				break;
+				result_cfg.P.find(iter.first)->second.erase(rule);
 			}
 		}
-		if (replaced) {
-*/
+	}
+
 	return result_cfg;
 }
 
-template <typename CFG_Type> CFG_Type break_long_bodies(const CFG_Type& input_cfg) {
-	CFG_Type result_cfg = input_cfg;
-	return result_cfg;
-}
-
-
-
-template <typename CFG_Type>
+template<typename CFG_Type>
 CFG_Type CNF(const CFG_Type& input_cfg) {
-	CFG_Type result_cfg = eliminate_useless_symbols(eliminate_unit_pairs(eliminate_epsilon_productions(input_cfg))); // Cleanup the grammar.
-	result_cfg = long_rules_to_only_variables(result_cfg);
+	CFG_Type result_cfg = break_long_bodies(long_rules_to_only_variables(
+			eliminate_useless_symbols(
+					eliminate_unit_pairs(
+							eliminate_epsilon_productions(input_cfg))))); // Cleanup the grammar. Eliminate terminals from long bodies and break the long bodies.
 	return result_cfg;
 }
-
 
 #endif /* CNF_CNF_HPP_ */
