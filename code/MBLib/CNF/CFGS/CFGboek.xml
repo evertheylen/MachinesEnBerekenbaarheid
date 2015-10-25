@@ -5,7 +5,7 @@
         <StartSymbol>S</StartSymbol>
 	</Variables>
 	<Terminals>
-	    ab$
+	    ab
 	</Terminals>
 	<Productions>
         <Rule LHS="S" RHS= "AB"/>

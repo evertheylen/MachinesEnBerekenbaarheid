@@ -22,7 +22,6 @@ s_CFG::s_CFG(TiXmlDocument& doc) {
 	for (char s: std::string(vars_el->GetText())) {
 		this->V.insert(std::string(1, s));
 	}
-	
 	this->S = std::string(vars_el->FirstChildElement("StartSymbol")->GetText());
 	
 	auto term_el = root->FirstChildElement("Terminals");

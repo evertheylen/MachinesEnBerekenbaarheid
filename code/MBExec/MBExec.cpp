@@ -45,13 +45,12 @@ int main(int argc, char** argv) {
 		G.to_xml(std::string(argv[3]));
 		
 	} else if (action == "CNF") {
-		ENSURE_ARGCOUNT(3);
+		ENSURE_ARGCOUNT(4);
 		TiXmlDocument doc_cfg(argv[2]);
 		doc_cfg.LoadFile();
 		s_CFG cfg(doc_cfg);
 		s_CFG cnf_cfg = CNF(cfg); // Step one for cnf: clean up grammar.
-		std::cout << cnf_cfg << std::endl;
-		
+		cnf_cfg.to_xml(argv[3]);
 	} else if (action == "parse_PDA") {
 		PDA<std::string, std::string> P;
 		P.Q = {"q0", "q1"};

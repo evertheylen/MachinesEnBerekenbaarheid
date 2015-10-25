@@ -217,6 +217,11 @@ std::set<typename CFG_Type::ID_Type> find_reachable_symbols(
 		const CFG_Type& input_cfg) {
 	std::set<typename CFG_Type::ID_Type> reachable_symbols;
 	reachable_symbols.insert(input_cfg.S);
+
+	/*for (auto c: reachable_symbols) {
+		std::cout << c << std::endl;
+	}*/
+
 	bool added = true;
 	while (added) {
 		added = false;
@@ -246,6 +251,9 @@ CFG_Type eliminate_useless_symbols(const CFG_Type& input_cfg) {
 
 	for (typename CFG_Type::ID_Type variable : input_cfg.V) {
 		if (generating_symbols.find(variable) == generating_symbols.end()) { // If a variable isnt generating, then delete it and all of its rules.
+			if (variable == input_cfg.S) {
+				std::cerr << "Problem: The start symbol of your grammar isn't a generating symbol. Please insert a valid grammar.\n";
+			}
 			result_cfg.P.erase(variable);
 			result_cfg.V.erase(variable);
 		}
@@ -310,27 +318,6 @@ CFG_Type long_rules_to_only_variables(const CFG_Type& input_cfg) {
 										} else {
 											new_rule.push_back(rule2.at(j));
 										}
-										/*std::cout << "Found the terminal "
-										 << terminal << " in rule: ";
-										 for (unsigned int k = 0;
-										 k < rule2.size(); k++) {
-										 std::cout << rule2.at(k);
-										 }
-										 std::cout << std::endl;
-										 */
-										/*for (unsigned int k = 0; k < j; k++) {
-										 new_rule.push_back(rule2.at(k));
-										 }
-										 new_rule.push_back(variable);
-										 for (unsigned int k = j + 1;
-										 k < rule2.size(); k++) {
-										 new_rule.push_back(rule2.at(k));
-										 }
-										 result_cfg.P.find(iter2.first)->second.erase(
-										 rule2);
-										 result_cfg.P.find(iter2.first)->second.insert(
-										 new_rule);
-										 */
 									}
 									result_cfg.P.find(iter2.first)->second.erase(
 											rule2);
@@ -416,6 +403,21 @@ CFG_Type CNF(const CFG_Type& input_cfg) {
 							eliminate_unit_pairs(
 									eliminate_epsilon_productions(
 											input_cfg))))); // Cleanup the grammar. Eliminate terminals from long bodies and break the long bodies.
+
+
+	// Uncomment the section below to show all steps of the CNF conversion
+	// Uncomment the section above to perform CNF without output.
+
+	/*CFG_Type result_cfg = eliminate_epsilon_productions(input_cfg);
+	std::cout << "Eliminate epsilon productions:\n" << result_cfg;
+	result_cfg = eliminate_unit_pairs(result_cfg);
+	std::cout << "Eliminate unit pairs:\n" << result_cfg;
+	result_cfg = eliminate_useless_symbols(result_cfg);
+	std::cout << "Eliminate useless symbols:\n" << result_cfg;
+	result_cfg = long_rules_to_only_variables(result_cfg);
+	std::cout << "Long rules to only variables:\n" << result_cfg;
+	result_cfg = break_long_bodies(result_cfg);
+	std::cout << "Break long bodies:\n" << result_cfg;*/
 	return result_cfg;
 }
 
