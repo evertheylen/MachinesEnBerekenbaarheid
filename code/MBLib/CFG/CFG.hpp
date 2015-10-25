@@ -59,13 +59,13 @@ public:
 		return m != T.end();
 	}
 	
-	std::set<String> get_bodies(ID_T var) {
+	std::set<String> get_bodies(ID_T var) const {
 		assert(is_variable(var));
 		auto m = P.find(var);
 		if (m == P.end()) {
 			return std::set<String>();  // empty set
 		} else {
-			return m.second;
+			return m->second;
 		}
 	}
 	
@@ -80,7 +80,7 @@ public:
 		if (m == P.end()) {
 			P[var] = {new_body};
 		} else {
-			m.second.insert(new_body);
+			m->second.insert(new_body);
 		}
 	}
 	

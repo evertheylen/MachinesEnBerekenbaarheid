@@ -5,11 +5,11 @@
         <StartSymbol>S</StartSymbol>
 	</Variables>
 	<Terminals>
-	    ab$
+	    ab
 	</Terminals>
 	<Productions>
-        <Rule LHS="S" RHS= "ASA|aB"/>
-		<Rule LHS="A" RHS= "B|S"/>
-		<Rule LHS="B" RHS= "b|"/>
+        <Rule LHS="S" RHS= "ASB"/>
+        <Rule LHS="A" RHS= "aAS|a|"/>
+        <Rule LHS="B" RHS= "SbS|A|bb"/>                
 	</Productions>
 </CFG>
