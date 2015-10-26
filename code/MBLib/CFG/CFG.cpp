@@ -19,15 +19,15 @@ s_CFG::s_CFG(TiXmlDocument& doc) {
 	
 	auto vars_el = root->FirstChildElement("Variables");
 	assert(vars_el != nullptr);
-	for (char s: std::string(vars_el->GetText())) {
-		this->V.insert(std::string(1, s));
+	for (auto s: split(std::string(vars_el->GetText()))) {
+		this->V.insert(s);
 	}
 	this->S = std::string(vars_el->FirstChildElement("StartSymbol")->GetText());
 	
 	auto term_el = root->FirstChildElement("Terminals");
 	assert(term_el != nullptr);
-	for (char s: std::string(term_el->GetText())) {
-		this->T.insert(std::string(1,s));
+	for (auto s: split(std::string(term_el->GetText()))) {
+		this->T.insert(s);
 	}
 	
 	auto prod_el = root->FirstChildElement("Productions");
@@ -37,16 +37,16 @@ s_CFG::s_CFG(TiXmlDocument& doc) {
 			rule_el = rule_el->NextSiblingElement("Rule")) {
 		std::string head = std::string(rule_el->Attribute("LHS"));
 		std::string bodies = std::string(rule_el->Attribute("RHS"));
-		std::vector<std::string> buf;
+		std::string buf;
 		for (char c: bodies) {
 			if (c == '|') {
-				this->P[head].insert(buf);
+				this->P[head].insert(split(buf));
 				buf.clear();
 			} else {
-				buf.push_back(std::string(1,c));
+				buf += c;
 			}
 		}
-		this->P[head].insert(buf);
+		this->P[head].insert(split(buf));
 	}
 }
 

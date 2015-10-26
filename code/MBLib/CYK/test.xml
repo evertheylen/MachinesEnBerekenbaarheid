@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<CFG>
+    <Variables>STUV
+        <StartSymbol>S</StartSymbol>
+    </Variables>
+    <Terminals>abcdefghij</Terminals>
+    <Productions>
+        <Rule LHS="S" RHS="ab" />
+        <Rule LHS="S" RHS="ST" />
+        <Rule LHS="S" RHS="d" />
+        <Rule LHS="T" RHS="aSb" />
+        <Rule LHS="T" RHS="baaa" />
+        <Rule LHS="T" RHS="defg" />
+        <Rule LHS="U" RHS="aSb" />
+        <Rule LHS="U" RHS="baaa" />
+        <Rule LHS="U" RHS="defg" />
+    </Productions>
+</CFG>

@@ -10,6 +10,7 @@ dependencies["build_exec"] = [
 	"MBLib/PDA_CFG>>build_objects",
 	"libs/tinyxml>>build_objects",
 	"MBLib/PDA>>build_objects",
+	"MBLib/CYK>>build_objects",
 ]
 
 
@@ -23,6 +24,8 @@ dependencies["build_exec"] = [
 #include "MBLib/PDA/PDA.hpp"
 #include "MBLib/CFG_PDA/CFG_PDA.hpp"
 #include "MBLib/PDA_CFG/PDA_CFG.hpp"
+#include "MBLib/CYK/CYK.hpp"
+
 #include "libs/tinyxml/tinyxml.h"
 
 #define ENSURE_ARGCOUNT(k) if (argc < k) { std::cout << "Not enough arguments." << std::endl; return 1; }
@@ -51,6 +54,7 @@ int main(int argc, char** argv) {
 		s_CFG cfg(doc_cfg);
 		s_CFG cnf_cfg = CNF(cfg); // Step one for cnf: clean up grammar.
 		cnf_cfg.to_xml(argv[3]);
+		
 	} else if (action == "parse_PDA") {
 		PDA<std::string, std::string> P;
 		P.Q = {"q0", "q1"};
@@ -96,6 +100,28 @@ int main(int argc, char** argv) {
 		std::cout << "\n=== Converted to CFG again: ===\n\n";
 		s_CFG G2 = PDA_to_CFG<s_PDA, s_CFG>(P);
 		std::cout << G2;
+		
+	} else if (action == "check_CNF") {
+		ENSURE_ARGCOUNT(3);
+		TiXmlDocument doc(argv[2]);
+		doc.LoadFile();
+		s_CFG G(doc);
+		std::cout << G;
+		if (check_CNF(G, true)) std::cout << "Is in CNF!\n";
+		else std::cout << "Is not in CNF.\n";
+		
+	} else if (action == "CYK") {
+		ENSURE_ARGCOUNT(4);
+		TiXmlDocument doc(argv[2]);
+		doc.LoadFile();
+		s_CFG G(doc);
+		std::cout << G;
+		
+		auto input = split(std::string(argv[3]));
+		std::cout << "input is " << input << "\n";
+		
+		if (CYK(G, input, true)) std::cout << "String accepted!\n";
+		else std::cout << "String not accepted.\n";
 		
 	} else {
 		std::cout << "We don't know that action, sorry.\n";

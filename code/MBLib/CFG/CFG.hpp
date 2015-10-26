@@ -111,8 +111,10 @@ class s_CFG: public CFG<std::string> {
 public:
 	
 	typedef std::string ID_Type;
+	typedef std::vector<std::string> String;
 	
 	// Hi my name is Bjarne Stroustrup and fuck you 'cause there is no easy mechanism for inheriting constructors
+	// Did I tell you about typedefs? No easy way to inherit them either :D Have fun with C++! lol
 	
 	s_CFG();
 	

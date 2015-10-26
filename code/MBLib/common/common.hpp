@@ -17,6 +17,9 @@ std::set<T> Union(std::set<T> A, std::set<T> B) {
 	return dest;
 }
 
+// split string in vector
+std::vector<std::string> split(const std::string& s);
+
 
 template <typename T>
 std::string to_string(T input) {
@@ -33,22 +36,24 @@ std::string to_string<std::string>(std::string input);
 
 // Output
 template <typename T>
-std::ostream& operator<< (std::ostream& out, std::vector<T>& s) {
-	for (T& el: s) {
+std::ostream& operator<< (std::ostream& out, const std::vector<T>& s) {
+	for (const T& el: s) {
 		out << el;
 	}
 	return out;
 }
 
+
 template <typename T>
-std::ostream& operator<< (std::ostream& out, std::set<T>& s) {
+std::ostream& operator<< (std::ostream& out, const std::set<T>& s) {
 	out << "{";
-	for (T el: s) {
+	for (const T& el: s) {
 		out << el << ", ";
 	}
 	out << "}";
 	return out;
 }
+
 
 #endif
 
