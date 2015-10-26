@@ -1,0 +1,26 @@
+<?xml version="1.0" ?>
+<CFG>
+    <Variables>ABS[C_0][C_1][_A][_B]
+        <StartSymbol>S</StartSymbol>
+    </Variables>
+    <Terminals>ab</Terminals>
+    <Productions>
+        <Rule LHS="A" RHS="[_A]A" />
+        <Rule LHS="A" RHS="[_A][C_0]" />
+        <Rule LHS="A" RHS="a" />
+        <Rule LHS="B" RHS="[_B]B" />
+        <Rule LHS="B" RHS="[_B][C_1]" />
+        <Rule LHS="B" RHS="b" />
+        <Rule LHS="S" RHS="AB" />
+        <Rule LHS="S" RHS="[_A]A" />
+        <Rule LHS="S" RHS="[_A][C_0]" />
+        <Rule LHS="S" RHS="[_B]B" />
+        <Rule LHS="S" RHS="[_B][C_1]" />
+        <Rule LHS="S" RHS="a" />
+        <Rule LHS="S" RHS="b" />
+        <Rule LHS="[C_0]" RHS="AA" />
+        <Rule LHS="[C_1]" RHS="BB" />
+        <Rule LHS="[_A]" RHS="a" />
+        <Rule LHS="[_B]" RHS="b" />
+    </Productions>
+</CFG>
