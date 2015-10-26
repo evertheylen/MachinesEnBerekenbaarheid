@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+<CFG>
+    <Variables>S[C_0][C_1][C_2][C_3][C_4][_A][_B][_D][_E][_F][_G]
+        <StartSymbol>S</StartSymbol>
+    </Variables>
+    <Terminals>abdefg</Terminals>
+    <Productions>
+        <Rule LHS="S" RHS="[_A][C_0]" />
+        <Rule LHS="S" RHS="[_A][_B]" />
+        <Rule LHS="S" RHS="[_B][C_1]" />
+        <Rule LHS="S" RHS="[_D][C_3]" />
+        <Rule LHS="[C_0]" RHS="S[_B]" />
+        <Rule LHS="[C_1]" RHS="[_A][C_2]" />
+        <Rule LHS="[C_2]" RHS="[_A][_A]" />
+        <Rule LHS="[C_3]" RHS="[_E][C_4]" />
+        <Rule LHS="[C_4]" RHS="[_F][_G]" />
+        <Rule LHS="[_A]" RHS="a" />
+        <Rule LHS="[_B]" RHS="b" />
+        <Rule LHS="[_D]" RHS="d" />
+        <Rule LHS="[_E]" RHS="e" />
+        <Rule LHS="[_F]" RHS="f" />
+        <Rule LHS="[_G]" RHS="g" />
+    </Productions>
+</CFG>
