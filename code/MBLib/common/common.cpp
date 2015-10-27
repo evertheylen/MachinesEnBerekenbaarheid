@@ -35,6 +35,17 @@ std::string to_string<std::vector<std::string>>(std::vector<std::string> input) 
 }
 
 template <>
+std::string to_string<std::set<std::string>>(std::set<std::string> input) {
+	std::string s = "{";
+	for (const std::string& p: input) {
+		s += p;
+		s += ", ";
+	}
+	s += "}";
+	return s;
+}
+
+template <>
 std::string to_string<std::string>(std::string input) {
 	return input;
 }

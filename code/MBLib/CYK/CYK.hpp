@@ -84,17 +84,43 @@ public:
 };
 
 
+void pad(const std::string& s, std::ostream& out, unsigned int length) {
+	out << s;
+	for (int i=0; i<(length-s.size()); i++) {
+		out << " ";
+	}
+}
+
+
 template <typename CFG_Type>
 std::ostream& operator<<(std::ostream& out, Table<CFG_Type>& t) {
+	std::vector<std::vector<std::string>> output(t.inputsize);
+	for (int s=t.inputsize-1; s>=0; s--) {
+		for (unsigned int i=0; i<t.inputsize-s; i++) {
+			//unsigned int j = i+s;
+			output.at(s).push_back(to_string(t.cget(s,i)));
+		}
+	}
+	
+	std::vector<int> row_width(t.inputsize, 0);
+	for (int s=t.inputsize-1; s>=0; s--) {
+		for (unsigned int i=0; i<t.inputsize-s; i++) {
+			if (output.at(s).at(i).size() > row_width.at(i)) {
+				row_width.at(i) = output.at(s).at(i).size();
+			}
+		}
+	}
+	
 	for (int s=t.inputsize-1; s>=0; s--) {
 		out << " | ";
 		for (unsigned int i=0; i<t.inputsize-s; i++) {
-			unsigned int j = i+s;
-			out << t.cget(s,i) << "\t";
+			pad(output.at(s).at(i), out, row_width.at(i));
+			out << "  ";
 		}
 		out << "\n";
 	}
-	out << " +------------------------------------------------\n\n";
+	
+	out << " +--------------------------------------------------------------------\n\n";
 	return out;
 }
 

@@ -31,6 +31,9 @@ template <>
 std::string to_string<std::vector<std::string>>(std::vector<std::string> input);
 
 template <>
+std::string to_string<std::set<std::string>>(std::set<std::string> input);
+
+template <>
 std::string to_string<std::string>(std::string input);
 
 

@@ -118,8 +118,8 @@ int main(int argc, char** argv) {
 		std::cout << G;
 		
 		auto input = split(std::string(argv[3]));
-		std::cout << "input is " << input << "\n";
-		
+		std::cout << "\nThe input is " << input << "\n";
+		std::cout << "\nStarting CYK:\n";
 		if (CYK(G, input, true)) std::cout << "String accepted!\n";
 		else std::cout << "String not accepted.\n";
 		
