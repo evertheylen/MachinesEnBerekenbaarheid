@@ -454,6 +454,9 @@ class Unit(BaseUnit):
         else:
             return []
     
+    def get_dep_actions(self):
+        yield from self.deps
+    
     def get_files(self):
         yield from self.files
     
@@ -489,6 +492,10 @@ class CollectionUnit(Unit):
         for s in self.subunits:
             deps.append(Dependency(s, None, action))
         return deps
+    
+    def get_dep_actions(self):
+        for i in self.subunits:
+            yield from i.get_dep_actions()
     
     def get_files(self):
         for s in self.subunits:
@@ -741,8 +748,8 @@ class GccCompiler(EasyWorker):
             
             # difficult one: if a todo is to be turned into an executable, for every object it depends upon,
             # it must also depend on it's headers.
-            if "build_exec" in todo.unit.deps:
-                for dep_obj in todo.unit.deps["build_exec"]:
+            if "build_exec" in todo.unit.get_dep_actions():
+                for dep_obj in todo.unit.get_deps("build_exec"):
                     extra.add(Dependency(dep_obj.unit, todo.worker, "headers"))
             
         return extra
