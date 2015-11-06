@@ -7,7 +7,6 @@ Authors:
 
   - Stijn Janssens
   - Anthony Hermans
-  - Pieter Coeck
   - Evert Heylen
 
 
