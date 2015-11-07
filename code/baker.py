@@ -273,10 +273,10 @@ def escape_path(s):
     return news
     
 
-def call(s, writer):
-    writer.debugline(">> " + s)
+def call(s, writer, cwd=None):
+    writer.debugline(">> %s [cwd=%s]"%(s, cwd))
     # if shell=True, it is recommended to pass the command as a string, rather than as a list
-    p = subprocess.Popen(s, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    p = subprocess.Popen(s, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd)
     while True:
         retcode = p.poll()
         writer.writebytes(p.stdout.readline())
@@ -286,8 +286,8 @@ def call(s, writer):
                 writer.writebytes(l)
             return retcode
 
-def check_call(s, writer, todo, info=""):
-    ret = call(s, writer)
+def check_call(s, writer, todo, info="", cwd=None):
+    ret = call(s, writer, cwd)
     if ret != 0:
         raise BuildError(todo, info)
     
@@ -328,11 +328,35 @@ def exec_file(location, loc=locals()):
 def dates_from_files(filenames):
     #print("dates_from_files got " + repr(filenames))
     for fn in filenames:
-        if os.path.isfile(fn):
+        if os.path.isfile(fn) or os.path.isdir:
             yield datetime.datetime.fromtimestamp(os.path.getmtime(fn))
         else:
             yield MIN_DATE
 
+# thanks http://stackoverflow.com/questions/1158076/implement-touch-using-python
+def touch(fname, mode=0o666, dir_fd=None, **kwargs):
+    if os.path.isfile(fname):
+        flags = os.O_CREAT | os.O_APPEND
+        #print("touching " + fname)
+        with os.fdopen(os.open(fname, flags=flags, mode=mode, dir_fd=dir_fd)) as f:
+            os.utime(f.fileno() if os.utime in os.supports_fd else fname,
+                dir_fd=None if os.supports_fd else dir_fd, **kwargs)
+
+def parse_worker(worker, config, worker_classes):
+    configs = []
+    
+    # Check own config
+    for c in worker.needs_config:
+        configs.append(config[c])
+        
+    return worker(*configs)
+
+
+def add_to_list_in_dict(dct, key, extra):
+    if key not in dct:
+        dct[key] = extra
+    else:
+        dct[key] += extra
 
 # -----------------------------------------------------------
 # Units
@@ -353,8 +377,8 @@ def create_unit(uname, config):
             u = CollectionUnit(uname, config)
         else:
             u = Unit(uname)
-        u.scan(config)
         all_units[u.location] = u
+        u.scan(config)
         return u
 
 
@@ -403,9 +427,9 @@ class Unit(BaseUnit):
             raise ConfigError(bake_me_loc, "whatever", str(e))
         
         # then, check all files
-        for fname in os.listdir(self.location):
-            if there_exists(config["extensions"], lambda e: fname.endswith(e)):
-                f_loc = os.path.join(self.location, fname)
+        # TODO more efficient :P
+        for pat in config["scanned_files"]:
+            for f_loc in glob.glob(os.path.join(self.location, pat)):
                 self.files.append(f_loc)
                 f = open(f_loc)
                 bake_code = ""
@@ -550,6 +574,14 @@ class Todo(Dependency):
         dbg_print("     =", repr(extra_deps))
         self.build_deps(extra_deps)
         
+    def new_action(self, new_action):
+        newtodo = copy.copy(self)
+        newtodo.action = new_action
+        if newtodo in all_todos:
+            return all_todos[newtodo]
+        else:
+            all_todos[newtodo] = newtodo
+            return newtodo
     
     def build_deps(self, deps):
         for d in deps:
@@ -610,10 +642,13 @@ class Todo(Dependency):
             if self in database:
                 writer.debugline("in database")
                 output_files_prev_run = database.get_row(self)
+                writer.debugline("input files: " + ", ".join(input_files))
+                writer.debugline("output files prev run: " + ", ".join(output_files_prev_run))
                 # no input files?
                 max_input = max(dates_from_files(input_files)) if len(input_files) > 0 else MIN_DATE
                 # no output files, but it is in the database? no need to redo
                 min_output = min(dates_from_files(output_files_prev_run)) if len(output_files_prev_run) > 0 else MAX_DATE
+                writer.debugline("dates max_input = {0}, min_output = {1}".format(max_input, min_output))
                 if max_input > min_output:
                     return self.actually_do(writer, database)
                 else:
@@ -637,6 +672,37 @@ class Todo(Dependency):
         database.set_row(self, output)
         self.status = JUST_DID
         return JUST_DID
+
+
+# See below
+class FakeUnit(BaseUnit):
+    def __init__(self, name, location, data):
+        BaseUnit.__init__(self, name)
+        self.location = location
+        self.data = data
+
+# Has no dependencies, and is mainly used to pass to a certain worker to get a something specific done
+class FakeTodo:
+    def __init__(self, unit_location, unit_data, worker, action):
+        self.unit = FakeUnit("FAKE", unit_location, unit_data)
+        self.worker = worker
+        self.action = action
+        self.status = NOT_DONE
+    
+    def build_deps():
+        pass
+        
+    def all_deps():
+        return
+        yield
+        
+    def all_deps_without_self():
+        return
+        yield
+    
+    def list_deps():
+        return
+        yield
 
 
 # creates only unique todos
@@ -687,15 +753,18 @@ class RootTodo(Todo):
 # ---------------------------------------------------------------------------------------
 # Workers
 
+# needs_config has been extended!
+
 # TODO more compiler/worker support may come
 class Worker:
     shortname = "LAZY DEVELOPER DETECTED"  # aka override me pls
-    
+    needs_config = []
+        
     def extra_deps(self, todo):
         # extra dependencies implicitly given by the action
         return set()  # by returns nothing
     
-    def do(self, todo):
+    def do(self, todo, writer):
         # by default does nothing, returns no output files
         # NOTE however, that if the worker actually did something but produced no output files,
         # you should return None instead of []
@@ -716,14 +785,24 @@ class EasyWorker(Worker):
 
 # --- Actual workers ---
 
+# A very configurable worker, on the level of the units themselves
+class Custom(Worker):
+    shortname = "custom"
+    
+    def do(self, todo, writer):
+        if todo.action not in todo.unit.data:
+            raise ConfigError("unit "+todo.unit.name, "function "+todo.action, "trying to use it as an action")
+        return todo.unit.data[todo.action](todo, writer)
+    
+
 class GccCompiler(EasyWorker):
     shortname = "gcc"
-    needs_config = "gcc_config"
+    needs_config = ["gcc_config"]
     
     def __init__(self, config):
         self.__dict__.update(config)
-        self.cmd_object = "clang++ -{s.mode} -std={s.std} -c {source} -o {objloc} {include} {s.extra}"
-        self.cmd_exec = "clang++ -{s.mode} -std={s.std} -o {execloc} {objects} {s.extra}"
+        self.cmd_object = "{s.compiler} -{s.mode} -std={s.std} -c -x c++ {source} -o {objloc} {include} {s.extra}"
+        self.cmd_exec = "{s.compiler} -{s.mode} -std={s.std} -o {execloc} {objects} {s.extra}"
     
     def extra_deps(self, todo):
         extra = set()
@@ -754,14 +833,10 @@ class GccCompiler(EasyWorker):
             
         return extra
     
+    
     def build_objects(self, todo, writer):
         output_files = []
-        includes = set([os.getcwd()])
-        for d in todo.all_deps():
-            if d.action == "headers":
-                includes.add(d.unit.location)
-        
-        include = " ".join(["-I %s/"%(escape_path(i)) for i in includes])
+        includes = self.get_dependent_includes(todo)
         
         # typical gcc call for objects:
         #  g++ -O3 -std=c++11 -I /include/me -c obj.cpp
@@ -770,34 +845,55 @@ class GccCompiler(EasyWorker):
         for source in glob.glob(os.path.join(todo.unit.location, "*.cpp")):
             filename = drop_ext(source)
             objloc = os.path.join(todo.unit.location, filename+".o")
-            check_call(self.cmd_object.format(s=self, source=escape_path(source), objloc=escape_path(objloc),
-                                               include=include), writer, todo)
-            output_files.append(objloc)
+            output_files.append(self.gcc_build_object(includes, source, objloc, writer, todo))
         
         return output_files
-        
+    
+    
     def build_exec(self, todo, writer):
-        output_files = []
         # typical gcc call for executables:
         #  g++ -O3 -std=c++11 -I /include/me -o exec obj.o obj2.o obj3.o
         #  --> produces exec
         
-        executable = todo.unit.data["executable"] if "executable" in todo.unit.data else None
-        if executable is not None:
-            objects = set(glob.glob(os.path.join(todo.unit.location, "*.o")))
-            for d in todo.all_deps():
-                if d.action == "build_objects":
-                    # dependencies should've already been built
-                    objects.update(glob.glob(os.path.join(d.unit.location, "*.o")))
-            
-            objects = " ".join([escape_path(o) for o in objects])
+        if "executable" in todo.unit.data:
+            executable = todo.unit.data["executable"]
+            objects = self.get_dependent_objects(todo)
             execloc = os.path.join(todo.unit.location, executable)
-            check_call(self.cmd_exec.format(s=self, execloc=escape_path(execloc), objects=objects), writer, todo)
-            output_files.append(execloc)
+            return [ self.gcc_build_exec(execloc, objects, writer, todo) ]  # should be a list
         else:
             raise ConfigError(todo.unit.name, "executable", "name of the resulting executable")
         
-        return output_files
+    
+    def get_dependent_objects(self, todo):
+        objects = set(glob.glob(os.path.join(todo.unit.location, "*.o")))
+        for d in todo.all_deps():
+            if d.action == "build_objects":
+                # dependencies should've already been built
+                objects.update(glob.glob(os.path.join(d.unit.location, "*.o")))
+        return objects
+    
+    
+    def get_dependent_includes(self, todo):
+        includes = set()
+        for d in todo.all_deps():
+            if d.action == "headers":
+                includes.add(d.unit.location)
+        return includes
+    
+    
+    def gcc_build_exec(self, execloc, objects, writer, todo, extra=""):
+        obj_str = " ".join([escape_path(o) for o in objects])
+        check_call(self.cmd_exec.format(s=self, execloc=escape_path(execloc), objects=obj_str) +" "+extra, writer, todo)
+        return execloc
+    
+    
+    def gcc_build_object(self, includes, sourceloc, objloc, writer, todo, extra=""):
+        includes.add(os.getcwd())
+        include = " ".join(["-I %s/"%(escape_path(i)) for i in includes])
+        check_call(self.cmd_object.format(s=self, source=escape_path(sourceloc), objloc=escape_path(objloc),
+                                            include=include) +" "+extra, writer, todo)
+        return objloc
+    
     
     def headers(self, todo, writer):
         loc = os.path.join(todo.unit.location, ".headers_baked")
@@ -805,17 +901,6 @@ class GccCompiler(EasyWorker):
         f.close()
         return [loc]
     
-    
-    #def input_files(self, todo):
-        #files = list(todo.unit.get_files())
-        #print("pre files are", repr(files))
-        #if todo.action == "build_objects" or todo.action == "build_exec":
-            ## add all header files too, referenced in some way
-            #for d in todo.all_deps():
-                #if d.action == "headers":
-                    #files.extend(self.find_headers(d))
-        #print("files are", repr(files))
-        #return files
     
     def find_headers(self, todo):
         files = []
@@ -829,9 +914,10 @@ class GccCompiler(EasyWorker):
         "headers": headers,
     }
 
+
 class Maintenance(EasyWorker):
     shortname = "maintenance"
-    needs_config = "maintenance_config"
+    needs_config = ["maintenance_config"]
     
     def __init__(self, config):
         if "dirty_files" not in config:
@@ -859,23 +945,169 @@ class Maintenance(EasyWorker):
     }
 
 
+class Make(Worker):
+    shortname = "make"
+    
+    def input_files(self, todo):
+        l = super(Make, self).input_files(todo)
+        l.append("Makefile")
+        return l
+    
+    def do(self, todo, writer, cwd=None):
+        if cwd is None:
+            cwd = todo.unit.location
+        # reminder: should return a list of output files!
+        # unless it should always run, which is the case for Makefiles (as they have their own mechanisms for this)
+        check_call("make "+todo.action, writer, todo, 
+                   "Makefile may not contain your preferred action", cwd)
+        # always run, return None
+        return None
 
 
+class CMake(Worker):
+    shortname = "cmake"
+    # only supports unix Makefiles, windows users can go f*** themselves
+    
+    def input_files(self, todo):
+        if todo.action == "generate_makefile":
+            l = super(CMake, self).input_files(todo)
+            l.append(os.path.join(todo.unit.location, "CMakeLists.txt"))
+            return l
+    
+    def extra_deps(self, todo):
+        # every other action than generating the makefile kinda needs the makefile
+        if todo.action != "generate_makefile":
+            return set([Dependency(todo.unit, self, "generate_makefile")])
+        return set()
+    
+    def do(self, todo, writer):
+        cmake_stuff = os.path.join(todo.unit.location, "cmake_stuff")
+        writer.debugline("cmake_stuff is " + cmake_stuff)
+        if todo.action == "generate_makefile":
+            if not os.path.exists(cmake_stuff):
+                os.makedirs(cmake_stuff)
+            check_call("cmake ..", writer, todo, cwd=cmake_stuff)
+            # Vague problem with cmake #003051: when calling `cmake ..` like this, it does not touch all files.
+            # This causes Baker to think it hasn't done any work at all, so it will keep redoing this.
+            # However, if I run `cmake ..` myself (in zsh), all files are touched and Baker knows what's
+            # going on. As a solution I manually touch each file.
+            result = [os.path.join(todo.unit.location, "cmake_stuff", f) for f in os.listdir(cmake_stuff)]
+            for f in result:
+                touch(f)
+            return result
+        else:
+            return Make.do(self, todo, writer, cmake_stuff)
+
+
+# put a 't' in front of everything
+# used internally in GTester, not for direct usage by user
+class GccTestCompiler(GccCompiler):
+    shortname = "gcc_gtest"
+    
+    def __init__(self, config, parent_gtest):
+        self.parent_gtest = parent_gtest
+        super(GccTestCompiler, self).__init__(config)
+    
+    def extra_deps(self, todo):
+        extra = set()
+        if todo.action == "build_test_exec":
+            extra = GccCompiler.extra_deps(self, todo.new_action("build_exec"))
+            extra.add(Dependency(todo.unit, self, "build_test_objects"))
+        elif todo.action == "build_test_objects":
+            extra = GccCompiler.extra_deps(self, todo.new_action("build_objects"))
+            extra.add(Dependency(todo.unit, self.parent_gtest, "generate_tests"))
+        return extra
+    
+    def build_test_exec(self, todo, writer):
+        objects = self.get_dependent_objects(todo)
+        objects.update(glob.glob(os.path.join(todo.unit.location, "*.to")))
+        execloc = os.path.join(todo.unit.location, "test.bin")
+        static_libs = escape_path(os.path.join(os.getcwd(), self.parent_gtest.static_libs))
+        return [ self.gcc_build_exec(execloc, objects, writer, todo, "-pthread -L %s -lgtest -lgtest_main"%static_libs) ]
+        
+        
+    def build_test_objects(self, todo, writer):
+        output_files = []
+        includes = self.get_dependent_includes(todo)
+        includes.add(os.path.join(self.parent_gtest.location, "include"))  # should be gtest's location
+        
+        for source in glob.glob(os.path.join(todo.unit.location, "*.cpp")):
+            filename = drop_ext(source)
+            objloc = os.path.join(todo.unit.location, filename+".o")
+            output_files.append(self.gcc_build_object(includes, source, objloc, writer, todo))
+        
+        for source in glob.glob(os.path.join(todo.unit.location, "*.tcpp")):
+            filename = drop_ext(source)
+            objloc = os.path.join(todo.unit.location, filename+".to")
+            output_files.append(self.gcc_build_object(includes, source, objloc, writer, todo))
+        
+        return output_files
+    
+    
+    actions = {
+        "build_test_exec": build_test_exec,
+        "build_test_objects": build_test_objects,
+        "build_objects": GccCompiler.build_objects,
+        "build_exec": GccCompiler.build_exec,
+        "headers": GccCompiler.headers,
+    }
+
+
+class GTester(EasyWorker):
+    shortname = "gtest"
+    needs_config = ["gtest_config", "gcc_config"]
+    
+    def __init__(self, config, gcc_config):
+        self.__dict__.update(config)
+        #mod_gcc_config = gcc_config.new_extra_layer({
+            #"default_executable": "tester",
+            #"extra": "-lgtest -lgtest_main",
+        #})
+        self.gcc = GccTestCompiler(gcc_config, self)
+    
+    def extra_deps(self, todo):
+        extra = set()
+        if todo.action == "build_tests":
+            extra.add(Dependency(todo.unit, self.gcc, "build_test_exec"))
+        return extra
+        
+    
+    def generate_tests(self, todo, writer):
+        output_files = []
+        
+        # Step 0: where are all the .test files?
+        test_files = glob.glob(os.path.join(todo.unit.location, "*.test"))
+        content = ""
+        for fname in test_files:
+            tf = open(fname, "r")
+            content += tf.read() + "\n"
+            tf.close()
+        
+        writer.debugline("content = " + content)
+        writer.debugline("template = " + self.template)
+        
+        # Step 1: generate a cpp containing all the tests
+        gen_cpp = os.path.join(todo.unit.location, "tests.tcpp")
+        output_files.append(gen_cpp)
+        f = open(gen_cpp, "w")
+        f.write(self.template.format(tests=content))
+        f.close()
+        
+        return output_files
+        
+    def build_tests(self, todo, writer):
+        writer.writeline("The test executable is waiting for you :)")
+
+    actions = {
+        "build_tests": build_tests,
+        "generate_tests": generate_tests,
+    }
+    
 # ------------------------------------------------------------------------------------
 # Main and config stuff
 
-to_be_configured_workers = {
-    "": None,  # default
-    "gtester": Worker,
-}
-
-auto_config = [GccCompiler, Maintenance]
-
-for w in auto_config:
-    if hasattr(w, "needs_config"):
-        to_be_configured_workers[w.shortname] = (w, w.needs_config)
-    else:
-        to_be_configured_workers[w.shortname] = w
+global workers_list
+workers_list = [Custom, GccCompiler, Maintenance, Make, CMake, GTester]
 
 global workers
 workers = {}
@@ -886,12 +1118,14 @@ standard_workers_by_action = {
     "build_objects": "gcc",
     "clean": "maintenance",
     "clean_all": "maintenance",
+    "build_tests": "gtest",
 }
+                    
 
 global project_name
 project_name = os.path.split(os.getcwd())[-1]
-
-
+        
+    
 def main():
     # which unit to bui-- perform some action on?
     
@@ -899,7 +1133,7 @@ def main():
     parser.add_argument("action", metavar="A", type=str, help="The action the worker should perform")
     parser.add_argument("units", metavar="U", type=str, nargs="+", help="A unit (given by relative path) to use")
     # TODO other actions
-    parser.add_argument("--worker", metavar="W", type=str, help="worker to use", choices=to_be_configured_workers.keys(), default="DEFAULT_BY_ACTION")
+    parser.add_argument("--worker", metavar="W", type=str, help="worker to use", choices=[w.shortname for w in workers_list], default="DEFAULT_BY_ACTION")
     parser.add_argument("--list-deps", action="store_true", help="simply list the dependencies of all units concerned", default=False)
     parser.add_argument("--debug", action="store_true", help="show extra debug info", default=False)
     parser.add_argument("--trace", action="store_true", help="python debugger set_trace()", default=False)
@@ -920,17 +1154,14 @@ def main():
     db = Database(".baking_database")
     
     # parse workers
-    for k, t in to_be_configured_workers.items():
-        if isinstance(t, tuple):
-            if len(t) == 1:
-                workers[k] = t[0]() if t[0] is not None else None
-            else:
-                try:
-                    workers[k] = t[0](config[t[1]])
-                except KeyError:
-                    raise ConfigError("bake_project.py", t[1])
-        else:
-            workers[k] = t() if t is not None else None
+    worker_classes = {}
+    for w in workers_list:
+        worker_classes[w.shortname] = w
+    
+    for w in workers_list:
+        workers[w.shortname] = parse_worker(w, config, worker_classes)
+    
+    workers[""] = None
     
     cmd_units = set()
     
@@ -948,7 +1179,7 @@ def main():
         if args.worker == "DEFAULT_BY_ACTION":
             default_worker = workers[standard_workers_by_action[args.action]]
         else:
-            default_worker = args.worker
+            default_worker = workers[args.worker]
         
         default_action = args.action
         

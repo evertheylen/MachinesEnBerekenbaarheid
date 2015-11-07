@@ -1,0 +1,7 @@
+
+#include "common.hpp"
+
+TEST(common, vector_to_string) {
+	std::vector<std::string> a = {"hello", "world"};
+	ASSERT_EQ(to_string(a), std::string("helloworld"));
+}

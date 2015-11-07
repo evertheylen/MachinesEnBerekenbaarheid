@@ -8,6 +8,7 @@ cmake_install.cmake
 install_manifest.txt
 
 
+
 *~
 
 *.core
@@ -19,6 +20,10 @@ install_manifest.txt
 # Bakerrrr
 *.baking_database
 *.headers_baked
+*.bin
+.*
+*.to
+*.tcpp
 
 # Binary images, don't want that!
 *.jpeg
