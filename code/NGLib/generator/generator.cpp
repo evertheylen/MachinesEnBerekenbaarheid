@@ -10,7 +10,6 @@ Generator::Generator(Outputter* _out, Replacor* _repl):
 
 // if max_repl == -1 ==> Infinite (default)
 void Generator::generate(std::vector<std::string> start, int max_repl) {
-	std::string the_var = "A";
 	std::list<std::string> context = {};
 	out->init();
 	for (auto s: start) {

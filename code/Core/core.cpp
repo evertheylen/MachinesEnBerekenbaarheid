@@ -11,11 +11,15 @@ executable = "core"
 
 [stop baking] */
 
+#include <memory>
+
 #include "NGLib/generator/generator.hpp"
 #include "NGLib/outputter/outputter.hpp"
 #include "NGLib/replacor/replacor.hpp"
 
 int main() {
-	Generator g(new FileOutPutter("test"), new DumbReplacor);
-	g.generate({"A", "A"}, 10);
+	std::unique_ptr<FileOutPutter> fo(new FileOutPutter("test"));
+	std::unique_ptr<DumbReplacor> dr(new DumbReplacor);
+	Generator g(fo.get(), dr.get());
+	g.generate({"A", "BC"}, 10);
 }
