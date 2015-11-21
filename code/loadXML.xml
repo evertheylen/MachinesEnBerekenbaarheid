@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<Generator>
+	<Outputter type="PythonOutputter">
+		<!-- inhoud wordt verwerkt door PythonOutputter -->
+	</Outputter>
+	<Replacor type="CfgReplacor">
+		<!-- idem -->
+	</Replacor>
+	<extra_setting>waarde</extra_setting>
+</Generator>
