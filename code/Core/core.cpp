@@ -22,4 +22,6 @@ int main() {
 	std::unique_ptr<DumbReplacor> dr(new DumbReplacor);
 	Generator g(fo.get(), dr.get());
 	g.generate({"A", "BC"}, 10);
+	//g.loadXML("loadXML.xml");
+	g.saveXML("saveXML.xml");
 }

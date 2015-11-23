@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<Generator>
+	<Outputter type="PythonOutputter">
+		Information about PythonOutputter here
+	</Outputter>
+	<Replacor type="CfgReplacor">
+		Information about CfgReplacor here
+	</Replacor>
+	<extra_setting>	</extra_setting>
+</Generator>
