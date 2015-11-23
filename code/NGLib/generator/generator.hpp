@@ -6,6 +6,10 @@
 
 # build_objects dependencies because of forward declarations
 
+dependencies["headers"] = [
+	"libs/tinyxml>>headers"
+]
+
 dependencies["build_objects"] = [
 	"NGLib/outputter>>build_objects",
 	"NGLib/replacor>>build_objects"

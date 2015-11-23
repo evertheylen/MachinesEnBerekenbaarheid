@@ -4,7 +4,6 @@
 #include "NGLib/outputter/outputter.hpp"
 #include "NGLib/replacor/replacor.hpp"
 #include "libs/tinyxml/tinyxml.h"
-#include "libs/tinyxml/tinystr.h"
 #include <fstream>
 #include <iostream>
 
@@ -24,13 +23,13 @@ void Generator::generate(std::vector<std::string> start, int max_repl) {
 }
 
 // this function will load a specified XML file
-void Generator::loadXML(std::string loadfile){
-	if (loadfile == ""){
+void Generator::loadXML(std::string inputfile){
+	if (inputfile == ""){
 		std::cout << "There is no file specified.\n";
 		return;
 	}
-	//TiXmlDocument loadXML(loadfile);
-	//loadXML.LoadFile();
+	TiXmlDocument file;
+	file.LoadFile(inputfile);
 	//inputXML.LoadFile(loadfile);
 	// std::ifstream myfile (loadfile);
 	// std::string line;
