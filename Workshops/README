@@ -1,0 +1,9 @@
+Geimplementeerde algoritmes zijn:
+
+
+==CNF==
+
+Normale versie van CNF
+epsilon in body wordt geinput door een | zonder regel achter zie input
+Output is zoals verwacht, met de variable -> terminal regel is de variable == [_TERMINAL]
+Met de splits regel zijn de variables gelijk aan [_C0], [_C1], ...
