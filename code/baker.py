@@ -27,6 +27,7 @@ all_todos = {}
 # (as defined by __eq__) two times (different objects in memory)
 
 hard_debug = False
+
 def dbg_print(*args):
     if hard_debug:
         print(*args)
@@ -1011,11 +1012,24 @@ class GccTestCompiler(GccCompiler):
     def extra_deps(self, todo):
         extra = set()
         if todo.action == "build_test_exec":
-            extra = GccCompiler.extra_deps(self, todo.new_action("build_exec"))
+            #extra = GccCompiler.extra_deps(self, todo.new_action("build_exec"))
+            # copy pasta instead
+            dbg_print("todo.deps = ", todo.deps)
+            for d in todo.deps:
+                dbg_print("test_exec has dep", d)
+                if d.action == "build_objects":
+                    for subd in d.all_deps():
+                        dbg_print("dep found", subd)
+                        if subd.action == "headers":
+                            extra.add(Dependency(subd.unit, subd.worker, "build_objects"))
+            
             extra.add(Dependency(todo.unit, self, "build_test_objects"))
+            
         elif todo.action == "build_test_objects":
             extra = GccCompiler.extra_deps(self, todo.new_action("build_objects"))
-            extra.add(Dependency(todo.unit, self.parent_gtest, "generate_tests"))
+            extra.add(Dependency(todo.unit, self.parent_gtest, "generate_tests"))            
+        
+        
         return extra
     
     def build_test_exec(self, todo, writer):

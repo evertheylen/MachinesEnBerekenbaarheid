@@ -1,0 +1,13 @@
+
+#include <set>
+#include <string>
+
+#include "CFG.hpp"
+
+
+TEST(CFG, Init) {
+	TiXmlDocument doc("CFG.xml");
+	doc.LoadFile();
+	s_CFG G(doc);
+	ASSERT_EQ(G.V, std::set<std::string>({"S", "T", "U", "V"}));
+}
