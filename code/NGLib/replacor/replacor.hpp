@@ -1,18 +1,31 @@
 
-#ifndef _REPLACOR_H
-#define _REPLACOR_H
+/* [bake me]
+
+dependencies["headers"] = [
+	"MBLib/new_CFG>>headers"
+]
+
+[stop baking] */
+
+#pragma once
 
 #include <string>
 #include <vector>
 #include <list>
 
+#include "MBLib/new_CFG/CFG.hpp"
+
+template <typename RuleT>
 class Replacor {
 public:
+	using Rule_Type = RuleT;
+	
 	// TODO constructor with CFG?
+	
 	
 	// a list so popping and pushing is easy
 	// TODO: string refs look hackerish and error-prone
-	virtual std::vector<std::string> replace(std::string var, std::list<std::string>& context) = 0;
+	virtual RuleT replace(std::string var, std::list<RuleT>& context) = 0;
 	
 	virtual bool replaceable(std::string symb) = 0;
 	// in a CFG bounded class, this would be `return is_var(var)`
@@ -21,12 +34,20 @@ public:
 };
 
 // Dummy replacor
-class DumbReplacor: public Replacor {
+class DumbReplacor: public Replacor<SimpleRule<std::string>> {
 public:
+	using Rule_Type = SimpleRule<std::string>;
 	
-	std::vector<std::string> replace(std::string var, std::list<std::string>& context);
-	
-	bool replaceable(std::string symb);
+	SimpleRule<std::string> replace(std::string var, std::list<SimpleRule<std::string>>& context) {
+		return SimpleRule<std::string>(var, {"(", var, ")"});
+	}
+
+	bool replaceable(std::string symb) {
+		if (symb == "(" or symb == ")") {
+			return false;
+		}
+		return true;
+	}
+
 };
 
-#endif

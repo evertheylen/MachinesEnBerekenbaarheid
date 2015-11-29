@@ -48,7 +48,7 @@ public:
 	}
 	
 	const std::vector<ID_T>& get_body() const {
-		return head;
+		return body;
 	}
 	
 	ID_T head;
