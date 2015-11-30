@@ -92,6 +92,10 @@ public:
 		return m != T.end();
 	}
 	
+	bool has_rules(const ID_T& var) const {
+        return P.find(var) != P.end();
+	}
+	
 	typename std::multimap<ID_T, RuleT>::const_iterator rules(const ID_T& var) const {
 		assert(is_variable(var));
 		auto m = P.find(var);
