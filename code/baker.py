@@ -656,9 +656,17 @@ class Todo(Dependency):
                 writer.debugline("input files: " + ", ".join(input_files))
                 writer.debugline("output files prev run: " + ", ".join(output_files_prev_run))
                 # no input files?
-                max_input = max(dates_from_files(input_files)) if len(input_files) > 0 else MIN_DATE
+                try:
+                    max_input = max(dates_from_files(input_files)) if len(input_files) > 0 else MIN_DATE
+                except FileNotFoundError:
+                    max_input = MAX_DATE
+                    
                 # no output files, but it is in the database? no need to redo
-                min_output = min(dates_from_files(output_files_prev_run)) if len(output_files_prev_run) > 0 else MAX_DATE
+                try:
+                    min_output = min(dates_from_files(output_files_prev_run)) if len(output_files_prev_run) > 0 else MAX_DATE
+                except FileNotFoundError:
+                    min_output = MIN_DATE
+                
                 writer.debugline("dates max_input = {0}, min_output = {1}".format(max_input, min_output))
                 if max_input > min_output:
                     return self.actually_do(writer, database)
