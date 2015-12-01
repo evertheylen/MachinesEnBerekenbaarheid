@@ -4,7 +4,6 @@
 dependencies["headers"] = [
 	"MBLib/new_CFG>>headers",
 	"NGLib/common>>headers",
-	"NGLib/replacor>>headers",
 ]
 
 [stop baking] */
@@ -17,7 +16,8 @@ dependencies["headers"] = [
 #include <random>
 
 #include "MBLib/new_CFG/CFG.hpp"
-#include "MBLib/common/s_rule.hpp"
+#include "MBLib/new_CFG/s_rule.hpp"
+#include "NGLib/replacor/replacor.hpp"
 
 // Stochastic replacor
 class StochasticReplacor: public Replacor<StochasticRule<std::string>> {
