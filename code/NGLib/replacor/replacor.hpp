@@ -21,7 +21,7 @@ public:
 	using Rule_Type = RuleT;
 	
 	// TODO constructor with CFG?
-	
+	Replacor(CFG _cfg): cfg(_cfg) {}
 	
 	// a list so popping and pushing is easy
 	// TODO: string refs look hackerish and error-prone
@@ -30,6 +30,9 @@ public:
 	virtual bool replaceable(std::string symb) = 0;
 	// in a CFG bounded class, this would be `return is_var(var)`
 	// this function decides whether a symbol will be replaced or outputted
+
+protected:
+    CFG cfg;
 	
 };
 
