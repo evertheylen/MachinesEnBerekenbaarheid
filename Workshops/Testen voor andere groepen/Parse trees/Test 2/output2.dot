@@ -1,0 +1,4 @@
+graph g {
+    S -- A [type = s];
+    A -- e [type = s];
+}

@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<CFG>
+	<Variables>
+        P
+        <StartSymbol>P</StartSymbol>
+	</Variables>
+	<Terminals>
+	    01
+	</Terminals>
+	<Productions>
+        <Rule LHS="P" RHS= "0P0|1P1|1|0|epsilon"/>
+	</Productions>
+</CFG>
