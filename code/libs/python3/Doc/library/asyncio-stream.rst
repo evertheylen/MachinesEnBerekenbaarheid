@@ -9,7 +9,7 @@ Streams (high-level API)
 Stream functions
 ================
 
-.. coroutinefunction:: open_connection(host=None, port=None, \*, loop=None, limit=None, \*\*kwds)
+.. function:: open_connection(host=None, port=None, \*, loop=None, limit=None, **kwds)
 
    A wrapper for :meth:`~BaseEventLoop.create_connection()` returning a (reader,
    writer) pair.
@@ -32,7 +32,7 @@ Stream functions
 
    This function is a :ref:`coroutine <coroutine>`.
 
-.. coroutinefunction:: start_server(client_connected_cb, host=None, port=None, \*, loop=None, limit=None, \*\*kwds)
+.. function:: start_server(client_connected_cb, host=None, port=None, \*, loop=None, limit=None, **kwds)
 
    Start a socket server, with a callback for each client connected. The return
    value is the same as :meth:`~BaseEventLoop.create_server()`.
@@ -56,7 +56,7 @@ Stream functions
 
    This function is a :ref:`coroutine <coroutine>`.
 
-.. coroutinefunction:: open_unix_connection(path=None, \*, loop=None, limit=None, **kwds)
+.. function:: open_unix_connection(path=None, \*, loop=None, limit=None, **kwds)
 
    A wrapper for :meth:`~BaseEventLoop.create_unix_connection()` returning
    a (reader, writer) pair.
@@ -68,7 +68,7 @@ Stream functions
 
    Availability: UNIX.
 
-.. coroutinefunction:: start_unix_server(client_connected_cb, path=None, \*, loop=None, limit=None, **kwds)
+.. function:: start_unix_server(client_connected_cb, path=None, \*, loop=None, limit=None, **kwds)
 
    Start a UNIX Domain Socket server, with a callback for each client connected.
 
@@ -84,8 +84,6 @@ StreamReader
 ============
 
 .. class:: StreamReader(limit=None, loop=None)
-
-   This class is :ref:`not thread safe <asyncio-multithreading>`.
 
    .. method:: exception()
 
@@ -108,7 +106,7 @@ StreamReader
 
       Set the transport.
 
-   .. coroutinemethod:: read(n=-1)
+   .. method:: read(n=-1)
 
       Read up to *n* bytes.  If *n* is not provided, or set to ``-1``,
       read until EOF and return all read bytes.
@@ -118,7 +116,7 @@ StreamReader
 
       This method is a :ref:`coroutine <coroutine>`.
 
-   .. coroutinemethod:: readline()
+   .. method:: readline()
 
       Read one line, where "line" is a sequence of bytes ending with ``\n``.
 
@@ -130,7 +128,7 @@ StreamReader
 
       This method is a :ref:`coroutine <coroutine>`.
 
-   .. coroutinemethod:: readexactly(n)
+   .. method:: readexactly(n)
 
       Read exactly *n* bytes. Raise an :exc:`IncompleteReadError` if the end of
       the stream is reached before *n* can be read, the
@@ -157,8 +155,6 @@ StreamWriter
    wait for flow control.  It also adds a transport attribute which references
    the :class:`Transport` directly.
 
-   This class is :ref:`not thread safe <asyncio-multithreading>`.
-
    .. attribute:: transport
 
       Transport.
@@ -172,7 +168,7 @@ StreamWriter
 
       Close the transport: see :meth:`BaseTransport.close`.
 
-   .. coroutinemethod:: drain()
+   .. method:: drain()
 
       Let the write buffer of the underlying transport a chance to be flushed.
 
@@ -364,7 +360,7 @@ Simple example querying HTTP headers of the URL passed on the command line::
 
     url = sys.argv[1]
     loop = asyncio.get_event_loop()
-    task = asyncio.ensure_future(print_http_headers(url))
+    task = asyncio.async(print_http_headers(url))
     loop.run_until_complete(task)
     loop.close()
 

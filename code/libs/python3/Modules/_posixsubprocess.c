@@ -14,9 +14,6 @@
 #ifdef HAVE_SYS_SYSCALL_H
 #include <sys/syscall.h>
 #endif
-#if defined(HAVE_SYS_RESOURCE_H)
-#include <sys/resource.h>
-#endif
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #endif
@@ -177,13 +174,6 @@ safe_get_max_fd(void)
     if (local_max_fd >= 0)
         return local_max_fd;
 #endif
-#if defined(HAVE_SYS_RESOURCE_H) && defined(__OpenBSD__)
-    struct rlimit rl;
-    /* Not on the POSIX async signal safe functions list but likely
-     * safe.  TODO - Someone should audit OpenBSD to make sure. */
-    if (getrlimit(RLIMIT_NOFILE, &rl) >= 0)
-        return (long) rl.rlim_max;
-#endif
 #ifdef _SC_OPEN_MAX
     local_max_fd = sysconf(_SC_OPEN_MAX);
     if (local_max_fd == -1)
@@ -217,13 +207,13 @@ _close_fds_by_brute_force(long start_fd, PyObject *py_fds_to_keep)
         if (keep_fd < start_fd)
             continue;
         for (fd_num = start_fd; fd_num < keep_fd; ++fd_num) {
-            close(fd_num);
+            while (close(fd_num) < 0 && errno == EINTR);
         }
         start_fd = keep_fd + 1;
     }
     if (start_fd <= end_fd) {
         for (fd_num = start_fd; fd_num < end_fd; ++fd_num) {
-            close(fd_num);
+            while (close(fd_num) < 0 && errno == EINTR);
         }
     }
 }
@@ -264,7 +254,7 @@ _close_open_fds_safe(int start_fd, PyObject* py_fds_to_keep)
 {
     int fd_dir_fd;
 
-    fd_dir_fd = _Py_open_noraise(FD_DIR, O_RDONLY);
+    fd_dir_fd = _Py_open(FD_DIR, O_RDONLY);
     if (fd_dir_fd == -1) {
         /* No way to get a list of open fds. */
         _close_fds_by_brute_force(start_fd, py_fds_to_keep);
@@ -284,11 +274,11 @@ _close_open_fds_safe(int start_fd, PyObject* py_fds_to_keep)
                     continue;  /* Not a number. */
                 if (fd != fd_dir_fd && fd >= start_fd &&
                     !_is_fd_in_sorted_fd_sequence(fd, py_fds_to_keep)) {
-                    close(fd);
+                    while (close(fd) < 0 && errno == EINTR);
                 }
             }
         }
-        close(fd_dir_fd);
+        while (close(fd_dir_fd) < 0 && errno == EINTR);
     }
 }
 
@@ -322,7 +312,7 @@ _close_open_fds_maybe_unsafe(long start_fd, PyObject* py_fds_to_keep)
      * reuse that fd otherwise we might close opendir's file descriptor in
      * our loop.  This trick assumes that fd's are allocated on a lowest
      * available basis. */
-    close(start_fd);
+    while (close(start_fd) < 0 && errno == EINTR);
     ++start_fd;
 #endif
 
@@ -349,7 +339,7 @@ _close_open_fds_maybe_unsafe(long start_fd, PyObject* py_fds_to_keep)
                 continue;  /* Not a number. */
             if (fd != fd_used_by_opendir && fd >= start_fd &&
                 !_is_fd_in_sorted_fd_sequence(fd, py_fds_to_keep)) {
-                close(fd);
+                while (close(fd) < 0 && errno == EINTR);
             }
             errno = 0;
         }
@@ -392,7 +382,7 @@ child_exec(char *const exec_array[],
            PyObject *preexec_fn,
            PyObject *preexec_fn_args_tuple)
 {
-    int i, saved_errno, reached_preexec = 0;
+    int i, saved_errno, unused, reached_preexec = 0;
     PyObject *result;
     const char* err_msg = "";
     /* Buffer large enough to hold a hex integer.  We can't malloc. */
@@ -506,29 +496,28 @@ error:
     saved_errno = errno;
     /* Report the posix error to our parent process. */
     /* We ignore all write() return values as the total size of our writes is
-       less than PIPEBUF and we cannot do anything about an error anyways.
-       Use _Py_write_noraise() to retry write() if it is interrupted by a
-       signal (fails with EINTR). */
+     * less than PIPEBUF and we cannot do anything about an error anyways. */
     if (saved_errno) {
         char *cur;
-        _Py_write_noraise(errpipe_write, "OSError:", 8);
+        unused = write(errpipe_write, "OSError:", 8);
         cur = hex_errno + sizeof(hex_errno);
         while (saved_errno != 0 && cur > hex_errno) {
-            *--cur = Py_hexdigits[saved_errno % 16];
+            *--cur = "0123456789ABCDEF"[saved_errno % 16];
             saved_errno /= 16;
         }
-        _Py_write_noraise(errpipe_write, cur, hex_errno + sizeof(hex_errno) - cur);
-        _Py_write_noraise(errpipe_write, ":", 1);
+        unused = write(errpipe_write, cur, hex_errno + sizeof(hex_errno) - cur);
+        unused = write(errpipe_write, ":", 1);
         if (!reached_preexec) {
             /* Indicate to the parent that the error happened before exec(). */
-            _Py_write_noraise(errpipe_write, "noexec", 6);
+            unused = write(errpipe_write, "noexec", 6);
         }
         /* We can't call strerror(saved_errno).  It is not async signal safe.
          * The parent process will look the error message up. */
     } else {
-        _Py_write_noraise(errpipe_write, "SubprocessError:0:", 18);
-        _Py_write_noraise(errpipe_write, err_msg, strlen(err_msg));
+        unused = write(errpipe_write, "SubprocessError:0:", 18);
+        unused = write(errpipe_write, err_msg, strlen(err_msg));
     }
+    if (unused) return;  /* silly? yes! avoids gcc compiler warning. */
 }
 
 

@@ -1,5 +1,5 @@
 import unittest
-from test.support import script_helper
+from test import script_helper
 from test import support
 import subprocess
 import sys
@@ -394,7 +394,7 @@ class ProcessTestCase(BaseTestCase):
         python_dir, python_base = self._split_python_path()
         abs_python = os.path.join(python_dir, python_base)
         rel_python = os.path.join(os.curdir, python_base)
-        with support.temp_dir() as wrong_dir:
+        with script_helper.temp_dir() as wrong_dir:
             # Before calling with an absolute path, confirm that using a
             # relative path fails.
             self.assertRaises(FileNotFoundError, subprocess.Popen,
@@ -1232,102 +1232,6 @@ class ProcessTestCase(BaseTestCase):
         fds_after_exception = os.listdir(fd_directory)
         self.assertEqual(fds_before_popen, fds_after_exception)
 
-
-class RunFuncTestCase(BaseTestCase):
-    def run_python(self, code, **kwargs):
-        """Run Python code in a subprocess using subprocess.run"""
-        argv = [sys.executable, "-c", code]
-        return subprocess.run(argv, **kwargs)
-
-    def test_returncode(self):
-        # call() function with sequence argument
-        cp = self.run_python("import sys; sys.exit(47)")
-        self.assertEqual(cp.returncode, 47)
-        with self.assertRaises(subprocess.CalledProcessError):
-            cp.check_returncode()
-
-    def test_check(self):
-        with self.assertRaises(subprocess.CalledProcessError) as c:
-            self.run_python("import sys; sys.exit(47)", check=True)
-        self.assertEqual(c.exception.returncode, 47)
-
-    def test_check_zero(self):
-        # check_returncode shouldn't raise when returncode is zero
-        cp = self.run_python("import sys; sys.exit(0)", check=True)
-        self.assertEqual(cp.returncode, 0)
-
-    def test_timeout(self):
-        # run() function with timeout argument; we want to test that the child
-        # process gets killed when the timeout expires.  If the child isn't
-        # killed, this call will deadlock since subprocess.run waits for the
-        # child.
-        with self.assertRaises(subprocess.TimeoutExpired):
-            self.run_python("while True: pass", timeout=0.0001)
-
-    def test_capture_stdout(self):
-        # capture stdout with zero return code
-        cp = self.run_python("print('BDFL')", stdout=subprocess.PIPE)
-        self.assertIn(b'BDFL', cp.stdout)
-
-    def test_capture_stderr(self):
-        cp = self.run_python("import sys; sys.stderr.write('BDFL')",
-                             stderr=subprocess.PIPE)
-        self.assertIn(b'BDFL', cp.stderr)
-
-    def test_check_output_stdin_arg(self):
-        # run() can be called with stdin set to a file
-        tf = tempfile.TemporaryFile()
-        self.addCleanup(tf.close)
-        tf.write(b'pear')
-        tf.seek(0)
-        cp = self.run_python(
-                 "import sys; sys.stdout.write(sys.stdin.read().upper())",
-                stdin=tf, stdout=subprocess.PIPE)
-        self.assertIn(b'PEAR', cp.stdout)
-
-    def test_check_output_input_arg(self):
-        # check_output() can be called with input set to a string
-        cp = self.run_python(
-                "import sys; sys.stdout.write(sys.stdin.read().upper())",
-                input=b'pear', stdout=subprocess.PIPE)
-        self.assertIn(b'PEAR', cp.stdout)
-
-    def test_check_output_stdin_with_input_arg(self):
-        # run() refuses to accept 'stdin' with 'input'
-        tf = tempfile.TemporaryFile()
-        self.addCleanup(tf.close)
-        tf.write(b'pear')
-        tf.seek(0)
-        with self.assertRaises(ValueError,
-              msg="Expected ValueError when stdin and input args supplied.") as c:
-            output = self.run_python("print('will not be run')",
-                                     stdin=tf, input=b'hare')
-        self.assertIn('stdin', c.exception.args[0])
-        self.assertIn('input', c.exception.args[0])
-
-    def test_check_output_timeout(self):
-        with self.assertRaises(subprocess.TimeoutExpired) as c:
-            cp = self.run_python((
-                     "import sys, time\n"
-                     "sys.stdout.write('BDFL')\n"
-                     "sys.stdout.flush()\n"
-                     "time.sleep(3600)"),
-                    # Some heavily loaded buildbots (sparc Debian 3.x) require
-                    # this much time to start and print.
-                    timeout=3, stdout=subprocess.PIPE)
-        self.assertEqual(c.exception.output, b'BDFL')
-        # output is aliased to stdout
-        self.assertEqual(c.exception.stdout, b'BDFL')
-
-    def test_run_kwargs(self):
-        newenv = os.environ.copy()
-        newenv["FRUIT"] = "banana"
-        cp = self.run_python(('import sys, os;'
-                      'sys.exit(33 if os.getenv("FRUIT")=="banana" else 31)'),
-                             env=newenv)
-        self.assertEqual(cp.returncode, 33)
-
-
 @unittest.skipIf(mswindows, "POSIX specific tests")
 class POSIXProcessTestCase(BaseTestCase):
 
@@ -2018,7 +1922,7 @@ class POSIXProcessTestCase(BaseTestCase):
         open_fds = set(fds)
         # add a bunch more fds
         for _ in range(9):
-            fd = os.open(os.devnull, os.O_RDONLY)
+            fd = os.open("/dev/null", os.O_RDONLY)
             self.addCleanup(os.close, fd)
             open_fds.add(fd)
 
@@ -2080,7 +1984,7 @@ class POSIXProcessTestCase(BaseTestCase):
         open_fds = set()
         # Add a bunch more fds to pass down.
         for _ in range(40):
-            fd = os.open(os.devnull, os.O_RDONLY)
+            fd = os.open("/dev/null", os.O_RDONLY)
             open_fds.add(fd)
 
         # Leave a two pairs of low ones available for use by the
@@ -2516,20 +2420,24 @@ class ProcessTestCaseNoPoll(ProcessTestCase):
         subprocess._PopenSelector = self.orig_selector
         ProcessTestCase.tearDown(self)
 
-    def test__all__(self):
-        """Ensure that __all__ is populated properly."""
-        intentionally_excluded = set(("list2cmdline",))
-        exported = set(subprocess.__all__)
-        possible_exports = set()
-        import types
-        for name, value in subprocess.__dict__.items():
-            if name.startswith('_'):
-                continue
-            if isinstance(value, (types.ModuleType,)):
-                continue
-            possible_exports.add(name)
-        self.assertEqual(exported, possible_exports - intentionally_excluded)
 
+class HelperFunctionTests(unittest.TestCase):
+    @unittest.skipIf(mswindows, "errno and EINTR make no sense on windows")
+    def test_eintr_retry_call(self):
+        record_calls = []
+        def fake_os_func(*args):
+            record_calls.append(args)
+            if len(record_calls) == 2:
+                raise OSError(errno.EINTR, "fake interrupted system call")
+            return tuple(reversed(args))
+
+        self.assertEqual((999, 256),
+                         subprocess._eintr_retry_call(fake_os_func, 256, 999))
+        self.assertEqual([(256, 999)], record_calls)
+        # This time there will be an EINTR so it will loop once.
+        self.assertEqual((666,),
+                         subprocess._eintr_retry_call(fake_os_func, 666))
+        self.assertEqual([(256, 999), (666,), (666,)], record_calls)
 
 
 @unittest.skipUnless(mswindows, "Windows-specific tests")
@@ -2613,22 +2521,6 @@ class ContextManagerTests(BaseTestCase):
                                   stderr=subprocess.PIPE) as proc:
                 pass
 
-    def test_broken_pipe_cleanup(self):
-        """Broken pipe error should not prevent wait() (Issue 21619)"""
-        proc = subprocess.Popen([sys.executable, '-c', 'pass'],
-                                stdin=subprocess.PIPE,
-                                bufsize=support.PIPE_MAX_SIZE*2)
-        proc = proc.__enter__()
-        # Prepare to send enough data to overflow any OS pipe buffering and
-        # guarantee a broken pipe error. Data is held in BufferedWriter
-        # buffer until closed.
-        proc.stdin.write(b'x' * support.PIPE_MAX_SIZE)
-        self.assertIsNone(proc.returncode)
-        # EPIPE expected under POSIX; EINVAL under Windows
-        self.assertRaises(OSError, proc.__exit__, None, None, None)
-        self.assertEqual(proc.returncode, 0)
-        self.assertTrue(proc.stdin.closed)
-
 
 def test_main():
     unit_tests = (ProcessTestCase,
@@ -2636,9 +2528,9 @@ def test_main():
                   Win32ProcessTestCase,
                   CommandTests,
                   ProcessTestCaseNoPoll,
+                  HelperFunctionTests,
                   CommandsWithSpaces,
                   ContextManagerTests,
-                  RunFuncTestCase,
                   )
 
     support.run_unittest(*unit_tests)

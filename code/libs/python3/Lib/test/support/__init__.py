@@ -6,14 +6,12 @@ if __name__ != 'test.support':
 import collections.abc
 import contextlib
 import errno
-import faulthandler
 import fnmatch
 import functools
 import gc
 import importlib
 import importlib.util
 import logging.handlers
-import nntplib
 import os
 import platform
 import re
@@ -88,7 +86,7 @@ __all__ = [
     "skip_unless_symlink", "requires_gzip", "requires_bz2", "requires_lzma",
     "bigmemtest", "bigaddrspacetest", "cpython_only", "get_attribute",
     "requires_IEEE_754", "skip_unless_xattr", "requires_zlib",
-    "anticipate_failure", "load_package_tests", "detect_api_mismatch",
+    "anticipate_failure", "load_package_tests",
     # sys
     "is_jython", "check_impl_detail",
     # network
@@ -98,7 +96,7 @@ __all__ = [
     # logging
     "TestHandler",
     # threads
-    "threading_setup", "threading_cleanup", "reap_threads", "start_threads",
+    "threading_setup", "threading_cleanup",
     # miscellaneous
     "check_warnings", "EnvironmentVarGuard", "run_with_locale", "swap_item",
     "swap_attr", "Matcher", "set_memlimit", "SuppressCrashReport", "sortdict",
@@ -376,32 +374,36 @@ def rmtree(path):
         pass
 
 def make_legacy_pyc(source):
-    """Move a PEP 3147/488 pyc file to its legacy pyc location.
+    """Move a PEP 3147 pyc/pyo file to its legacy pyc/pyo location.
+
+    The choice of .pyc or .pyo extension is done based on the __debug__ flag
+    value.
 
     :param source: The file system path to the source file.  The source file
-        does not need to exist, however the PEP 3147/488 pyc file must exist.
+        does not need to exist, however the PEP 3147 pyc file must exist.
     :return: The file system path to the legacy pyc file.
     """
     pyc_file = importlib.util.cache_from_source(source)
     up_one = os.path.dirname(os.path.abspath(source))
-    legacy_pyc = os.path.join(up_one, source + 'c')
+    legacy_pyc = os.path.join(up_one, source + ('c' if __debug__ else 'o'))
     os.rename(pyc_file, legacy_pyc)
     return legacy_pyc
 
 def forget(modname):
     """'Forget' a module was ever imported.
 
-    This removes the module from sys.modules and deletes any PEP 3147/488 or
-    legacy .pyc files.
+    This removes the module from sys.modules and deletes any PEP 3147 or
+    legacy .pyc and .pyo files.
     """
     unload(modname)
     for dirname in sys.path:
         source = os.path.join(dirname, modname + '.py')
         # It doesn't matter if they exist or not, unlink all possible
-        # combinations of PEP 3147/488 and legacy pyc files.
+        # combinations of PEP 3147 and legacy pyc and pyo files.
         unlink(source + 'c')
-        for opt in ('', 1, 2):
-            unlink(importlib.util.cache_from_source(source, optimization=opt))
+        unlink(source + 'o')
+        unlink(importlib.util.cache_from_source(source, debug_override=True))
+        unlink(importlib.util.cache_from_source(source, debug_override=False))
 
 # Check whether a gui is actually available
 def _is_gui_available():
@@ -1038,8 +1040,7 @@ def open_urlresource(url, *args, **kw):
     # Verify the requirement before downloading the file
     requires('urlfetch')
 
-    if verbose:
-        print('\tfetching %s ...' % url, file=get_original_stdout())
+    print('\tfetching %s ...' % url, file=get_original_stdout())
     opener = urllib.request.build_opener()
     if gzip:
         opener.addheaders.append(('Accept-Encoding', 'gzip'))
@@ -1323,11 +1324,8 @@ def transient_internet(resource_name, *, timeout=30.0, errnos=()):
         n = getattr(err, 'errno', None)
         if (isinstance(err, socket.timeout) or
             (isinstance(err, socket.gaierror) and n in gai_errnos) or
-            (isinstance(err, urllib.error.HTTPError) and
-             500 <= err.code <= 599) or
             (isinstance(err, urllib.error.URLError) and
-                 (("ConnectionRefusedError" in err.reason) or
-                  ("TimeoutError" in err.reason))) or
+             "ConnectionRefusedError" in err.reason) or
             n in captured_errnos):
             if not verbose:
                 sys.stderr.write(denied.args[0] + "\n")
@@ -1338,10 +1336,6 @@ def transient_internet(resource_name, *, timeout=30.0, errnos=()):
         if timeout is not None:
             socket.setdefaulttimeout(timeout)
         yield
-    except nntplib.NNTPTemporaryError as err:
-        if verbose:
-            sys.stderr.write(denied.args[0] + "\n")
-        raise denied from err
     except OSError as err:
         # urllib can wrap original socket errors multiple times (!), we must
         # unwrap to get at the original error.
@@ -1381,7 +1375,7 @@ def captured_stdout():
 
        with captured_stdout() as stdout:
            print("hello")
-       self.assertEqual(stdout.getvalue(), "hello\\n")
+       self.assertEqual(stdout.getvalue(), "hello\n")
     """
     return captured_output("stdout")
 
@@ -1390,7 +1384,7 @@ def captured_stderr():
 
        with captured_stderr() as stderr:
            print("hello", file=sys.stderr)
-       self.assertEqual(stderr.getvalue(), "hello\\n")
+       self.assertEqual(stderr.getvalue(), "hello\n")
     """
     return captured_output("stderr")
 
@@ -1398,7 +1392,7 @@ def captured_stdin():
     """Capture the input to sys.stdin:
 
        with captured_stdin() as stdin:
-           stdin.write('hello\\n')
+           stdin.write('hello\n')
            stdin.seek(0)
            # call test code that consumes from sys.stdin
            captured = input()
@@ -1441,7 +1435,7 @@ def python_is_optimized():
     for opt in cflags.split():
         if opt.startswith('-O'):
             final_opt = opt
-    return final_opt not in ('', '-O0', '-Og')
+    return final_opt != '' and final_opt != '-O0'
 
 
 _header = 'nP'
@@ -1944,42 +1938,6 @@ def reap_children():
                 break
 
 @contextlib.contextmanager
-def start_threads(threads, unlock=None):
-    threads = list(threads)
-    started = []
-    try:
-        try:
-            for t in threads:
-                t.start()
-                started.append(t)
-        except:
-            if verbose:
-                print("Can't start %d threads, only %d threads started" %
-                      (len(threads), len(started)))
-            raise
-        yield
-    finally:
-        try:
-            if unlock:
-                unlock()
-            endtime = starttime = time.time()
-            for timeout in range(1, 16):
-                endtime += 60
-                for t in started:
-                    t.join(max(endtime - time.time(), 0.01))
-                started = [t for t in started if t.isAlive()]
-                if not started:
-                    break
-                if verbose:
-                    print('Unable to join %d threads during a period of '
-                          '%d minutes' % (len(started), timeout))
-        finally:
-            started = [t for t in started if t.isAlive()]
-            if started:
-                faulthandler.dump_traceback(sys.stdout)
-                raise AssertionError('Unable to join %d threads' % len(started))
-
-@contextlib.contextmanager
 def swap_attr(obj, attr, new_val):
     """Temporary swap out an attribute with a new object.
 
@@ -2173,30 +2131,16 @@ def skip_unless_xattr(test):
 
 def fs_is_case_insensitive(directory):
     """Detects if the file system for the specified directory is case-insensitive."""
-    with tempfile.NamedTemporaryFile(dir=directory) as base:
-        base_path = base.name
-        case_path = base_path.upper()
-        if case_path == base_path:
-            case_path = base_path.lower()
-        try:
-            return os.path.samefile(base_path, case_path)
-        except FileNotFoundError:
-            return False
-
-
-def detect_api_mismatch(ref_api, other_api, *, ignore=()):
-    """Returns the set of items in ref_api not in other_api, except for a
-    defined list of items to be ignored in this check.
-
-    By default this skips private attributes beginning with '_' but
-    includes all magic methods, i.e. those starting and ending in '__'.
-    """
-    missing_items = set(dir(ref_api)) - set(dir(other_api))
-    if ignore:
-        missing_items -= set(ignore)
-    missing_items = set(m for m in missing_items
-                        if not m.startswith('_') or m.endswith('__'))
-    return missing_items
+    base_fp, base_path = tempfile.mkstemp(dir=directory)
+    case_path = base_path.upper()
+    if case_path == base_path:
+        case_path = base_path.lower()
+    try:
+        return os.path.samefile(base_path, case_path)
+    except FileNotFoundError:
+        return False
+    finally:
+        os.unlink(base_path)
 
 
 class SuppressCrashReport:
@@ -2206,7 +2150,6 @@ class SuppressCrashReport:
     disable the creation of coredump file.
     """
     old_value = None
-    old_modes = None
 
     def __enter__(self):
         """On Windows, disable Windows Error Reporting dialogs using
@@ -2224,26 +2167,6 @@ class SuppressCrashReport:
             SEM_NOGPFAULTERRORBOX = 0x02
             self.old_value = self._k32.SetErrorMode(SEM_NOGPFAULTERRORBOX)
             self._k32.SetErrorMode(self.old_value | SEM_NOGPFAULTERRORBOX)
-
-            # Suppress assert dialogs in debug builds
-            # (see http://bugs.python.org/issue23314)
-            try:
-                import msvcrt
-                msvcrt.CrtSetReportMode
-            except (AttributeError, ImportError):
-                # no msvcrt or a release build
-                pass
-            else:
-                self.old_modes = {}
-                for report_type in [msvcrt.CRT_WARN,
-                                    msvcrt.CRT_ERROR,
-                                    msvcrt.CRT_ASSERT]:
-                    old_mode = msvcrt.CrtSetReportMode(report_type,
-                            msvcrt.CRTDBG_MODE_FILE)
-                    old_file = msvcrt.CrtSetReportFile(report_type,
-                            msvcrt.CRTDBG_FILE_STDERR)
-                    self.old_modes[report_type] = old_mode, old_file
-
         else:
             if resource is not None:
                 try:
@@ -2275,12 +2198,6 @@ class SuppressCrashReport:
 
         if sys.platform.startswith('win'):
             self._k32.SetErrorMode(self.old_value)
-
-            if self.old_modes:
-                import msvcrt
-                for report_type, (old_mode, old_file) in self.old_modes.items():
-                    msvcrt.CrtSetReportMode(report_type, old_mode)
-                    msvcrt.CrtSetReportFile(report_type, old_file)
         else:
             if resource is not None:
                 try:

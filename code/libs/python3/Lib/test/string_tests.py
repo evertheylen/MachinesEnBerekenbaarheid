@@ -976,9 +976,6 @@ class MixinStrUnicodeUserStringTest:
         self.checkequal(True, 'helloworld', 'startswith', 'lowo', 3)
         self.checkequal(True, 'helloworld', 'startswith', 'lowo', 3, 7)
         self.checkequal(False, 'helloworld', 'startswith', 'lowo', 3, 6)
-        self.checkequal(True, '', 'startswith', '', 0, 1)
-        self.checkequal(True, '', 'startswith', '', 0, 0)
-        self.checkequal(False, '', 'startswith', '', 1, 0)
 
         # test negative indices
         self.checkequal(True, 'hello', 'startswith', 'he', 0, -1)
@@ -1025,9 +1022,6 @@ class MixinStrUnicodeUserStringTest:
         self.checkequal(False, 'helloworld', 'endswith', 'lowo', 3, 8)
         self.checkequal(False, 'ab', 'endswith', 'ab', 0, 1)
         self.checkequal(False, 'ab', 'endswith', 'ab', 0, 0)
-        self.checkequal(True, '', 'endswith', '', 0, 1)
-        self.checkequal(True, '', 'endswith', '', 0, 0)
-        self.checkequal(False, '', 'endswith', '', 1, 0)
 
         # test negative indices
         self.checkequal(True, 'hello', 'endswith', 'lo', -2)
@@ -1182,7 +1176,8 @@ class MixinStrUnicodeUserStringTest:
         self.checkraises(TypeError, 'abc', '__mod__')
         self.checkraises(TypeError, '%(foo)s', '__mod__', 42)
         self.checkraises(TypeError, '%s%s', '__mod__', (42,))
-        self.checkraises(TypeError, '%c', '__mod__', (None,))
+        with self.assertWarns(DeprecationWarning):
+            self.checkraises(TypeError, '%c', '__mod__', (None,))
         self.checkraises(ValueError, '%(foo', '__mod__', {})
         self.checkraises(TypeError, '%(foo)s %(bar)s', '__mod__', ('foo', 42))
         self.checkraises(TypeError, '%d', '__mod__', "42") # not numeric

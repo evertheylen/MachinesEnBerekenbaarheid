@@ -62,11 +62,6 @@ class BaseSelectorEventLoopTests(test_utils.TestCase):
         self.loop.add_reader._is_coroutine = False
         transport = self.loop._make_socket_transport(m, asyncio.Protocol())
         self.assertIsInstance(transport, _SelectorSocketTransport)
-
-        # Calling repr() must not fail when the event loop is closed
-        self.loop.close()
-        repr(transport)
-
         close_transport(transport)
 
     @unittest.skipIf(ssl is None, 'No ssl module')
@@ -348,7 +343,7 @@ class BaseSelectorEventLoopTests(test_utils.TestCase):
             self.loop._sock_connect.call_args[0])
 
     def test_sock_connect_timeout(self):
-        # asyncio issue #205: sock_connect() must unregister the socket on
+        # Tulip issue #205: sock_connect() must unregister the socket on
         # timeout error
 
         # prepare mocks

@@ -12,7 +12,8 @@
 #include "longintrepr.h"
 #include "code.h"
 #include "marshal.h"
-#include "../Modules/hashtable.h"
+
+#define ABS(x) ((x) < 0 ? -(x) : (x))
 
 /* High water mark to determine when the marshalled object is dangerously deep
  * and risks coring the interpreter.  When the object stack gets this deep,
@@ -20,7 +21,7 @@
  * On Windows debug builds, reduce this value.
  */
 #if defined(MS_WINDOWS) && defined(_DEBUG)
-#define MAX_MARSHAL_STACK_DEPTH 1000
+#define MAX_MARSHAL_STACK_DEPTH 1500
 #else
 #define MAX_MARSHAL_STACK_DEPTH 2000
 #endif
@@ -65,83 +66,54 @@ typedef struct {
     FILE *fp;
     int error;  /* see WFERR_* values */
     int depth;
+    /* If fp == NULL, the following are valid: */
+    PyObject *readable;    /* Stream-like object being read from */
     PyObject *str;
+    PyObject *current_filename;
     char *ptr;
     char *end;
     char *buf;
-    _Py_hashtable_t *hashtable;
+    Py_ssize_t buf_size;
+    PyObject *refs; /* dict on marshal, list on unmarshal */
     int version;
 } WFILE;
 
-#define w_byte(c, p) do {                               \
-        if ((p)->ptr != (p)->end || w_reserve((p), 1))  \
-            *(p)->ptr++ = (c);                          \
-    } while(0)
+#define w_byte(c, p) if (((p)->fp)) putc((c), (p)->fp); \
+                      else if ((p)->ptr != (p)->end) *(p)->ptr++ = (c); \
+                           else w_more((c), p)
 
 static void
-w_flush(WFILE *p)
+w_more(char c, WFILE *p)
 {
-    assert(p->fp != NULL);
-    fwrite(p->buf, 1, p->ptr - p->buf, p->fp);
-    p->ptr = p->buf;
-}
-
-static int
-w_reserve(WFILE *p, Py_ssize_t needed)
-{
-    Py_ssize_t pos, size, delta;
-    if (p->ptr == NULL)
-        return 0; /* An error already occurred */
-    if (p->fp != NULL) {
-        w_flush(p);
-        return needed <= p->end - p->ptr;
-    }
-    assert(p->str != NULL);
-    pos = p->ptr - p->buf;
+    Py_ssize_t size, newsize;
+    if (p->str == NULL)
+        return; /* An error already occurred */
     size = PyBytes_Size(p->str);
-    if (size > 16*1024*1024)
-        delta = (size >> 3);            /* 12.5% overallocation */
-    else
-        delta = size + 1024;
-    delta = Py_MAX(delta, needed);
-    if (delta > PY_SSIZE_T_MAX - size) {
-        p->error = WFERR_NOMEMORY;
-        return 0;
+    newsize = size + size + 1024;
+    if (newsize > 32*1024*1024) {
+        newsize = size + (size >> 3);           /* 12.5% overallocation */
     }
-    size += delta;
-    if (_PyBytes_Resize(&p->str, size) != 0) {
-        p->ptr = p->buf = p->end = NULL;
-        return 0;
+    if (_PyBytes_Resize(&p->str, newsize) != 0) {
+        p->ptr = p->end = NULL;
     }
     else {
-        p->buf = PyBytes_AS_STRING(p->str);
-        p->ptr = p->buf + pos;
-        p->end = p->buf + size;
-        return 1;
+        p->ptr = PyBytes_AS_STRING((PyBytesObject *)p->str) + size;
+        p->end =
+            PyBytes_AS_STRING((PyBytesObject *)p->str) + newsize;
+        *p->ptr++ = c;
     }
 }
 
 static void
 w_string(const char *s, Py_ssize_t n, WFILE *p)
 {
-    Py_ssize_t m;
-    if (!n || p->ptr == NULL)
-        return;
-    m = p->end - p->ptr;
     if (p->fp != NULL) {
-        if (n <= m) {
-            Py_MEMCPY(p->ptr, s, n);
-            p->ptr += n;
-        }
-        else {
-            w_flush(p);
-            fwrite(s, 1, n, p->fp);
-        }
+        fwrite(s, 1, n, p->fp);
     }
     else {
-        if (n <= m || w_reserve(p, n - m)) {
-            Py_MEMCPY(p->ptr, s, n);
-            p->ptr += n;
+        while (--n >= 0) {
+            w_byte(*s, p);
+            s++;
         }
     }
 }
@@ -220,7 +192,7 @@ w_PyLong(const PyLongObject *ob, char flag, WFILE *p)
     }
 
     /* set l to number of base PyLong_MARSHAL_BASE digits */
-    n = Py_ABS(Py_SIZE(ob));
+    n = ABS(Py_SIZE(ob));
     l = (n-1) * PyLong_MARSHAL_RATIO;
     d = ob->ob_digit[n-1];
     assert(d != 0); /* a PyLong is always normalized */
@@ -253,38 +225,46 @@ w_PyLong(const PyLongObject *ob, char flag, WFILE *p)
 static int
 w_ref(PyObject *v, char *flag, WFILE *p)
 {
-    _Py_hashtable_entry_t *entry;
-    int w;
+    PyObject *id;
+    PyObject *idx;
 
-    if (p->version < 3 || p->hashtable == NULL)
+    if (p->version < 3 || p->refs == NULL)
         return 0; /* not writing object references */
 
     /* if it has only one reference, it definitely isn't shared */
     if (Py_REFCNT(v) == 1)
         return 0;
 
-    entry = _Py_hashtable_get_entry(p->hashtable, v);
-    if (entry != NULL) {
+    id = PyLong_FromVoidPtr((void*)v);
+    if (id == NULL)
+        goto err;
+    idx = PyDict_GetItem(p->refs, id);
+    if (idx != NULL) {
         /* write the reference index to the stream */
-        _Py_HASHTABLE_ENTRY_READ_DATA(p->hashtable, &w, sizeof(w), entry);
+        long w = PyLong_AsLong(idx);
+        Py_DECREF(id);
+        if (w == -1 && PyErr_Occurred()) {
+            goto err;
+        }
         /* we don't store "long" indices in the dict */
         assert(0 <= w && w <= 0x7fffffff);
         w_byte(TYPE_REF, p);
         w_long(w, p);
         return 1;
     } else {
-        size_t s = p->hashtable->entries;
+        int ok;
+        Py_ssize_t s = PyDict_Size(p->refs);
         /* we don't support long indices */
         if (s >= 0x7fffffff) {
             PyErr_SetString(PyExc_ValueError, "too many objects");
             goto err;
         }
-        w = (int)s;
-        Py_INCREF(v);
-        if (_Py_HASHTABLE_SET(p->hashtable, v, w) < 0) {
-            Py_DECREF(v);
+        idx = PyLong_FromSsize_t(s);
+        ok = idx && PyDict_SetItem(p->refs, id, idx) == 0;
+        Py_DECREF(id);
+        Py_XDECREF(idx);
+        if (!ok)
             goto err;
-        }
         *flag |= FLAG_REF;
         return 0;
     }
@@ -567,81 +547,37 @@ w_complex_object(PyObject *v, char flag, WFILE *p)
     }
 }
 
-static int
-w_init_refs(WFILE *wf, int version)
-{
-    if (version >= 3) {
-        wf->hashtable = _Py_hashtable_new(sizeof(int), _Py_hashtable_hash_ptr,
-                                          _Py_hashtable_compare_direct);
-        if (wf->hashtable == NULL) {
-            PyErr_NoMemory();
-            return -1;
-        }
-    }
-    return 0;
-}
-
-static int
-w_decref_entry(_Py_hashtable_entry_t *entry, void *Py_UNUSED(data))
-{
-    Py_XDECREF(entry->key);
-    return 0;
-}
-
-static void
-w_clear_refs(WFILE *wf)
-{
-    if (wf->hashtable != NULL) {
-        _Py_hashtable_foreach(wf->hashtable, w_decref_entry, NULL);
-        _Py_hashtable_destroy(wf->hashtable);
-    }
-}
-
 /* version currently has no effect for writing ints. */
 void
 PyMarshal_WriteLongToFile(long x, FILE *fp, int version)
 {
-    char buf[4];
     WFILE wf;
-    memset(&wf, 0, sizeof(wf));
     wf.fp = fp;
-    wf.ptr = wf.buf = buf;
-    wf.end = wf.ptr + sizeof(buf);
     wf.error = WFERR_OK;
+    wf.depth = 0;
+    wf.refs = NULL;
     wf.version = version;
     w_long(x, &wf);
-    w_flush(&wf);
 }
 
 void
 PyMarshal_WriteObjectToFile(PyObject *x, FILE *fp, int version)
 {
-    char buf[BUFSIZ];
     WFILE wf;
-    memset(&wf, 0, sizeof(wf));
     wf.fp = fp;
-    wf.ptr = wf.buf = buf;
-    wf.end = wf.ptr + sizeof(buf);
     wf.error = WFERR_OK;
+    wf.depth = 0;
+    if (version >= 3) {
+        if ((wf.refs = PyDict_New()) == NULL)
+            return; /* caller mush check PyErr_Occurred() */
+    } else
+        wf.refs = NULL;
     wf.version = version;
-    if (w_init_refs(&wf, version))
-        return; /* caller mush check PyErr_Occurred() */
     w_object(x, &wf);
-    w_clear_refs(&wf);
-    w_flush(&wf);
+    Py_XDECREF(wf.refs);
 }
 
-typedef struct {
-    FILE *fp;
-    int depth;
-    PyObject *readable;  /* Stream-like object being read from */
-    PyObject *current_filename;
-    char *ptr;
-    char *end;
-    char *buf;
-    Py_ssize_t buf_size;
-    PyObject *refs;  /* a list */
-} RFILE;
+typedef WFILE RFILE; /* Same struct with different invariants */
 
 static char *
 r_string(Py_ssize_t n, RFILE *p)
@@ -791,8 +727,8 @@ r_PyLong(RFILE *p)
         return NULL;
     }
 
-    size = 1 + (Py_ABS(n) - 1) / PyLong_MARSHAL_RATIO;
-    shorts_in_top_digit = 1 + (Py_ABS(n) - 1) % PyLong_MARSHAL_RATIO;
+    size = 1 + (ABS(n) - 1) / PyLong_MARSHAL_RATIO;
+    shorts_in_top_digit = 1 + (ABS(n) - 1) % PyLong_MARSHAL_RATIO;
     ob = _PyLong_New(size);
     if (ob == NULL)
         return NULL;
@@ -1481,20 +1417,18 @@ PyMarshal_ReadLongFromFile(FILE *fp)
     return res;
 }
 
-/* Return size of file in bytes; < 0 if unknown or INT_MAX if too big */
+#ifdef HAVE_FSTAT
+/* Return size of file in bytes; < 0 if unknown. */
 static off_t
 getfilesize(FILE *fp)
 {
-    struct _Py_stat_struct st;
-    if (_Py_fstat_noraise(fileno(fp), &st) != 0)
+    struct stat st;
+    if (fstat(fileno(fp), &st) != 0)
         return -1;
-#if SIZEOF_OFF_T == 4
-    else if (st.st_size >= INT_MAX)
-        return (off_t)INT_MAX;
-#endif
     else
-        return (off_t)st.st_size;
+        return st.st_size;
 }
+#endif
 
 /* If we can get the size of the file up-front, and it's reasonably small,
  * read it in one gulp and delegate to ...FromString() instead.  Much quicker
@@ -1507,6 +1441,7 @@ PyMarshal_ReadLastObjectFromFile(FILE *fp)
 {
 /* REASONABLE_FILE_LIMIT is by defn something big enough for Tkinter.pyc. */
 #define REASONABLE_FILE_LIMIT (1L << 18)
+#ifdef HAVE_FSTAT
     off_t filesize;
     filesize = getfilesize(fp);
     if (filesize > 0 && filesize <= REASONABLE_FILE_LIMIT) {
@@ -1519,6 +1454,7 @@ PyMarshal_ReadLastObjectFromFile(FILE *fp)
         }
 
     }
+#endif
     /* We don't have fstat, or we do but the file is larger than
      * REASONABLE_FILE_LIMIT or malloc failed -- read a byte at a time.
      */
@@ -1575,20 +1511,25 @@ PyMarshal_WriteObjectToString(PyObject *x, int version)
 {
     WFILE wf;
 
-    memset(&wf, 0, sizeof(wf));
+    wf.fp = NULL;
+    wf.readable = NULL;
     wf.str = PyBytes_FromStringAndSize((char *)NULL, 50);
     if (wf.str == NULL)
         return NULL;
-    wf.ptr = wf.buf = PyBytes_AS_STRING((PyBytesObject *)wf.str);
+    wf.ptr = PyBytes_AS_STRING((PyBytesObject *)wf.str);
     wf.end = wf.ptr + PyBytes_Size(wf.str);
     wf.error = WFERR_OK;
+    wf.depth = 0;
     wf.version = version;
-    if (w_init_refs(&wf, version)) {
-        Py_DECREF(wf.str);
-        return NULL;
-    }
+    if (version >= 3) {
+        if ((wf.refs = PyDict_New()) == NULL) {
+            Py_DECREF(wf.str);
+            return NULL;
+        }
+    } else
+        wf.refs = NULL;
     w_object(x, &wf);
-    w_clear_refs(&wf);
+    Py_XDECREF(wf.refs);
     if (wf.str != NULL) {
         char *base = PyBytes_AS_STRING((PyBytesObject *)wf.str);
         if (wf.ptr - base > PY_SSIZE_T_MAX) {

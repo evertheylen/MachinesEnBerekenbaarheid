@@ -11,13 +11,14 @@ import reprlib
 import sys
 import traceback
 
-from . import compat
 from . import events
 
 # States for Future.
 _PENDING = 'PENDING'
 _CANCELLED = 'CANCELLED'
 _FINISHED = 'FINISHED'
+
+_PY34 = sys.version_info >= (3, 4)
 
 Error = concurrent.futures._base.Error
 CancelledError = concurrent.futures.CancelledError
@@ -161,7 +162,7 @@ class Future:
             cb = ''
 
         def format_cb(callback):
-            return events._format_callback_source(callback, ())
+            return events._format_callback(callback, ())
 
         if size == 1:
             cb = format_cb(cb[0])
@@ -197,7 +198,7 @@ class Future:
     # On Python 3.3 and older, objects with a destructor part of a reference
     # cycle are never destroyed. It's not more the case on Python 3.4 thanks
     # to the PEP 442.
-    if compat.PY34:
+    if _PY34:
         def __del__(self):
             if not self._log_traceback:
                 # set_exception() was not called, or result() or exception()
@@ -350,7 +351,7 @@ class Future:
         self._exception = exception
         self._state = _FINISHED
         self._schedule_callbacks()
-        if compat.PY34:
+        if _PY34:
             self._log_traceback = True
         else:
             self._tb_logger = _TracebackLogger(self, exception)
@@ -385,9 +386,6 @@ class Future:
             yield self  # This tells Task to wait for completion.
         assert self.done(), "yield from wasn't used with future"
         return self.result()  # May raise too.
-
-    if compat.PY35:
-        __await__ = __iter__ # make compatible with 'await' expression
 
 
 def wrap_future(fut, *, loop=None):

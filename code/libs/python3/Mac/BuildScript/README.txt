@@ -1,15 +1,25 @@
 Building a Python Mac OS X distribution
 =======================================
 
-The ``build-install.py`` script creates Python distributions, including
-certain third-party libraries as necessary.  It builds a complete
-framework-based Python out-of-tree, installs it in a funny place with
-$DESTROOT, massages that installation to remove .pyc files and such, creates
-an Installer package from the installation plus other files in ``resources``
+The ``build-installer.py`` script creates Python distributions, including
+certain third-party libraries as necessary.  It builds a complete 
+framework-based Python out-of-tree, installs it in a funny place with 
+$DESTROOT, massages that installation to remove .pyc files and such, creates 
+an Installer package from the installation plus other files in ``resources`` 
 and ``scripts`` and placed that on a ``.dmg`` disk image.
 
-For Python 3.4.0, PSF practice is to build two installer variants
-for each release.
+This installers built by this script are legacy bundle installers that have
+been supported from the early days of OS X.  In particular, they are supported
+on OS X 10.3.9, the earliest supported release for builds from this script.
+
+Beginning with Python 3.4.2, PSF practice is to build two installer variants
+using the newer flat package format, supported on 10.5+, and signed with the
+builder's Apple developer key, allowing downloaded packages to satisfy Apple's
+default Gatekeeper policy (e.g. starting with 10.8, Apple store downloads and
+Apple developer ID signed apps and installer packages).  The process for
+transforming the output build artifacts into signed flat packages is not
+yet integrated into ``build-installer.py``.  The steps prior to the flat
+package creation are the same as for 3.4.1 below.
 
 1.  32-bit-only, i386 and PPC universal, capable on running on all machines
     supported by Mac OS X 10.5 through (at least) 10.9::
@@ -21,8 +31,9 @@ for each release.
 
     - builds the following third-party libraries
 
+        * libcrypto and libssl from OpenSSL 1.0.1 (new, as of 3.4.3)
         * NCurses 5.9 (http://bugs.python.org/issue15037)
-        * SQLite 3.8.11
+        * SQLite 3.8.3.1
         * XZ 5.0.5
 
     - uses system-supplied versions of third-party libraries
@@ -57,11 +68,12 @@ for each release.
     - builds the following third-party libraries
 
         * NCurses 5.9 (http://bugs.python.org/issue15037)
-        * SQLite 3.8.11
+        * SQLite 3.8.3.1
         * XZ 5.0.5
 
     - uses system-supplied versions of third-party libraries
 
+        * libcrypto and libssl from Apple OpenSSL 0.9.8
         * readline module links with Apple BSD editline (libedit)
 
     - requires ActiveState Tcl/Tk 8.5.15.1 (or later) to be installed for building
@@ -88,47 +100,6 @@ for each release.
           available on the deprecated Xcode 4.x for 10.6 were early releases
           and did not receive the level of exposure in production environments
           that the Xcode 3 gcc-4.2 compiler has had.
-
-
-*   For Python 2.7.x and 3.2.x, the 32-bit-only installer was configured to
-    support Mac OS X 10.3.9 through (at least) 10.6.  Because it is
-    believed that there are few systems still running OS X 10.3 or 10.4
-    and because it has become increasingly difficult to test and
-    support the differences in these earlier systems, as of Python 3.3.0 the PSF
-    32-bit installer no longer supports them.  For reference in building such
-    an installer yourself, the details are::
-
-        /usr/bin/python build-installer.py \
-            --sdk-path=/Developer/SDKs/MacOSX10.4u.sdk \
-            --universal-archs=32-bit \
-            --dep-target=10.3
-
-    - builds the following third-party libraries
-
-        * Bzip2
-        * NCurses
-        * GNU Readline (GPL)
-        * SQLite 3
-        * XZ
-        * Zlib 1.2.3
-        * Oracle Sleepycat DB 4.8 (Python 2.x only)
-
-    - requires ActiveState ``Tcl/Tk 8.4`` (currently 8.4.20) to be installed for building
-
-    - recommended build environment:
-
-        * Mac OS X 10.5.8 PPC or Intel
-        * Xcode 3.1.4 (or later)
-        * ``MacOSX10.4u`` SDK (later SDKs do not support PPC G3 processors)
-        * ``MACOSX_DEPLOYMENT_TARGET=10.3``
-        * Apple ``gcc-4.0``
-        * system Python 2.5 for documentation build with Sphinx
-
-    - alternate build environments:
-
-        * Mac OS X 10.6.8 with Xcode 3.2.6
-            - need to change ``/System/Library/Frameworks/{Tcl,Tk}.framework/Version/Current`` to ``8.4``
-
 
 
 General Prerequisites
@@ -174,7 +145,7 @@ Here are the steps you need to follow to build a Python installer:
 Building other universal installers
 ...................................
 
-It is also possible to build a 4-way universal installer that runs on
+It is also possible to build a 4-way universal installer that runs on 
 OS X 10.5 Leopard or later::
 
     /usr/bin/python /build-installer.py \
@@ -208,7 +179,7 @@ a PPC G4 system with OS X 10.5 and at least one Intel system running OS X
 
     /usr/local/bin/pythonn.n -m test -w -u all,-largefile
     /usr/local/bin/pythonn.n-32 -m test -w -u all
-
+    
 Certain tests will be skipped and some cause the interpreter to fail
 which will likely generate ``Python quit unexpectedly`` alert messages
 to be generated at several points during a test run.  These are normal

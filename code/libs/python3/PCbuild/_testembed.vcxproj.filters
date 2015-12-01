@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Programs\_testembed.c">
+    <ClCompile Include="..\Modules\_testembed.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

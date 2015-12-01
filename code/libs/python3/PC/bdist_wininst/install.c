@@ -1,9 +1,10 @@
 /*
-  IMPORTANT NOTE: IF THIS FILE IS CHANGED, PCBUILD\BDIST_WININST.VCXPROJ MUST
-  BE REBUILT AS WELL.
+  IMPORTANT NOTE: IF THIS FILE IS CHANGED, WININST-6.EXE MUST BE RECOMPILED
+  WITH THE MSVC6 WININST.DSW WORKSPACE FILE MANUALLY, AND WININST-7.1.EXE MUST
+  BE RECOMPILED WITH THE MSVC 2003.NET WININST-7.1.VCPROJ FILE MANUALLY.
 
-  IF CHANGES TO THIS FILE ARE CHECKED IN, THE RECOMPILED BINARIES MUST BE
-  CHECKED IN AS WELL!
+  IF CHANGES TO THIS FILE ARE CHECKED INTO PYTHON CVS, THE RECOMPILED BINARIES
+  MUST BE CHECKED IN AS WELL!
 */
 
 /*
@@ -1215,7 +1216,7 @@ static void CenterWindow(HWND hwnd)
 
 #include <prsht.h>
 
-INT_PTR CALLBACK
+BOOL CALLBACK
 IntroDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     LPNMHDR lpnm;
@@ -1564,7 +1565,7 @@ SCHEME *GetScheme(int major, int minor)
     return old_scheme;
 }
 
-INT_PTR CALLBACK
+BOOL CALLBACK
 SelectPythonDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     LPNMHDR lpnm;
@@ -1866,7 +1867,7 @@ static void CloseLogfile(void)
         fclose(logfile);
 }
 
-INT_PTR CALLBACK
+BOOL CALLBACK
 InstallFilesDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     LPNMHDR lpnm;
@@ -1940,21 +1941,21 @@ InstallFilesDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 /*
  * The scheme we have to use depends on the Python version...
  if sys.version < "2.2":
-    WINDOWS_SCHEME = {
-    'purelib': '$base',
-    'platlib': '$base',
-    'headers': '$base/Include/$dist_name',
-    'scripts': '$base/Scripts',
-    'data'   : '$base',
-    }
+ WINDOWS_SCHEME = {
+ 'purelib': '$base',
+ 'platlib': '$base',
+ 'headers': '$base/Include/$dist_name',
+ 'scripts': '$base/Scripts',
+ 'data'   : '$base',
+ }
  else:
-    WINDOWS_SCHEME = {
-    'purelib': '$base/Lib/site-packages',
-    'platlib': '$base/Lib/site-packages',
-    'headers': '$base/Include/$dist_name',
-    'scripts': '$base/Scripts',
-    'data'   : '$base',
-    }
+ WINDOWS_SCHEME = {
+ 'purelib': '$base/Lib/site-packages',
+ 'platlib': '$base/Lib/site-packages',
+ 'headers': '$base/Include/$dist_name',
+ 'scripts': '$base/Scripts',
+ 'data'   : '$base',
+ }
 */
             scheme = GetScheme(py_major, py_minor);
             /* Run the pre-install script. */
@@ -2021,7 +2022,7 @@ InstallFilesDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 }
 
 
-INT_PTR CALLBACK
+BOOL CALLBACK
 FinishedDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     LPNMHDR lpnm;
@@ -2197,6 +2198,23 @@ BOOL NeedAutoUAC()
     return TRUE;
 }
 
+// Returns TRUE if the platform supports UAC.
+BOOL PlatformSupportsUAC()
+{
+    // Note that win2k does seem to support ShellExecute with 'runas',
+    // but does *not* support IsUserAnAdmin - so we just pretend things
+    // only work on XP and later.
+    BOOL bIsWindowsXPorLater;
+    OSVERSIONINFO winverinfo;
+    winverinfo.dwOSVersionInfoSize = sizeof(winverinfo);
+    if (!GetVersionEx(&winverinfo))
+        return FALSE; // something bad has gone wrong
+    bIsWindowsXPorLater =
+       ( (winverinfo.dwMajorVersion > 5) ||
+       ( (winverinfo.dwMajorVersion == 5) && (winverinfo.dwMinorVersion >= 1) ));
+    return bIsWindowsXPorLater;
+}
+
 // Spawn ourself as an elevated application.  On failure, a message is
 // displayed to the user - but this app will always terminate, even
 // on error.
@@ -2252,7 +2270,7 @@ int DoInstall(void)
 
     // See if we need to do the Vista UAC magic.
     if (strcmp(user_access_control, "force")==0) {
-        if (!MyIsUserAnAdmin()) {
+        if (PlatformSupportsUAC() && !MyIsUserAnAdmin()) {
             SpawnUAC();
             return 0;
         }
@@ -2260,7 +2278,7 @@ int DoInstall(void)
     } else if (strcmp(user_access_control, "auto")==0) {
         // Check if it looks like we need UAC control, based
         // on how Python itself was installed.
-        if (!MyIsUserAnAdmin() && NeedAutoUAC()) {
+        if (PlatformSupportsUAC() && !MyIsUserAnAdmin() && NeedAutoUAC()) {
             SpawnUAC();
             return 0;
         }

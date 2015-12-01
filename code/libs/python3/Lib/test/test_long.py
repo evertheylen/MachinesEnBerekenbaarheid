@@ -599,6 +599,8 @@ class LongTest(unittest.TestCase):
                 return (x > y) - (x < y)
             def __eq__(self, other):
                 return self._cmp__(other) == 0
+            def __ne__(self, other):
+                return self._cmp__(other) != 0
             def __ge__(self, other):
                 return self._cmp__(other) >= 0
             def __gt__(self, other):
@@ -1241,5 +1243,8 @@ class LongTest(unittest.TestCase):
                 self.assertEqual(type(value >> shift), int)
 
 
+def test_main():
+    support.run_unittest(LongTest)
+
 if __name__ == "__main__":
-    unittest.main()
+    test_main()

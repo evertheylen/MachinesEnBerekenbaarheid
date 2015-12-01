@@ -12,8 +12,7 @@ PyDoc_STRVAR(audioop_getsample__doc__,
     {"getsample", (PyCFunction)audioop_getsample, METH_VARARGS, audioop_getsample__doc__},
 
 static PyObject *
-audioop_getsample_impl(PyModuleDef *module, Py_buffer *fragment, int width,
-                       Py_ssize_t index);
+audioop_getsample_impl(PyModuleDef *module, Py_buffer *fragment, int width, Py_ssize_t index);
 
 static PyObject *
 audioop_getsample(PyModuleDef *module, PyObject *args)
@@ -23,7 +22,8 @@ audioop_getsample(PyModuleDef *module, PyObject *args)
     int width;
     Py_ssize_t index;
 
-    if (!PyArg_ParseTuple(args, "y*in:getsample",
+    if (!PyArg_ParseTuple(args,
+        "y*in:getsample",
         &fragment, &width, &index))
         goto exit;
     return_value = audioop_getsample_impl(module, &fragment, width, index);
@@ -55,7 +55,8 @@ audioop_max(PyModuleDef *module, PyObject *args)
     Py_buffer fragment = {NULL, NULL};
     int width;
 
-    if (!PyArg_ParseTuple(args, "y*i:max",
+    if (!PyArg_ParseTuple(args,
+        "y*i:max",
         &fragment, &width))
         goto exit;
     return_value = audioop_max_impl(module, &fragment, width);
@@ -87,7 +88,8 @@ audioop_minmax(PyModuleDef *module, PyObject *args)
     Py_buffer fragment = {NULL, NULL};
     int width;
 
-    if (!PyArg_ParseTuple(args, "y*i:minmax",
+    if (!PyArg_ParseTuple(args,
+        "y*i:minmax",
         &fragment, &width))
         goto exit;
     return_value = audioop_minmax_impl(module, &fragment, width);
@@ -119,7 +121,8 @@ audioop_avg(PyModuleDef *module, PyObject *args)
     Py_buffer fragment = {NULL, NULL};
     int width;
 
-    if (!PyArg_ParseTuple(args, "y*i:avg",
+    if (!PyArg_ParseTuple(args,
+        "y*i:avg",
         &fragment, &width))
         goto exit;
     return_value = audioop_avg_impl(module, &fragment, width);
@@ -151,7 +154,8 @@ audioop_rms(PyModuleDef *module, PyObject *args)
     Py_buffer fragment = {NULL, NULL};
     int width;
 
-    if (!PyArg_ParseTuple(args, "y*i:rms",
+    if (!PyArg_ParseTuple(args,
+        "y*i:rms",
         &fragment, &width))
         goto exit;
     return_value = audioop_rms_impl(module, &fragment, width);
@@ -174,8 +178,7 @@ PyDoc_STRVAR(audioop_findfit__doc__,
     {"findfit", (PyCFunction)audioop_findfit, METH_VARARGS, audioop_findfit__doc__},
 
 static PyObject *
-audioop_findfit_impl(PyModuleDef *module, Py_buffer *fragment,
-                     Py_buffer *reference);
+audioop_findfit_impl(PyModuleDef *module, Py_buffer *fragment, Py_buffer *reference);
 
 static PyObject *
 audioop_findfit(PyModuleDef *module, PyObject *args)
@@ -184,7 +187,8 @@ audioop_findfit(PyModuleDef *module, PyObject *args)
     Py_buffer fragment = {NULL, NULL};
     Py_buffer reference = {NULL, NULL};
 
-    if (!PyArg_ParseTuple(args, "y*y*:findfit",
+    if (!PyArg_ParseTuple(args,
+        "y*y*:findfit",
         &fragment, &reference))
         goto exit;
     return_value = audioop_findfit_impl(module, &fragment, &reference);
@@ -210,8 +214,7 @@ PyDoc_STRVAR(audioop_findfactor__doc__,
     {"findfactor", (PyCFunction)audioop_findfactor, METH_VARARGS, audioop_findfactor__doc__},
 
 static PyObject *
-audioop_findfactor_impl(PyModuleDef *module, Py_buffer *fragment,
-                        Py_buffer *reference);
+audioop_findfactor_impl(PyModuleDef *module, Py_buffer *fragment, Py_buffer *reference);
 
 static PyObject *
 audioop_findfactor(PyModuleDef *module, PyObject *args)
@@ -220,7 +223,8 @@ audioop_findfactor(PyModuleDef *module, PyObject *args)
     Py_buffer fragment = {NULL, NULL};
     Py_buffer reference = {NULL, NULL};
 
-    if (!PyArg_ParseTuple(args, "y*y*:findfactor",
+    if (!PyArg_ParseTuple(args,
+        "y*y*:findfactor",
         &fragment, &reference))
         goto exit;
     return_value = audioop_findfactor_impl(module, &fragment, &reference);
@@ -246,8 +250,7 @@ PyDoc_STRVAR(audioop_findmax__doc__,
     {"findmax", (PyCFunction)audioop_findmax, METH_VARARGS, audioop_findmax__doc__},
 
 static PyObject *
-audioop_findmax_impl(PyModuleDef *module, Py_buffer *fragment,
-                     Py_ssize_t length);
+audioop_findmax_impl(PyModuleDef *module, Py_buffer *fragment, Py_ssize_t length);
 
 static PyObject *
 audioop_findmax(PyModuleDef *module, PyObject *args)
@@ -256,7 +259,8 @@ audioop_findmax(PyModuleDef *module, PyObject *args)
     Py_buffer fragment = {NULL, NULL};
     Py_ssize_t length;
 
-    if (!PyArg_ParseTuple(args, "y*n:findmax",
+    if (!PyArg_ParseTuple(args,
+        "y*n:findmax",
         &fragment, &length))
         goto exit;
     return_value = audioop_findmax_impl(module, &fragment, length);
@@ -288,7 +292,8 @@ audioop_avgpp(PyModuleDef *module, PyObject *args)
     Py_buffer fragment = {NULL, NULL};
     int width;
 
-    if (!PyArg_ParseTuple(args, "y*i:avgpp",
+    if (!PyArg_ParseTuple(args,
+        "y*i:avgpp",
         &fragment, &width))
         goto exit;
     return_value = audioop_avgpp_impl(module, &fragment, width);
@@ -320,7 +325,8 @@ audioop_maxpp(PyModuleDef *module, PyObject *args)
     Py_buffer fragment = {NULL, NULL};
     int width;
 
-    if (!PyArg_ParseTuple(args, "y*i:maxpp",
+    if (!PyArg_ParseTuple(args,
+        "y*i:maxpp",
         &fragment, &width))
         goto exit;
     return_value = audioop_maxpp_impl(module, &fragment, width);
@@ -352,7 +358,8 @@ audioop_cross(PyModuleDef *module, PyObject *args)
     Py_buffer fragment = {NULL, NULL};
     int width;
 
-    if (!PyArg_ParseTuple(args, "y*i:cross",
+    if (!PyArg_ParseTuple(args,
+        "y*i:cross",
         &fragment, &width))
         goto exit;
     return_value = audioop_cross_impl(module, &fragment, width);
@@ -375,8 +382,7 @@ PyDoc_STRVAR(audioop_mul__doc__,
     {"mul", (PyCFunction)audioop_mul, METH_VARARGS, audioop_mul__doc__},
 
 static PyObject *
-audioop_mul_impl(PyModuleDef *module, Py_buffer *fragment, int width,
-                 double factor);
+audioop_mul_impl(PyModuleDef *module, Py_buffer *fragment, int width, double factor);
 
 static PyObject *
 audioop_mul(PyModuleDef *module, PyObject *args)
@@ -386,7 +392,8 @@ audioop_mul(PyModuleDef *module, PyObject *args)
     int width;
     double factor;
 
-    if (!PyArg_ParseTuple(args, "y*id:mul",
+    if (!PyArg_ParseTuple(args,
+        "y*id:mul",
         &fragment, &width, &factor))
         goto exit;
     return_value = audioop_mul_impl(module, &fragment, width, factor);
@@ -409,8 +416,7 @@ PyDoc_STRVAR(audioop_tomono__doc__,
     {"tomono", (PyCFunction)audioop_tomono, METH_VARARGS, audioop_tomono__doc__},
 
 static PyObject *
-audioop_tomono_impl(PyModuleDef *module, Py_buffer *fragment, int width,
-                    double lfactor, double rfactor);
+audioop_tomono_impl(PyModuleDef *module, Py_buffer *fragment, int width, double lfactor, double rfactor);
 
 static PyObject *
 audioop_tomono(PyModuleDef *module, PyObject *args)
@@ -421,7 +427,8 @@ audioop_tomono(PyModuleDef *module, PyObject *args)
     double lfactor;
     double rfactor;
 
-    if (!PyArg_ParseTuple(args, "y*idd:tomono",
+    if (!PyArg_ParseTuple(args,
+        "y*idd:tomono",
         &fragment, &width, &lfactor, &rfactor))
         goto exit;
     return_value = audioop_tomono_impl(module, &fragment, width, lfactor, rfactor);
@@ -444,8 +451,7 @@ PyDoc_STRVAR(audioop_tostereo__doc__,
     {"tostereo", (PyCFunction)audioop_tostereo, METH_VARARGS, audioop_tostereo__doc__},
 
 static PyObject *
-audioop_tostereo_impl(PyModuleDef *module, Py_buffer *fragment, int width,
-                      double lfactor, double rfactor);
+audioop_tostereo_impl(PyModuleDef *module, Py_buffer *fragment, int width, double lfactor, double rfactor);
 
 static PyObject *
 audioop_tostereo(PyModuleDef *module, PyObject *args)
@@ -456,7 +462,8 @@ audioop_tostereo(PyModuleDef *module, PyObject *args)
     double lfactor;
     double rfactor;
 
-    if (!PyArg_ParseTuple(args, "y*idd:tostereo",
+    if (!PyArg_ParseTuple(args,
+        "y*idd:tostereo",
         &fragment, &width, &lfactor, &rfactor))
         goto exit;
     return_value = audioop_tostereo_impl(module, &fragment, width, lfactor, rfactor);
@@ -479,8 +486,7 @@ PyDoc_STRVAR(audioop_add__doc__,
     {"add", (PyCFunction)audioop_add, METH_VARARGS, audioop_add__doc__},
 
 static PyObject *
-audioop_add_impl(PyModuleDef *module, Py_buffer *fragment1,
-                 Py_buffer *fragment2, int width);
+audioop_add_impl(PyModuleDef *module, Py_buffer *fragment1, Py_buffer *fragment2, int width);
 
 static PyObject *
 audioop_add(PyModuleDef *module, PyObject *args)
@@ -490,7 +496,8 @@ audioop_add(PyModuleDef *module, PyObject *args)
     Py_buffer fragment2 = {NULL, NULL};
     int width;
 
-    if (!PyArg_ParseTuple(args, "y*y*i:add",
+    if (!PyArg_ParseTuple(args,
+        "y*y*i:add",
         &fragment1, &fragment2, &width))
         goto exit;
     return_value = audioop_add_impl(module, &fragment1, &fragment2, width);
@@ -516,8 +523,7 @@ PyDoc_STRVAR(audioop_bias__doc__,
     {"bias", (PyCFunction)audioop_bias, METH_VARARGS, audioop_bias__doc__},
 
 static PyObject *
-audioop_bias_impl(PyModuleDef *module, Py_buffer *fragment, int width,
-                  int bias);
+audioop_bias_impl(PyModuleDef *module, Py_buffer *fragment, int width, int bias);
 
 static PyObject *
 audioop_bias(PyModuleDef *module, PyObject *args)
@@ -527,7 +533,8 @@ audioop_bias(PyModuleDef *module, PyObject *args)
     int width;
     int bias;
 
-    if (!PyArg_ParseTuple(args, "y*ii:bias",
+    if (!PyArg_ParseTuple(args,
+        "y*ii:bias",
         &fragment, &width, &bias))
         goto exit;
     return_value = audioop_bias_impl(module, &fragment, width, bias);
@@ -559,7 +566,8 @@ audioop_reverse(PyModuleDef *module, PyObject *args)
     Py_buffer fragment = {NULL, NULL};
     int width;
 
-    if (!PyArg_ParseTuple(args, "y*i:reverse",
+    if (!PyArg_ParseTuple(args,
+        "y*i:reverse",
         &fragment, &width))
         goto exit;
     return_value = audioop_reverse_impl(module, &fragment, width);
@@ -591,7 +599,8 @@ audioop_byteswap(PyModuleDef *module, PyObject *args)
     Py_buffer fragment = {NULL, NULL};
     int width;
 
-    if (!PyArg_ParseTuple(args, "y*i:byteswap",
+    if (!PyArg_ParseTuple(args,
+        "y*i:byteswap",
         &fragment, &width))
         goto exit;
     return_value = audioop_byteswap_impl(module, &fragment, width);
@@ -614,8 +623,7 @@ PyDoc_STRVAR(audioop_lin2lin__doc__,
     {"lin2lin", (PyCFunction)audioop_lin2lin, METH_VARARGS, audioop_lin2lin__doc__},
 
 static PyObject *
-audioop_lin2lin_impl(PyModuleDef *module, Py_buffer *fragment, int width,
-                     int newwidth);
+audioop_lin2lin_impl(PyModuleDef *module, Py_buffer *fragment, int width, int newwidth);
 
 static PyObject *
 audioop_lin2lin(PyModuleDef *module, PyObject *args)
@@ -625,7 +633,8 @@ audioop_lin2lin(PyModuleDef *module, PyObject *args)
     int width;
     int newwidth;
 
-    if (!PyArg_ParseTuple(args, "y*ii:lin2lin",
+    if (!PyArg_ParseTuple(args,
+        "y*ii:lin2lin",
         &fragment, &width, &newwidth))
         goto exit;
     return_value = audioop_lin2lin_impl(module, &fragment, width, newwidth);
@@ -649,9 +658,7 @@ PyDoc_STRVAR(audioop_ratecv__doc__,
     {"ratecv", (PyCFunction)audioop_ratecv, METH_VARARGS, audioop_ratecv__doc__},
 
 static PyObject *
-audioop_ratecv_impl(PyModuleDef *module, Py_buffer *fragment, int width,
-                    int nchannels, int inrate, int outrate, PyObject *state,
-                    int weightA, int weightB);
+audioop_ratecv_impl(PyModuleDef *module, Py_buffer *fragment, int width, int nchannels, int inrate, int outrate, PyObject *state, int weightA, int weightB);
 
 static PyObject *
 audioop_ratecv(PyModuleDef *module, PyObject *args)
@@ -666,7 +673,8 @@ audioop_ratecv(PyModuleDef *module, PyObject *args)
     int weightA = 1;
     int weightB = 0;
 
-    if (!PyArg_ParseTuple(args, "y*iiiiO|ii:ratecv",
+    if (!PyArg_ParseTuple(args,
+        "y*iiiiO|ii:ratecv",
         &fragment, &width, &nchannels, &inrate, &outrate, &state, &weightA, &weightB))
         goto exit;
     return_value = audioop_ratecv_impl(module, &fragment, width, nchannels, inrate, outrate, state, weightA, weightB);
@@ -698,7 +706,8 @@ audioop_lin2ulaw(PyModuleDef *module, PyObject *args)
     Py_buffer fragment = {NULL, NULL};
     int width;
 
-    if (!PyArg_ParseTuple(args, "y*i:lin2ulaw",
+    if (!PyArg_ParseTuple(args,
+        "y*i:lin2ulaw",
         &fragment, &width))
         goto exit;
     return_value = audioop_lin2ulaw_impl(module, &fragment, width);
@@ -730,7 +739,8 @@ audioop_ulaw2lin(PyModuleDef *module, PyObject *args)
     Py_buffer fragment = {NULL, NULL};
     int width;
 
-    if (!PyArg_ParseTuple(args, "y*i:ulaw2lin",
+    if (!PyArg_ParseTuple(args,
+        "y*i:ulaw2lin",
         &fragment, &width))
         goto exit;
     return_value = audioop_ulaw2lin_impl(module, &fragment, width);
@@ -762,7 +772,8 @@ audioop_lin2alaw(PyModuleDef *module, PyObject *args)
     Py_buffer fragment = {NULL, NULL};
     int width;
 
-    if (!PyArg_ParseTuple(args, "y*i:lin2alaw",
+    if (!PyArg_ParseTuple(args,
+        "y*i:lin2alaw",
         &fragment, &width))
         goto exit;
     return_value = audioop_lin2alaw_impl(module, &fragment, width);
@@ -794,7 +805,8 @@ audioop_alaw2lin(PyModuleDef *module, PyObject *args)
     Py_buffer fragment = {NULL, NULL};
     int width;
 
-    if (!PyArg_ParseTuple(args, "y*i:alaw2lin",
+    if (!PyArg_ParseTuple(args,
+        "y*i:alaw2lin",
         &fragment, &width))
         goto exit;
     return_value = audioop_alaw2lin_impl(module, &fragment, width);
@@ -817,8 +829,7 @@ PyDoc_STRVAR(audioop_lin2adpcm__doc__,
     {"lin2adpcm", (PyCFunction)audioop_lin2adpcm, METH_VARARGS, audioop_lin2adpcm__doc__},
 
 static PyObject *
-audioop_lin2adpcm_impl(PyModuleDef *module, Py_buffer *fragment, int width,
-                       PyObject *state);
+audioop_lin2adpcm_impl(PyModuleDef *module, Py_buffer *fragment, int width, PyObject *state);
 
 static PyObject *
 audioop_lin2adpcm(PyModuleDef *module, PyObject *args)
@@ -828,7 +839,8 @@ audioop_lin2adpcm(PyModuleDef *module, PyObject *args)
     int width;
     PyObject *state;
 
-    if (!PyArg_ParseTuple(args, "y*iO:lin2adpcm",
+    if (!PyArg_ParseTuple(args,
+        "y*iO:lin2adpcm",
         &fragment, &width, &state))
         goto exit;
     return_value = audioop_lin2adpcm_impl(module, &fragment, width, state);
@@ -851,8 +863,7 @@ PyDoc_STRVAR(audioop_adpcm2lin__doc__,
     {"adpcm2lin", (PyCFunction)audioop_adpcm2lin, METH_VARARGS, audioop_adpcm2lin__doc__},
 
 static PyObject *
-audioop_adpcm2lin_impl(PyModuleDef *module, Py_buffer *fragment, int width,
-                       PyObject *state);
+audioop_adpcm2lin_impl(PyModuleDef *module, Py_buffer *fragment, int width, PyObject *state);
 
 static PyObject *
 audioop_adpcm2lin(PyModuleDef *module, PyObject *args)
@@ -862,7 +873,8 @@ audioop_adpcm2lin(PyModuleDef *module, PyObject *args)
     int width;
     PyObject *state;
 
-    if (!PyArg_ParseTuple(args, "y*iO:adpcm2lin",
+    if (!PyArg_ParseTuple(args,
+        "y*iO:adpcm2lin",
         &fragment, &width, &state))
         goto exit;
     return_value = audioop_adpcm2lin_impl(module, &fragment, width, state);
@@ -874,4 +886,4 @@ exit:
 
     return return_value;
 }
-/*[clinic end generated code: output=a076e1b213a8727b input=a9049054013a1b77]*/
+/*[clinic end generated code: output=be840bba5d40c2ce input=a9049054013a1b77]*/

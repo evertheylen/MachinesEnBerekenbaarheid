@@ -6,12 +6,6 @@
 
 #include <grp.h>
 
-#include "clinic/grpmodule.c.h"
-/*[clinic input]
-module grp
-[clinic start generated code]*/
-/*[clinic end generated code: output=da39a3ee5e6b4b0d input=cade63f2ed1bd9f8]*/
-
 static PyStructSequence_Field struct_group_type_fields[] = {
    {"gr_name", "group name"},
    {"gr_passwd", "password"},
@@ -82,25 +76,14 @@ mkgrent(struct group *p)
     return v;
 }
 
-/*[clinic input]
-grp.getgrgid
-
-    id: object
-
-Return the group database entry for the given numeric group ID.
-
-If id is not valid, raise KeyError.
-[clinic start generated code]*/
-
 static PyObject *
-grp_getgrgid_impl(PyModuleDef *module, PyObject *id)
-/*[clinic end generated code: output=8a11f5fdeb8c78a0 input=15fa0e2ccf5cda25]*/
+grp_getgrgid(PyObject *self, PyObject *pyo_id)
 {
     PyObject *py_int_id;
     gid_t gid;
     struct group *p;
 
-    py_int_id = PyNumber_Long(id);
+    py_int_id = PyNumber_Long(pyo_id);
     if (!py_int_id)
             return NULL;
     if (!_Py_Gid_Converter(py_int_id, &gid)) {
@@ -120,31 +103,22 @@ grp_getgrgid_impl(PyModuleDef *module, PyObject *id)
     return mkgrent(p);
 }
 
-/*[clinic input]
-grp.getgrnam
-
-    name: unicode
-
-Return the group database entry for the given group name.
-
-If name is not valid, raise KeyError.
-[clinic start generated code]*/
-
 static PyObject *
-grp_getgrnam_impl(PyModuleDef *module, PyObject *name)
-/*[clinic end generated code: output=cd47511f4854da8e input=08ded29affa3c863]*/
+grp_getgrnam(PyObject *self, PyObject *args)
 {
-    char *name_chars;
+    char *name;
     struct group *p;
-    PyObject *bytes, *retval = NULL;
+    PyObject *arg, *bytes, *retval = NULL;
 
-    if ((bytes = PyUnicode_EncodeFSDefault(name)) == NULL)
+    if (!PyArg_ParseTuple(args, "U:getgrnam", &arg))
         return NULL;
-    if (PyBytes_AsStringAndSize(bytes, &name_chars, NULL) == -1)
+    if ((bytes = PyUnicode_EncodeFSDefault(arg)) == NULL)
+        return NULL;
+    if (PyBytes_AsStringAndSize(bytes, &name, NULL) == -1)
         goto out;
 
-    if ((p = getgrnam(name_chars)) == NULL) {
-        PyErr_Format(PyExc_KeyError, "getgrnam(): name not found: %s", name_chars);
+    if ((p = getgrnam(name)) == NULL) {
+        PyErr_Format(PyExc_KeyError, "getgrnam(): name not found: %s", name);
         goto out;
     }
     retval = mkgrent(p);
@@ -153,18 +127,8 @@ out:
     return retval;
 }
 
-/*[clinic input]
-grp.getgrall
-
-Return a list of all available group entries, in arbitrary order.
-
-An entry whose name starts with '+' or '-' represents an instruction
-to use YP/NIS and may not be accessible via getgrnam or getgrgid.
-[clinic start generated code]*/
-
 static PyObject *
-grp_getgrall_impl(PyModuleDef *module)
-/*[clinic end generated code: output=add9037a20c202de input=d7df76c825c367df]*/
+grp_getgrall(PyObject *self, PyObject *ignore)
 {
     PyObject *d;
     struct group *p;
@@ -187,10 +151,20 @@ grp_getgrall_impl(PyModuleDef *module)
 }
 
 static PyMethodDef grp_methods[] = {
-    GRP_GETGRGID_METHODDEF
-    GRP_GETGRNAM_METHODDEF
-    GRP_GETGRALL_METHODDEF
-    {NULL, NULL}
+    {"getgrgid",        grp_getgrgid,   METH_O,
+     "getgrgid(id) -> (gr_name,gr_passwd,gr_gid,gr_mem)\n\
+Return the group database entry for the given numeric group ID.  If\n\
+id is not valid, raise KeyError."},
+    {"getgrnam",        grp_getgrnam,   METH_VARARGS,
+     "getgrnam(name) -> (gr_name,gr_passwd,gr_gid,gr_mem)\n\
+Return the group database entry for the given group name.  If\n\
+name is not valid, raise KeyError."},
+    {"getgrall",        grp_getgrall,   METH_NOARGS,
+     "getgrall() -> list of tuples\n\
+Return a list of all available group entries, in arbitrary order.\n\
+An entry whose name starts with '+' or '-' represents an instruction\n\
+to use YP/NIS and may not be accessible via getgrnam or getgrgid."},
+    {NULL,              NULL}           /* sentinel */
 };
 
 PyDoc_STRVAR(grp__doc__,

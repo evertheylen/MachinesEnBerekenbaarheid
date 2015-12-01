@@ -47,11 +47,7 @@ The convenience functions are:
 .. function:: parseString(string, handler, error_handler=handler.ErrorHandler())
 
    Similar to :func:`parse`, but parses from a buffer *string* received as a
-   parameter.  *string* must be a :class:`str` instance or a
-   :term:`bytes-like object`.
-
-   .. versionchanged:: 3.5
-      Added support of :class:`str` instances.
+   parameter.
 
 A typical SAX application uses three kinds of objects: readers, handlers and
 input sources.  "Reader" in this context is another term for parser, i.e. some

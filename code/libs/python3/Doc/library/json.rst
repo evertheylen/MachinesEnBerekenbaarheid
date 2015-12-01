@@ -106,8 +106,6 @@ Using json.tool from the shell to validate and pretty-print::
     $ echo '{1.2:3.4}' | python -m json.tool
     Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
 
-See :ref:`json-commandline` for detailed documentation.
-
 .. highlight:: python3
 
 .. note::
@@ -250,7 +248,7 @@ Basic Usage
    will be passed to the constructor of the class.
 
    If the data being deserialized is not a valid JSON document, a
-   :exc:`JSONDecodeError` will be raised.
+   :exc:`ValueError` will be raised.
 
 .. function:: loads(s, encoding=None, cls=None, object_hook=None, parse_float=None, parse_int=None, parse_constant=None, object_pairs_hook=None, **kw)
 
@@ -261,7 +259,7 @@ Basic Usage
    *encoding* which is ignored and deprecated.
 
    If the data being deserialized is not a valid JSON document, a
-   :exc:`JSONDecodeError` will be raised.
+   :exc:`ValueError` will be raised.
 
 Encoders and Decoders
 ---------------------
@@ -334,15 +332,12 @@ Encoders and Decoders
    ``'\n'``, ``'\r'`` and ``'\0'``.
 
    If the data being deserialized is not a valid JSON document, a
-   :exc:`JSONDecodeError` will be raised.
+   :exc:`ValueError` will be raised.
 
    .. method:: decode(s)
 
       Return the Python representation of *s* (a :class:`str` instance
       containing a JSON document)
-
-      :exc:`JSONDecodeError` will be raised if the given JSON document is not
-      valid.
 
    .. method:: raw_decode(s)
 
@@ -472,36 +467,6 @@ Encoders and Decoders
                 mysocket.write(chunk)
 
 
-Exceptions
-----------
-
-.. exception:: JSONDecodeError(msg, doc, pos, end=None)
-
-    Subclass of :exc:`ValueError` with the following additional attributes:
-
-    .. attribute:: msg
-
-        The unformatted error message.
-
-    .. attribute:: doc
-
-        The JSON document being parsed.
-
-    .. attribute:: pos
-
-        The start index of *doc* where parsing failed.
-
-    .. attribute:: lineno
-
-        The line corresponding to *pos*.
-
-    .. attribute:: colno
-
-        The column corresponding to *pos*.
-
-   .. versionadded:: 3.5
-
-
 Standard Compliance and Interoperability
 ----------------------------------------
 
@@ -622,68 +587,6 @@ representation's range and precision limitations.  This is especially relevant
 when serializing Python :class:`int` values of extremely large magnitude, or
 when serializing instances of "exotic" numerical types such as
 :class:`decimal.Decimal`.
-
-.. highlight:: bash
-.. module:: json.tool
-
-.. _json-commandline:
-
-Command Line Interface
-----------------------
-
-The :mod:`json.tool` module provides a simple command line interface to validate
-and pretty-print JSON objects.
-
-If the optional ``infile`` and ``outfile`` arguments are not
-specified, :attr:`sys.stdin` and :attr:`sys.stdout` will be used respectively::
-
-    $ echo '{"json": "obj"}' | python -m json.tool
-    {
-        "json": "obj"
-    }
-    $ echo '{1.2:3.4}' | python -m json.tool
-    Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
-
-.. versionchanged:: 3.5
-   The output is now in the same order as the input. Use the
-   :option:`--sort-keys` option to sort the output of dictionaries
-   alphabetically by key.
-
-Command line options
-^^^^^^^^^^^^^^^^^^^^
-
-.. cmdoption:: infile
-
-   The JSON file to be validated or pretty-printed::
-
-      $ python -m json.tool mp_films.json
-      [
-          {
-              "title": "And Now for Something Completely Different",
-              "year": 1971
-          },
-          {
-              "title": "Monty Python and the Holy Grail",
-              "year": 1975
-          }
-      ]
-
-   If *infile* is not specified, read from :attr:`sys.stdin`.
-
-.. cmdoption:: outfile
-
-   Write the output of the *infile* to the given *outfile*. Otherwise, write it
-   to :attr:`sys.stdout`.
-
-.. cmdoption:: --sort-keys
-
-   Sort the output of dictionaries alphabetically by key.
-
-   .. versionadded:: 3.5
-
-.. cmdoption:: -h, --help
-
-   Show the help message.
 
 
 .. rubric:: Footnotes

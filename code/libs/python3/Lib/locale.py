@@ -301,8 +301,8 @@ def str(val):
     """Convert float to integer, taking the locale into account."""
     return format("%.12g", val)
 
-def delocalize(string):
-    "Parses a string as a normalized number according to the locale settings."
+def atof(string, func=float):
+    "Parses a string as a float according to the locale settings."
     #First, get rid of the grouping
     ts = localeconv()['thousands_sep']
     if ts:
@@ -311,15 +311,12 @@ def delocalize(string):
     dd = localeconv()['decimal_point']
     if dd:
         string = string.replace(dd, '.')
-    return string
+    #finally, parse the string
+    return func(string)
 
-def atof(string, func=float):
-    "Parses a string as a float according to the locale settings."
-    return func(delocalize(string))
-
-def atoi(string):
+def atoi(str):
     "Converts a string to an integer according to the locale settings."
-    return int(delocalize(string))
+    return atof(str, int)
 
 def _test():
     setlocale(LC_ALL, "")
@@ -699,9 +696,7 @@ locale_encoding_alias = {
     'euc_kr':                       'eucKR',
     'utf_8':                        'UTF-8',
     'koi8_r':                       'KOI8-R',
-    'koi8_t':                       'KOI8-T',
     'koi8_u':                       'KOI8-U',
-    'kz1048':                       'RK1048',
     'cp1251':                       'CP1251',
     'cp1255':                       'CP1255',
     'cp1256':                       'CP1256',

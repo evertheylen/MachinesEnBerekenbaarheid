@@ -364,26 +364,39 @@ in frm is mapped to the byte at the same position in to.\n\
 The bytes objects frm and to must be of the same length.");
 
 PyObject *
-_Py_bytes_maketrans(Py_buffer *frm, Py_buffer *to)
+_Py_bytes_maketrans(PyObject *args)
 {
     PyObject *res = NULL;
+    Py_buffer bfrm = {NULL, NULL};
+    Py_buffer bto = {NULL, NULL};
     Py_ssize_t i;
     char *p;
 
-    if (frm->len != to->len) {
+    bfrm.len = -1;
+    bto.len = -1;
+
+    if (!PyArg_ParseTuple(args, "y*y*:maketrans", &bfrm, &bto))
+        return NULL;
+    if (bfrm.len != bto.len) {
         PyErr_Format(PyExc_ValueError,
                      "maketrans arguments must have same length");
-        return NULL;
+        goto done;
     }
     res = PyBytes_FromStringAndSize(NULL, 256);
-    if (!res)
-        return NULL;
+    if (!res) {
+        goto done;
+    }
     p = PyBytes_AS_STRING(res);
     for (i = 0; i < 256; i++)
         p[i] = (char) i;
-    for (i = 0; i < frm->len; i++) {
-        p[((unsigned char *)frm->buf)[i]] = ((char *)to->buf)[i];
+    for (i = 0; i < bfrm.len; i++) {
+        p[((unsigned char *)bfrm.buf)[i]] = ((char *)bto.buf)[i];
     }
 
+done:
+    if (bfrm.obj != NULL)
+        PyBuffer_Release(&bfrm);
+    if (bfrm.obj != NULL)
+        PyBuffer_Release(&bto);
     return res;
 }

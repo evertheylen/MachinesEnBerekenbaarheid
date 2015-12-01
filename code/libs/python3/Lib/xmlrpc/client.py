@@ -208,8 +208,8 @@ class ProtocolError(Error):
         self.headers = headers
     def __repr__(self):
         return (
-            "<%s for %s: %s %s>" %
-            (self.__class__.__name__, self.url, self.errcode, self.errmsg)
+            "<ProtocolError for %s: %s %s>" %
+            (self.url, self.errcode, self.errmsg)
             )
 
 ##
@@ -237,8 +237,7 @@ class Fault(Error):
         self.faultCode = faultCode
         self.faultString = faultString
     def __repr__(self):
-        return "<%s %s: %r>" % (self.__class__.__name__,
-                                self.faultCode, self.faultString)
+        return "<Fault %s: %r>" % (self.faultCode, self.faultString)
 
 # --------------------------------------------------------------------
 # Special values
@@ -340,6 +339,10 @@ class DateTime:
         s, o = self.make_comparable(other)
         return s == o
 
+    def __ne__(self, other):
+        s, o = self.make_comparable(other)
+        return s != o
+
     def timetuple(self):
         return time.strptime(self.value, "%Y%m%dT%H:%M:%S")
 
@@ -352,7 +355,7 @@ class DateTime:
         return self.value
 
     def __repr__(self):
-        return "<%s %r at %#x>" % (self.__class__.__name__, self.value, id(self))
+        return "<DateTime %r at %x>" % (self.value, id(self))
 
     def decode(self, data):
         self.value = str(data).strip()
@@ -403,6 +406,11 @@ class Binary:
             other = other.data
         return self.data == other
 
+    def __ne__(self, other):
+        if isinstance(other, Binary):
+            other = other.data
+        return self.data != other
+
     def decode(self, data):
         self.data = base64.decodebytes(data)
 
@@ -438,13 +446,8 @@ class ExpatParser:
         self._parser.Parse(data, 0)
 
     def close(self):
-        try:
-            parser = self._parser
-        except AttributeError:
-            pass
-        else:
-            del self._target, self._parser # get rid of circular references
-            parser.Parse(b"", True) # end of data
+        self._parser.Parse("", 1) # end of data
+        del self._target, self._parser # get rid of circular references
 
 # --------------------------------------------------------------------
 # XML-RPC marshalling and unmarshalling code
@@ -844,7 +847,7 @@ class MultiCall:
         self.__call_list = []
 
     def __repr__(self):
-        return "<%s at %#x>" % (self.__class__.__name__, id(self))
+        return "<MultiCall at %x>" % id(self)
 
     __str__ = __repr__
 
@@ -1015,9 +1018,12 @@ def gzip_encode(data):
     if not gzip:
         raise NotImplementedError
     f = BytesIO()
-    with gzip.GzipFile(mode="wb", fileobj=f, compresslevel=1) as gzf:
-        gzf.write(data)
-    return f.getvalue()
+    gzf = gzip.GzipFile(mode="wb", fileobj=f, compresslevel=1)
+    gzf.write(data)
+    gzf.close()
+    encoded = f.getvalue()
+    f.close()
+    return encoded
 
 ##
 # Decode a string using the gzip content encoding such as specified by the
@@ -1038,14 +1044,17 @@ def gzip_decode(data, max_decode=20971520):
     """
     if not gzip:
         raise NotImplementedError
-    with gzip.GzipFile(mode="rb", fileobj=BytesIO(data)) as gzf:
-        try:
-            if max_decode < 0: # no limit
-                decoded = gzf.read()
-            else:
-                decoded = gzf.read(max_decode + 1)
-        except OSError:
-            raise ValueError("invalid data")
+    f = BytesIO(data)
+    gzf = gzip.GzipFile(mode="rb", fileobj=f)
+    try:
+        if max_decode < 0: # no limit
+            decoded = gzf.read()
+        else:
+            decoded = gzf.read(max_decode + 1)
+    except OSError:
+        raise ValueError("invalid data")
+    f.close()
+    gzf.close()
     if max_decode >= 0 and len(decoded) > max_decode:
         raise ValueError("max gzipped payload length exceeded")
     return decoded
@@ -1070,10 +1079,8 @@ class GzipDecodedResponse(gzip.GzipFile if gzip else object):
         gzip.GzipFile.__init__(self, mode="rb", fileobj=self.io)
 
     def close(self):
-        try:
-            gzip.GzipFile.close(self)
-        finally:
-            self.io.close()
+        gzip.GzipFile.close(self)
+        self.io.close()
 
 
 # --------------------------------------------------------------------
@@ -1135,7 +1142,7 @@ class Transport:
                 if i or e.errno not in (errno.ECONNRESET, errno.ECONNABORTED,
                                         errno.EPIPE):
                     raise
-            except http.client.RemoteDisconnected:
+            except http.client.BadStatusLine: #close after we sent request
                 if i:
                     raise
 
@@ -1228,10 +1235,9 @@ class Transport:
     # Used in the event of socket errors.
     #
     def close(self):
-        host, connection = self._connection
-        if connection:
+        if self._connection[1]:
+            self._connection[1].close()
             self._connection = (None, None)
-            connection.close()
 
     ##
     # Send HTTP request.
@@ -1438,8 +1444,8 @@ class ServerProxy:
 
     def __repr__(self):
         return (
-            "<%s for %s%s>" %
-            (self.__class__.__name__, self.__host, self.__handler)
+            "<ServerProxy for %s%s>" %
+            (self.__host, self.__handler)
             )
 
     __str__ = __repr__
@@ -1460,12 +1466,6 @@ class ServerProxy:
         elif attr == "transport":
             return self.__transport
         raise AttributeError("Attribute %r not found" % (attr,))
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args):
-        self.__close()
 
 # compatibility
 

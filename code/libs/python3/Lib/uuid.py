@@ -139,8 +139,10 @@ class UUID(object):
         if bytes_le is not None:
             if len(bytes_le) != 16:
                 raise ValueError('bytes_le is not a 16-char string')
-            bytes = (bytes_le[4-1::-1] + bytes_le[6-1:4-1:-1] +
-                     bytes_le[8-1:6-1:-1] + bytes_le[8:])
+            bytes = (bytes_(reversed(bytes_le[0:4])) +
+                     bytes_(reversed(bytes_le[4:6])) +
+                     bytes_(reversed(bytes_le[6:8])) +
+                     bytes_le[8:])
         if bytes is not None:
             if len(bytes) != 16:
                 raise ValueError('bytes is not a 16-char string')
@@ -185,6 +187,11 @@ class UUID(object):
             return self.int == other.int
         return NotImplemented
 
+    def __ne__(self, other):
+        if isinstance(other, UUID):
+            return self.int != other.int
+        return NotImplemented
+
     # Q. What's the value of being able to sort UUIDs?
     # A. Use them as keys in a B-Tree or similar mapping.
 
@@ -215,7 +222,7 @@ class UUID(object):
         return self.int
 
     def __repr__(self):
-        return '%s(%r)' % (self.__class__.__name__, str(self))
+        return 'UUID(%r)' % str(self)
 
     def __setattr__(self, name, value):
         raise TypeError('UUID objects are immutable')
@@ -227,12 +234,17 @@ class UUID(object):
 
     @property
     def bytes(self):
-        return self.int.to_bytes(16, 'big')
+        bytes = bytearray()
+        for shift in range(0, 128, 8):
+            bytes.insert(0, (self.int >> shift) & 0xff)
+        return bytes_(bytes)
 
     @property
     def bytes_le(self):
         bytes = self.bytes
-        return (bytes[4-1::-1] + bytes[6-1:4-1:-1] + bytes[8-1:6-1:-1] +
+        return (bytes_(reversed(bytes[0:4])) +
+                bytes_(reversed(bytes[4:6])) +
+                bytes_(reversed(bytes[6:8])) +
                 bytes[8:])
 
     @property
@@ -299,38 +311,33 @@ class UUID(object):
         if self.variant == RFC_4122:
             return int((self.int >> 76) & 0xf)
 
-def _popen(command, *args):
-    import os, shutil, subprocess
+def _popen(command, args):
+    import os, shutil
     executable = shutil.which(command)
     if executable is None:
         path = os.pathsep.join(('/sbin', '/usr/sbin'))
         executable = shutil.which(command, path=path)
         if executable is None:
             return None
-    # LC_ALL=C to ensure English output, stderr=DEVNULL to prevent output
-    # on stderr (Note: we don't have an example where the words we search
-    # for are actually localized, but in theory some system could do so.)
-    env = dict(os.environ)
-    env['LC_ALL'] = 'C'
-    proc = subprocess.Popen((executable,) + args,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.DEVNULL,
-                            env=env)
-    return proc
+    # LC_ALL to ensure English output, 2>/dev/null to prevent output on
+    # stderr (Note: we don't have an example where the words we search for
+    # are actually localized, but in theory some system could do so.)
+    cmd = 'LC_ALL=C %s %s 2>/dev/null' % (executable, args)
+    return os.popen(cmd)
 
 def _find_mac(command, args, hw_identifiers, get_index):
     try:
-        proc = _popen(command, *args.split())
-        if not proc:
+        pipe = _popen(command, args)
+        if not pipe:
             return
-        with proc:
-            for line in proc.stdout:
+        with pipe:
+            for line in pipe:
                 words = line.lower().rstrip().split()
                 for i in range(len(words)):
                     if words[i] in hw_identifiers:
                         try:
                             word = words[get_index(i)]
-                            mac = int(word.replace(b':', b''), 16)
+                            mac = int(word.replace(':', ''), 16)
                             if mac:
                                 return mac
                         except (ValueError, IndexError):
@@ -347,16 +354,9 @@ def _ifconfig_getnode():
     """Get the hardware address on Unix by running ifconfig."""
     # This works on Linux ('' or '-a'), Tru64 ('-av'), but not all Unixes.
     for args in ('', '-a', '-av'):
-        mac = _find_mac('ifconfig', args, [b'hwaddr', b'ether'], lambda i: i+1)
+        mac = _find_mac('ifconfig', args, ['hwaddr', 'ether'], lambda i: i+1)
         if mac:
             return mac
-
-def _ip_getnode():
-    """Get the hardware address on Unix by running ip."""
-    # This works on Linux with iproute2.
-    mac = _find_mac('ip', 'link list', [b'link/ether'], lambda i: i+1)
-    if mac:
-        return mac
 
 def _arp_getnode():
     """Get the hardware address on Unix by running arp."""
@@ -367,32 +367,32 @@ def _arp_getnode():
         return None
 
     # Try getting the MAC addr from arp based on our IP address (Solaris).
-    return _find_mac('arp', '-an', [os.fsencode(ip_addr)], lambda i: -1)
+    return _find_mac('arp', '-an', [ip_addr], lambda i: -1)
 
 def _lanscan_getnode():
     """Get the hardware address on Unix by running lanscan."""
     # This might work on HP-UX.
-    return _find_mac('lanscan', '-ai', [b'lan0'], lambda i: 0)
+    return _find_mac('lanscan', '-ai', ['lan0'], lambda i: 0)
 
 def _netstat_getnode():
     """Get the hardware address on Unix by running netstat."""
     # This might work on AIX, Tru64 UNIX and presumably on IRIX.
     try:
-        proc = _popen('netstat', '-ia')
-        if not proc:
+        pipe = _popen('netstat', '-ia')
+        if not pipe:
             return
-        with proc:
-            words = proc.stdout.readline().rstrip().split()
+        with pipe:
+            words = pipe.readline().rstrip().split()
             try:
-                i = words.index(b'Address')
+                i = words.index('Address')
             except ValueError:
                 return
-            for line in proc.stdout:
+            for line in pipe:
                 try:
                     words = line.rstrip().split()
                     word = words[i]
-                    if len(word) == 17 and word.count(b':') == 5:
-                        mac = int(word.replace(b':', b''), 16)
+                    if len(word) == 17 and word.count(':') == 5:
+                        mac = int(word.replace(':', ''), 16)
                         if mac:
                             return mac
                 except (ValueError, IndexError):
@@ -447,10 +447,9 @@ def _netbios_getnode():
         if win32wnet.Netbios(ncb) != 0:
             continue
         status._unpack()
-        bytes = status.adapter_address[:6]
-        if len(bytes) != 6:
-            continue
-        return int.from_bytes(bytes, 'big')
+        bytes = status.adapter_address
+        return ((bytes[0]<<40) + (bytes[1]<<32) + (bytes[2]<<24) +
+                (bytes[3]<<16) + (bytes[4]<<8) + bytes[5])
 
 # Thanks to Thomas Heller for ctypes and for his help with its use here.
 
@@ -459,17 +458,13 @@ def _netbios_getnode():
 _uuid_generate_random = _uuid_generate_time = _UuidCreate = None
 try:
     import ctypes, ctypes.util
-    import sys
 
     # The uuid_generate_* routines are provided by libuuid on at least
     # Linux and FreeBSD, and provided by libc on Mac OS X.
-    _libnames = ['uuid']
-    if not sys.platform.startswith('win'):
-        _libnames.append('c')
-    for libname in _libnames:
+    for libname in ['uuid', 'c']:
         try:
             lib = ctypes.CDLL(ctypes.util.find_library(libname))
-        except Exception:
+        except:
             continue
         if hasattr(lib, 'uuid_generate_random'):
             _uuid_generate_random = lib.uuid_generate_random
@@ -477,7 +472,6 @@ try:
             _uuid_generate_time = lib.uuid_generate_time
             if _uuid_generate_random is not None:
                 break  # found everything we were looking for
-    del _libnames
 
     # The uuid_generate_* functions are broken on MacOS X 10.5, as noted
     # in issue #8621 the function generates the same sequence of values
@@ -486,6 +480,7 @@ try:
     #
     # Assume that the uuid_generate functions are broken from 10.5 onward,
     # the test can be adjusted when a later version is fixed.
+    import sys
     if sys.platform == 'darwin':
         import os
         if int(os.uname().release.split('.')[0]) >= 9:
@@ -523,7 +518,7 @@ def _windll_getnode():
 def _random_getnode():
     """Get a random node ID, with eighth bit set as suggested by RFC 4122."""
     import random
-    return random.getrandbits(48) | 0x010000000000
+    return random.randrange(0, 1<<48) | 0x010000000000
 
 _node = None
 
@@ -544,8 +539,8 @@ def getnode():
     if sys.platform == 'win32':
         getters = [_windll_getnode, _netbios_getnode, _ipconfig_getnode]
     else:
-        getters = [_unixdll_getnode, _ifconfig_getnode, _ip_getnode,
-                   _arp_getnode, _lanscan_getnode, _netstat_getnode]
+        getters = [_unixdll_getnode, _ifconfig_getnode, _arp_getnode,
+                   _lanscan_getnode, _netstat_getnode]
 
     for getter in getters + [_random_getnode]:
         try:
@@ -581,7 +576,7 @@ def uuid1(node=None, clock_seq=None):
     _last_timestamp = timestamp
     if clock_seq is None:
         import random
-        clock_seq = random.getrandbits(14) # instead of stable storage
+        clock_seq = random.randrange(1<<14) # instead of stable storage
     time_low = timestamp & 0xffffffff
     time_mid = (timestamp >> 32) & 0xffff
     time_hi_version = (timestamp >> 48) & 0x0fff
@@ -611,9 +606,10 @@ def uuid4():
     try:
         import os
         return UUID(bytes=os.urandom(16), version=4)
-    except Exception:
+    except:
         import random
-        return UUID(int=random.getrandbits(128), version=4)
+        bytes = bytes_(random.randrange(256) for i in range(16))
+        return UUID(bytes=bytes, version=4)
 
 def uuid5(namespace, name):
     """Generate a UUID from the SHA-1 hash of a namespace UUID and a name."""

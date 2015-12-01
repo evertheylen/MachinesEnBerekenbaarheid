@@ -4,10 +4,13 @@ import os
 import errno
 import pathlib
 import pickle
+import shutil
 import socket
 import stat
+import sys
 import tempfile
 import unittest
+from contextlib import contextmanager
 
 from test import support
 TESTFN = support.TESTFN
@@ -102,35 +105,31 @@ class NTFlavourTest(_BaseFlavourTest, unittest.TestCase):
         check = self._check_parse_parts
         # First part is anchored
         check(['c:'],                   ('c:', '', ['c:']))
-        check(['c:/'],                  ('c:', '\\', ['c:\\']))
-        check(['/'],                    ('', '\\', ['\\']))
+        check(['c:\\'],                 ('c:', '\\', ['c:\\']))
+        check(['\\'],                   ('', '\\', ['\\']))
         check(['c:a'],                  ('c:', '', ['c:', 'a']))
-        check(['c:/a'],                 ('c:', '\\', ['c:\\', 'a']))
-        check(['/a'],                   ('', '\\', ['\\', 'a']))
+        check(['c:\\a'],                ('c:', '\\', ['c:\\', 'a']))
+        check(['\\a'],                  ('', '\\', ['\\', 'a']))
         # UNC paths
-        check(['//a/b'],                ('\\\\a\\b', '\\', ['\\\\a\\b\\']))
-        check(['//a/b/'],               ('\\\\a\\b', '\\', ['\\\\a\\b\\']))
-        check(['//a/b/c'],              ('\\\\a\\b', '\\', ['\\\\a\\b\\', 'c']))
+        check(['\\\\a\\b'],             ('\\\\a\\b', '\\', ['\\\\a\\b\\']))
+        check(['\\\\a\\b\\'],           ('\\\\a\\b', '\\', ['\\\\a\\b\\']))
+        check(['\\\\a\\b\\c'],          ('\\\\a\\b', '\\', ['\\\\a\\b\\', 'c']))
         # Second part is anchored, so that the first part is ignored
         check(['a', 'Z:b', 'c'],        ('Z:', '', ['Z:', 'b', 'c']))
-        check(['a', 'Z:/b', 'c'],       ('Z:', '\\', ['Z:\\', 'b', 'c']))
+        check(['a', 'Z:\\b', 'c'],      ('Z:', '\\', ['Z:\\', 'b', 'c']))
+        check(['a', '\\b', 'c'],        ('', '\\', ['\\', 'b', 'c']))
         # UNC paths
-        check(['a', '//b/c', 'd'],      ('\\\\b\\c', '\\', ['\\\\b\\c\\', 'd']))
+        check(['a', '\\\\b\\c', 'd'],   ('\\\\b\\c', '\\', ['\\\\b\\c\\', 'd']))
         # Collapsing and stripping excess slashes
-        check(['a', 'Z://b//c/', 'd/'], ('Z:', '\\', ['Z:\\', 'b', 'c', 'd']))
+        check(['a', 'Z:\\\\b\\\\c\\', 'd\\'], ('Z:', '\\', ['Z:\\', 'b', 'c', 'd']))
         # UNC paths
-        check(['a', '//b/c//', 'd'],    ('\\\\b\\c', '\\', ['\\\\b\\c\\', 'd']))
+        check(['a', '\\\\b\\c\\\\', 'd'], ('\\\\b\\c', '\\', ['\\\\b\\c\\', 'd']))
         # Extended paths
-        check(['//?/c:/'],              ('\\\\?\\c:', '\\', ['\\\\?\\c:\\']))
-        check(['//?/c:/a'],             ('\\\\?\\c:', '\\', ['\\\\?\\c:\\', 'a']))
-        check(['//?/c:/a', '/b'],       ('\\\\?\\c:', '\\', ['\\\\?\\c:\\', 'b']))
+        check(['\\\\?\\c:\\'],          ('\\\\?\\c:', '\\', ['\\\\?\\c:\\']))
+        check(['\\\\?\\c:\\a'],         ('\\\\?\\c:', '\\', ['\\\\?\\c:\\', 'a']))
         # Extended UNC paths (format is "\\?\UNC\server\share")
-        check(['//?/UNC/b/c'],          ('\\\\?\\UNC\\b\\c', '\\', ['\\\\?\\UNC\\b\\c\\']))
-        check(['//?/UNC/b/c/d'],        ('\\\\?\\UNC\\b\\c', '\\', ['\\\\?\\UNC\\b\\c\\', 'd']))
-        # Second part has a root but not drive
-        check(['a', '/b', 'c'],         ('', '\\', ['\\', 'b', 'c']))
-        check(['Z:/a', '/b', 'c'],      ('Z:', '\\', ['Z:\\', 'b', 'c']))
-        check(['//?/Z:/a', '/b', 'c'],  ('\\\\?\\Z:', '\\', ['\\\\?\\Z:\\', 'b', 'c']))
+        check(['\\\\?\\UNC\\b\\c'],     ('\\\\?\\UNC\\b\\c', '\\', ['\\\\?\\UNC\\b\\c\\']))
+        check(['\\\\?\\UNC\\b\\c\\d'],  ('\\\\?\\UNC\\b\\c', '\\', ['\\\\?\\UNC\\b\\c\\', 'd']))
 
     def test_splitroot(self):
         f = self.flavour.splitroot
@@ -744,6 +743,7 @@ class PureWindowsPathTest(_BasePurePathTest, unittest.TestCase):
         self.assertEqual(P('//Some/SHARE/a/B'), P('//somE/share/A/b'))
 
     def test_as_uri(self):
+        from urllib.parse import quote_from_bytes
         P = self.cls
         with self.assertRaises(ValueError):
             P('/a/b').as_uri()
@@ -1265,54 +1265,10 @@ class _BasePathTest(object):
         p = self.cls.cwd()
         self._test_cwd(p)
 
-    def _test_home(self, p):
-        q = self.cls(os.path.expanduser('~'))
-        self.assertEqual(p, q)
-        self.assertEqual(str(p), str(q))
-        self.assertIs(type(p), type(q))
-        self.assertTrue(p.is_absolute())
-
-    def test_home(self):
-        p = self.cls.home()
-        self._test_home(p)
-
-    def test_samefile(self):
-        fileA_path = os.path.join(BASE, 'fileA')
-        fileB_path = os.path.join(BASE, 'dirB', 'fileB')
-        p = self.cls(fileA_path)
-        pp = self.cls(fileA_path)
-        q = self.cls(fileB_path)
-        self.assertTrue(p.samefile(fileA_path))
-        self.assertTrue(p.samefile(pp))
-        self.assertFalse(p.samefile(fileB_path))
-        self.assertFalse(p.samefile(q))
-        # Test the non-existent file case
-        non_existent = os.path.join(BASE, 'foo')
-        r = self.cls(non_existent)
-        self.assertRaises(FileNotFoundError, p.samefile, r)
-        self.assertRaises(FileNotFoundError, p.samefile, non_existent)
-        self.assertRaises(FileNotFoundError, r.samefile, p)
-        self.assertRaises(FileNotFoundError, r.samefile, non_existent)
-        self.assertRaises(FileNotFoundError, r.samefile, r)
-        self.assertRaises(FileNotFoundError, r.samefile, non_existent)
-
     def test_empty_path(self):
         # The empty path points to '.'
         p = self.cls('')
         self.assertEqual(p.stat(), os.stat('.'))
-
-    def test_expanduser_common(self):
-        P = self.cls
-        p = P('~')
-        self.assertEqual(p.expanduser(), P(os.path.expanduser('~')))
-        p = P('foo')
-        self.assertEqual(p.expanduser(), p)
-        p = P('/~')
-        self.assertEqual(p.expanduser(), p)
-        p = P('../~')
-        self.assertEqual(p.expanduser(), p)
-        p = P(P('').absolute().anchor) / '~'
-        self.assertEqual(p.expanduser(), p)
 
     def test_exists(self):
         P = self.cls
@@ -1340,23 +1296,6 @@ class _BasePathTest(object):
         with (p / 'fileA').open('rb', buffering=0) as f:
             self.assertIsInstance(f, io.RawIOBase)
             self.assertEqual(f.read().strip(), b"this is file A")
-
-    def test_read_write_bytes(self):
-        p = self.cls(BASE)
-        (p / 'fileA').write_bytes(b'abcdefg')
-        self.assertEqual((p / 'fileA').read_bytes(), b'abcdefg')
-        # check that trying to write str does not truncate the file
-        self.assertRaises(TypeError, (p / 'fileA').write_bytes, 'somestr')
-        self.assertEqual((p / 'fileA').read_bytes(), b'abcdefg')
-
-    def test_read_write_text(self):
-        p = self.cls(BASE)
-        (p / 'fileA').write_text('äbcdefg', encoding='latin-1')
-        self.assertEqual((p / 'fileA').read_text(
-            encoding='utf-8', errors='ignore'), 'bcdefg')
-        # check that trying to write bytes does not truncate the file
-        self.assertRaises(TypeError, (p / 'fileA').write_text, b'somebytes')
-        self.assertEqual((p / 'fileA').read_text(encoding='latin-1'), 'äbcdefg')
 
     def test_iterdir(self):
         P = self.cls
@@ -1661,59 +1600,6 @@ class _BasePathTest(object):
         # the parent's permissions follow the default process settings
         self.assertEqual(stat.S_IMODE(p.parent.stat().st_mode), mode)
 
-    def test_mkdir_exist_ok(self):
-        p = self.cls(BASE, 'dirB')
-        st_ctime_first = p.stat().st_ctime
-        self.assertTrue(p.exists())
-        self.assertTrue(p.is_dir())
-        with self.assertRaises(FileExistsError) as cm:
-            p.mkdir()
-        self.assertEqual(cm.exception.errno, errno.EEXIST)
-        p.mkdir(exist_ok=True)
-        self.assertTrue(p.exists())
-        self.assertEqual(p.stat().st_ctime, st_ctime_first)
-
-    def test_mkdir_exist_ok_with_parent(self):
-        p = self.cls(BASE, 'dirC')
-        self.assertTrue(p.exists())
-        with self.assertRaises(FileExistsError) as cm:
-            p.mkdir()
-        self.assertEqual(cm.exception.errno, errno.EEXIST)
-        p = p / 'newdirC'
-        p.mkdir(parents=True)
-        st_ctime_first = p.stat().st_ctime
-        self.assertTrue(p.exists())
-        with self.assertRaises(FileExistsError) as cm:
-            p.mkdir(parents=True)
-        self.assertEqual(cm.exception.errno, errno.EEXIST)
-        p.mkdir(parents=True, exist_ok=True)
-        self.assertTrue(p.exists())
-        self.assertEqual(p.stat().st_ctime, st_ctime_first)
-
-    def test_mkdir_with_child_file(self):
-        p = self.cls(BASE, 'dirB', 'fileB')
-        self.assertTrue(p.exists())
-        # An exception is raised when the last path component is an existing
-        # regular file, regardless of whether exist_ok is true or not.
-        with self.assertRaises(FileExistsError) as cm:
-            p.mkdir(parents=True)
-        self.assertEqual(cm.exception.errno, errno.EEXIST)
-        with self.assertRaises(FileExistsError) as cm:
-            p.mkdir(parents=True, exist_ok=True)
-        self.assertEqual(cm.exception.errno, errno.EEXIST)
-
-    def test_mkdir_no_parents_file(self):
-        p = self.cls(BASE, 'fileA')
-        self.assertTrue(p.exists())
-        # An exception is raised when the last path component is an existing
-        # regular file, regardless of whether exist_ok is true or not.
-        with self.assertRaises(FileExistsError) as cm:
-            p.mkdir()
-        self.assertEqual(cm.exception.errno, errno.EEXIST)
-        with self.assertRaises(FileExistsError) as cm:
-            p.mkdir(exist_ok=True)
-        self.assertEqual(cm.exception.errno, errno.EEXIST)
-
     @with_symlinks
     def test_symlink_to(self):
         P = self.cls(BASE)
@@ -1956,6 +1842,7 @@ class PosixPathTest(_BasePathTest, unittest.TestCase):
     @with_symlinks
     def test_resolve_loop(self):
         # Loop detection for broken symlinks under POSIX
+        P = self.cls
         # Loops with relative symlinks
         os.symlink('linkX/inside', join('linkX'))
         self._check_symlink_loop(BASE, 'linkX')
@@ -1987,48 +1874,6 @@ class PosixPathTest(_BasePathTest, unittest.TestCase):
         self.assertEqual(given, expect)
         self.assertEqual(set(p.rglob("FILEd*")), set())
 
-    def test_expanduser(self):
-        P = self.cls
-        support.import_module('pwd')
-        import pwd
-        pwdent = pwd.getpwuid(os.getuid())
-        username = pwdent.pw_name
-        userhome = pwdent.pw_dir.rstrip('/')
-        # find arbitrary different user (if exists)
-        for pwdent in pwd.getpwall():
-            othername = pwdent.pw_name
-            otherhome = pwdent.pw_dir.rstrip('/')
-            if othername != username and otherhome:
-                break
-
-        p1 = P('~/Documents')
-        p2 = P('~' + username + '/Documents')
-        p3 = P('~' + othername + '/Documents')
-        p4 = P('../~' + username + '/Documents')
-        p5 = P('/~' + username + '/Documents')
-        p6 = P('')
-        p7 = P('~fakeuser/Documents')
-
-        with support.EnvironmentVarGuard() as env:
-            env.pop('HOME', None)
-
-            self.assertEqual(p1.expanduser(), P(userhome) / 'Documents')
-            self.assertEqual(p2.expanduser(), P(userhome) / 'Documents')
-            self.assertEqual(p3.expanduser(), P(otherhome) / 'Documents')
-            self.assertEqual(p4.expanduser(), p4)
-            self.assertEqual(p5.expanduser(), p5)
-            self.assertEqual(p6.expanduser(), p6)
-            self.assertRaises(RuntimeError, p7.expanduser)
-
-            env['HOME'] = '/tmp'
-            self.assertEqual(p1.expanduser(), P('/tmp/Documents'))
-            self.assertEqual(p2.expanduser(), P(userhome) / 'Documents')
-            self.assertEqual(p3.expanduser(), P(otherhome) / 'Documents')
-            self.assertEqual(p4.expanduser(), p4)
-            self.assertEqual(p5.expanduser(), p5)
-            self.assertEqual(p6.expanduser(), p6)
-            self.assertRaises(RuntimeError, p7.expanduser)
-
 
 @only_nt
 class WindowsPathTest(_BasePathTest, unittest.TestCase):
@@ -2043,61 +1888,6 @@ class WindowsPathTest(_BasePathTest, unittest.TestCase):
         P = self.cls
         p = P(BASE, "dirC")
         self.assertEqual(set(p.rglob("FILEd")), { P(BASE, "dirC/dirD/fileD") })
-
-    def test_expanduser(self):
-        P = self.cls
-        with support.EnvironmentVarGuard() as env:
-            env.pop('HOME', None)
-            env.pop('USERPROFILE', None)
-            env.pop('HOMEPATH', None)
-            env.pop('HOMEDRIVE', None)
-            env['USERNAME'] = 'alice'
-
-            # test that the path returns unchanged
-            p1 = P('~/My Documents')
-            p2 = P('~alice/My Documents')
-            p3 = P('~bob/My Documents')
-            p4 = P('/~/My Documents')
-            p5 = P('d:~/My Documents')
-            p6 = P('')
-            self.assertRaises(RuntimeError, p1.expanduser)
-            self.assertRaises(RuntimeError, p2.expanduser)
-            self.assertRaises(RuntimeError, p3.expanduser)
-            self.assertEqual(p4.expanduser(), p4)
-            self.assertEqual(p5.expanduser(), p5)
-            self.assertEqual(p6.expanduser(), p6)
-
-            def check():
-                env.pop('USERNAME', None)
-                self.assertEqual(p1.expanduser(),
-                                 P('C:/Users/alice/My Documents'))
-                self.assertRaises(KeyError, p2.expanduser)
-                env['USERNAME'] = 'alice'
-                self.assertEqual(p2.expanduser(),
-                                 P('C:/Users/alice/My Documents'))
-                self.assertEqual(p3.expanduser(),
-                                 P('C:/Users/bob/My Documents'))
-                self.assertEqual(p4.expanduser(), p4)
-                self.assertEqual(p5.expanduser(), p5)
-                self.assertEqual(p6.expanduser(), p6)
-
-            # test the first lookup key in the env vars
-            env['HOME'] = 'C:\\Users\\alice'
-            check()
-
-            # test that HOMEPATH is available instead
-            env.pop('HOME', None)
-            env['HOMEPATH'] = 'C:\\Users\\alice'
-            check()
-
-            env['HOMEDRIVE'] = 'C:\\'
-            env['HOMEPATH'] = 'Users\\alice'
-            check()
-
-            env.pop('HOMEDRIVE', None)
-            env.pop('HOMEPATH', None)
-            env['USERPROFILE'] = 'C:\\Users\\alice'
-            check()
 
 
 if __name__ == "__main__":

@@ -236,14 +236,7 @@ class PlatformTest(unittest.TestCase):
             self.assertEqual(sts, 0)
 
     def test_dist(self):
-        with warnings.catch_warnings():
-            warnings.filterwarnings(
-                'ignore',
-                'dist\(\) and linux_distribution\(\) '
-                'functions are deprecated .*',
-                PendingDeprecationWarning,
-            )
-            res = platform.dist()
+        res = platform.dist()
 
     def test_libc_ver(self):
         import os
@@ -312,37 +305,16 @@ class PlatformTest(unittest.TestCase):
                 f.write('Fedora release 19 (Schr\xf6dinger\u2019s Cat)\n')
 
             with mock.patch('platform._UNIXCONFDIR', tempdir):
-                with warnings.catch_warnings():
-                    warnings.filterwarnings(
-                        'ignore',
-                        'dist\(\) and linux_distribution\(\) '
-                        'functions are deprecated .*',
-                        PendingDeprecationWarning,
-                    )
-                    distname, version, distid = platform.linux_distribution()
+                distname, version, distid = platform.linux_distribution()
 
-                self.assertEqual(distname, 'Fedora')
+            self.assertEqual(distname, 'Fedora')
             self.assertEqual(version, '19')
             self.assertEqual(distid, 'Schr\xf6dinger\u2019s Cat')
 
-
-class DeprecationTest(unittest.TestCase):
-
-    def test_dist_deprecation(self):
-        with self.assertWarns(PendingDeprecationWarning) as cm:
-            platform.dist()
-        self.assertEqual(str(cm.warning),
-                         'dist() and linux_distribution() functions are '
-                         'deprecated in Python 3.5 and will be removed in '
-                         'Python 3.7')
-
-    def test_linux_distribution_deprecation(self):
-        with self.assertWarns(PendingDeprecationWarning) as cm:
-            platform.linux_distribution()
-        self.assertEqual(str(cm.warning),
-                         'dist() and linux_distribution() functions are '
-                         'deprecated in Python 3.5 and will be removed in '
-                         'Python 3.7')
+def test_main():
+    support.run_unittest(
+        PlatformTest
+    )
 
 if __name__ == '__main__':
-    unittest.main()
+    test_main()

@@ -28,7 +28,6 @@ import traceback
 import sys
 import warnings
 
-from . import compat
 from . import coroutines
 from . import events
 from . import futures
@@ -192,14 +191,12 @@ class BaseEventLoop(events.AbstractEventLoop):
         self._thread_id = None
         self._clock_resolution = time.get_clock_info('monotonic').resolution
         self._exception_handler = None
-        self.set_debug((not sys.flags.ignore_environment
-                        and bool(os.environ.get('PYTHONASYNCIODEBUG'))))
+        self._debug = (not sys.flags.ignore_environment
+                       and bool(os.environ.get('PYTHONASYNCIODEBUG')))
         # In debug mode, if the execution of a callback or a step of a task
         # exceed this duration in seconds, the slow callback/task is logged.
         self.slow_callback_duration = 0.1
         self._current_handle = None
-        self._task_factory = None
-        self._coroutine_wrapper_set = False
 
     def __repr__(self):
         return ('<%s running=%s closed=%s debug=%s>'
@@ -212,31 +209,10 @@ class BaseEventLoop(events.AbstractEventLoop):
         Return a task object.
         """
         self._check_closed()
-        if self._task_factory is None:
-            task = tasks.Task(coro, loop=self)
-            if task._source_traceback:
-                del task._source_traceback[-1]
-        else:
-            task = self._task_factory(self, coro)
+        task = tasks.Task(coro, loop=self)
+        if task._source_traceback:
+            del task._source_traceback[-1]
         return task
-
-    def set_task_factory(self, factory):
-        """Set a task factory that will be used by loop.create_task().
-
-        If factory is None the default task factory will be set.
-
-        If factory is a callable, it should have a signature matching
-        '(loop, coro)', where 'loop' will be a reference to the active
-        event loop, 'coro' will be a coroutine object.  The callable
-        must return a Future.
-        """
-        if factory is not None and not callable(factory):
-            raise TypeError('task factory must be a callable or None')
-        self._task_factory = factory
-
-    def get_task_factory(self):
-        """Return a task factory, or None if the default one is in use."""
-        return self._task_factory
 
     def _make_socket_transport(self, sock, protocol, waiter=None, *,
                                extra=None, server=None):
@@ -293,7 +269,6 @@ class BaseEventLoop(events.AbstractEventLoop):
         self._check_closed()
         if self.is_running():
             raise RuntimeError('Event loop is running.')
-        self._set_coroutine_wrapper(self._debug)
         self._thread_id = threading.get_ident()
         try:
             while True:
@@ -303,7 +278,6 @@ class BaseEventLoop(events.AbstractEventLoop):
                     break
         finally:
             self._thread_id = None
-            self._set_coroutine_wrapper(False)
 
     def run_until_complete(self, future):
         """Run until the Future is done.
@@ -319,7 +293,7 @@ class BaseEventLoop(events.AbstractEventLoop):
         self._check_closed()
 
         new_task = not isinstance(future, futures.Future)
-        future = tasks.ensure_future(future, loop=self)
+        future = tasks.async(future, loop=self)
         if new_task:
             # An exception is raised if the future didn't complete, so there
             # is no need to log the "destroy pending task" message
@@ -379,7 +353,7 @@ class BaseEventLoop(events.AbstractEventLoop):
     # On Python 3.3 and older, objects with a destructor part of a reference
     # cycle are never destroyed. It's not more the case on Python 3.4 thanks
     # to the PEP 442.
-    if compat.PY34:
+    if sys.version_info >= (3, 4):
         def __del__(self):
             if not self.is_closed():
                 warnings.warn("unclosed event loop %r" % self, ResourceWarning)
@@ -491,25 +465,25 @@ class BaseEventLoop(events.AbstractEventLoop):
         self._write_to_self()
         return handle
 
-    def run_in_executor(self, executor, func, *args):
-        if (coroutines.iscoroutine(func)
-        or coroutines.iscoroutinefunction(func)):
+    def run_in_executor(self, executor, callback, *args):
+        if (coroutines.iscoroutine(callback)
+        or coroutines.iscoroutinefunction(callback)):
             raise TypeError("coroutines cannot be used with run_in_executor()")
         self._check_closed()
-        if isinstance(func, events.Handle):
+        if isinstance(callback, events.Handle):
             assert not args
-            assert not isinstance(func, events.TimerHandle)
-            if func._cancelled:
+            assert not isinstance(callback, events.TimerHandle)
+            if callback._cancelled:
                 f = futures.Future(loop=self)
                 f.set_result(None)
                 return f
-            func, args = func._callback, func._args
+            callback, args = callback._callback, callback._args
         if executor is None:
             executor = self._default_executor
             if executor is None:
                 executor = concurrent.futures.ThreadPoolExecutor(_MAX_WORKERS)
                 self._default_executor = executor
-        return futures.wrap_future(executor.submit(func, *args), loop=self)
+        return futures.wrap_future(executor.submit(callback, *args), loop=self)
 
     def set_default_executor(self, executor):
         self._default_executor = executor
@@ -1198,44 +1172,8 @@ class BaseEventLoop(events.AbstractEventLoop):
                 handle._run()
         handle = None  # Needed to break cycles when an exception occurs.
 
-    def _set_coroutine_wrapper(self, enabled):
-        try:
-            set_wrapper = sys.set_coroutine_wrapper
-            get_wrapper = sys.get_coroutine_wrapper
-        except AttributeError:
-            return
-
-        enabled = bool(enabled)
-        if self._coroutine_wrapper_set == enabled:
-            return
-
-        wrapper = coroutines.debug_wrapper
-        current_wrapper = get_wrapper()
-
-        if enabled:
-            if current_wrapper not in (None, wrapper):
-                warnings.warn(
-                    "loop.set_debug(True): cannot set debug coroutine "
-                    "wrapper; another wrapper is already set %r" %
-                    current_wrapper, RuntimeWarning)
-            else:
-                set_wrapper(wrapper)
-                self._coroutine_wrapper_set = True
-        else:
-            if current_wrapper not in (None, wrapper):
-                warnings.warn(
-                    "loop.set_debug(False): cannot unset debug coroutine "
-                    "wrapper; another wrapper was set %r" %
-                    current_wrapper, RuntimeWarning)
-            else:
-                set_wrapper(None)
-                self._coroutine_wrapper_set = False
-
     def get_debug(self):
         return self._debug
 
     def set_debug(self, enabled):
         self._debug = enabled
-
-        if self.is_running():
-            self._set_coroutine_wrapper(enabled)

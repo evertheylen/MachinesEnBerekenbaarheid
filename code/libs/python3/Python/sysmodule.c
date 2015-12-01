@@ -645,48 +645,6 @@ sys_setrecursionlimit(PyObject *self, PyObject *args)
     return Py_None;
 }
 
-static PyObject *
-sys_set_coroutine_wrapper(PyObject *self, PyObject *wrapper)
-{
-    if (wrapper != Py_None) {
-        if (!PyCallable_Check(wrapper)) {
-            PyErr_Format(PyExc_TypeError,
-                         "callable expected, got %.50s",
-                         Py_TYPE(wrapper)->tp_name);
-            return NULL;
-        }
-        _PyEval_SetCoroutineWrapper(wrapper);
-    }
-    else {
-        _PyEval_SetCoroutineWrapper(NULL);
-    }
-    Py_RETURN_NONE;
-}
-
-PyDoc_STRVAR(set_coroutine_wrapper_doc,
-"set_coroutine_wrapper(wrapper)\n\
-\n\
-Set a wrapper for coroutine objects."
-);
-
-static PyObject *
-sys_get_coroutine_wrapper(PyObject *self, PyObject *args)
-{
-    PyObject *wrapper = _PyEval_GetCoroutineWrapper();
-    if (wrapper == NULL) {
-        wrapper = Py_None;
-    }
-    Py_INCREF(wrapper);
-    return wrapper;
-}
-
-PyDoc_STRVAR(get_coroutine_wrapper_doc,
-"get_coroutine_wrapper()\n\
-\n\
-Return the wrapper for coroutine objects set by sys.set_coroutine_wrapper."
-);
-
-
 static PyTypeObject Hash_InfoType;
 
 PyDoc_STRVAR(hash_info_doc,
@@ -814,12 +772,6 @@ static PyStructSequence_Desc windows_version_desc = {
                                  via indexing, the rest are name only */
 };
 
-/* Disable deprecation warnings about GetVersionEx as the result is
-   being passed straight through to the caller, who is responsible for
-   using it correctly. */
-#pragma warning(push)
-#pragma warning(disable:4996)
-
 static PyObject *
 sys_getwindowsversion(PyObject *self)
 {
@@ -850,8 +802,6 @@ sys_getwindowsversion(PyObject *self)
     }
     return version;
 }
-
-#pragma warning(pop)
 
 #endif /* MS_WINDOWS */
 
@@ -1171,16 +1121,6 @@ PyDoc_STRVAR(sys_clear_type_cache__doc__,
 "_clear_type_cache() -> None\n\
 Clear the internal type lookup cache.");
 
-static PyObject *
-sys_is_finalizing(PyObject* self, PyObject* args)
-{
-    return PyBool_FromLong(_Py_Finalizing != NULL);
-}
-
-PyDoc_STRVAR(is_finalizing_doc,
-"is_finalizing()\n\
-Return True if Python is exiting.");
-
 
 static PyMethodDef sys_methods[] = {
     /* Might as well keep this in alphabetic order */
@@ -1227,7 +1167,6 @@ static PyMethodDef sys_methods[] = {
      getwindowsversion_doc},
 #endif /* MS_WINDOWS */
     {"intern",          sys_intern,     METH_VARARGS, intern_doc},
-    {"is_finalizing",   sys_is_finalizing, METH_NOARGS, is_finalizing_doc},
 #ifdef USE_MALLOPT
     {"mdebug",          sys_mdebug, METH_VARARGS},
 #endif
@@ -1257,10 +1196,6 @@ static PyMethodDef sys_methods[] = {
     {"call_tracing", sys_call_tracing, METH_VARARGS, call_tracing_doc},
     {"_debugmallocstats", sys_debugmallocstats, METH_NOARGS,
      debugmallocstats_doc},
-    {"set_coroutine_wrapper", sys_set_coroutine_wrapper, METH_O,
-     set_coroutine_wrapper_doc},
-    {"get_coroutine_wrapper", sys_get_coroutine_wrapper, METH_NOARGS,
-     get_coroutine_wrapper_doc},
     {NULL,              NULL}           /* sentinel */
 };
 
@@ -1735,8 +1670,8 @@ _PySys_Init(void)
     the shell already prevents that. */
 #if !defined(MS_WINDOWS)
     {
-        struct _Py_stat_struct sb;
-        if (_Py_fstat_noraise(fileno(stdin), &sb) == 0 &&
+        struct stat sb;
+        if (fstat(fileno(stdin), &sb) == 0 &&
             S_ISDIR(sb.st_mode)) {
             /* There's nothing more we can do. */
             /* Py_FatalError() will core dump, so just exit. */
@@ -1746,7 +1681,7 @@ _PySys_Init(void)
     }
 #endif
 
-    /* stdin/stdout/stderr are set in pylifecycle.c */
+    /* stdin/stdout/stderr are now set by pythonrun.c */
 
     SET_SYS_FROM_STRING_BORROW("__displayhook__",
                                PyDict_GetItemString(sysdict, "displayhook"));

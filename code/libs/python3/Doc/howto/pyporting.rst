@@ -28,14 +28,15 @@ The Short Explanation
 To make your project be single-source Python 2/3 compatible, the basic steps
 are:
 
-#. Only worry about supporting Python 2.7
+#. Update your code to drop support for Python 2.5 or older (supporting only
+   Python 2.7 is ideal)
 #. Make sure you have good test coverage (coverage.py_ can help;
    ``pip install coverage``)
 #. Learn the differences between Python 2 & 3
 #. Use Modernize_ or Futurize_ to update your code (``pip install modernize`` or
    ``pip install future``, respectively)
 #. Use Pylint_ to help make sure you don't regress on your Python 3 support
-   (``pip install pylint``)
+   (if only supporting Python 2.7/3.4 or newer; ``pip install pylint``)
 #. Use caniusepython3_ to find out which of your dependencies are blocking your
    use of Python 3 (``pip install caniusepython3``)
 #. Once your dependencies are no longer blocking you, use continuous integration
@@ -66,27 +67,26 @@ Keep those key points in mind while you read on about the details of porting
 your code to support Python 2 & 3 simultaneously.
 
 
-Drop support for Python 2.6 and older
--------------------------------------
+Drop support for Python 2.5 and older (at least)
+------------------------------------------------
 
 While you can make Python 2.5 work with Python 3, it is **much** easier if you
-only have to work with Python 2.7. If dropping Python 2.5 is not an
-option then the six_ project can help you support Python 2.5 & 3 simultaneously
+only have to work with Python 2.6 or newer (and easier still if you only have
+to work with Python 2.7). If dropping Python 2.5 is not an option then the six_
+project can help you support Python 2.5 & 3 simultaneously
 (``pip install six``). Do realize, though, that nearly all the projects listed
 in this HOWTO will not be available to you.
 
-If you are able to skip Python 2.5 and older, then the required changes
+If you are able to only support Python 2.6 or newer, then the required changes
 to your code should continue to look and feel like idiomatic Python code. At
 worst you will have to use a function instead of a method in some instances or
 have to import a function instead of using a built-in one, but otherwise the
 overall transformation should not feel foreign to you.
 
-But you should aim for only supporting Python 2.7. Python 2.6 is no longer
-supported and thus is not receiving bugfixes. This means **you** will have to
-work around any issues you come across with Python 2.6. There are also some
-tools mentioned in this HOWTO which do not support Python 2.6 (e.g., Pylint_),
-and this will become more commonplace as time goes on. It will simply be easier
-for you if you only support the versions of Python that you have to support.
+But please aim for Python 2.7. Bugfixes for that version of Python will continue
+until 2020 while Python 2.6 is no longer supported. There are also some tools
+mentioned in this HOWTO which do not support Python 2.6 (e.g., Pylint_), and
+this will become more commonplace as time goes on.
 
 Make sure you specify the proper version support in your ``setup.py`` file
 --------------------------------------------------------------------------
@@ -169,9 +169,8 @@ things:
    division or continue using ``/`` and expect a float
 
 The reason that ``/`` isn't simply translated to ``//`` automatically is that if
-an object defines a ``__truediv__`` method but not ``__floordiv__`` then your
-code would begin to fail (e.g. a user-defined class that uses ``/`` to
-signify some operation but not ``//`` for the same thing or at all).
+an object defines its own ``__div__`` method but not ``__floordiv__`` then your
+code would begin to fail.
 
 Text versus binary data
 +++++++++++++++++++++++
@@ -207,11 +206,12 @@ that's ``str``/``bytes`` in Python 2 and ``bytes`` in Python 3). The following
 table lists the **unique** methods of each data type across Python 2 & 3
 (e.g., the ``decode()`` method is usable on the equivalent binary data type in
 either Python 2 or 3, but it can't be used by the text data type consistently
-between Python 2 and 3 because ``str`` in Python 3 doesn't have the method). Do
-note that as of Python 3.5 the ``__mod__`` method was added to the bytes type.
+between Python 2 and 3 because ``str`` in Python 3 doesn't have the method).
 
 ======================== =====================
 **Text data**            **Binary data**
+------------------------ ---------------------
+__mod__ (``%`` operator)
 ------------------------ ---------------------
 \                        decode
 ------------------------ ---------------------
@@ -347,12 +347,10 @@ tox with your continuous integration system so that you never accidentally break
 Python 2 or 3 support.
 
 You may also want to use use the ``-bb`` flag with the Python 3 interpreter to
-trigger an exception when you are comparing bytes to strings or bytes to an int
-(the latter is available starting in Python 3.5). By default type-differing
-comparisons simply return ``False``, but if you made a mistake in your
-separation of text/binary data handling or indexing on bytes you wouldn't easily
-find the mistake. This flag will raise an exception when these kinds of
-comparisons occur, making the mistake much easier to track down.
+trigger an exception when you are comparing bytes to strings. Usually it's
+simply ``False``, but if you made a mistake in your separation of text/binary
+data handling you may be accidentally comparing text and binary data. This flag
+will raise an exception when that occurs to help track down such cases.
 
 And that's mostly it! At this point your code base is compatible with both
 Python 2 and 3 simultaneously. Your testing will also be set up so that you

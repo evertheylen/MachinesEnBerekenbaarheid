@@ -1,9 +1,8 @@
 # Import the email modules we'll need
 from email.parser import Parser
 
-# If the e-mail headers are in a file, uncomment these two lines:
-# with open(messagefile) as fp:
-#     headers = Parser().parse(fp)
+#  If the e-mail headers are in a file, uncomment this line:
+#headers = Parser().parse(open(messagefile, 'r'))
 
 #  Or for parsing headers in a string, use:
 headers = Parser().parsestr('From: <user@example.com>\n'

@@ -365,7 +365,10 @@ class Connection(_ConnectionBase):
     def _send(self, buf, write=_write):
         remaining = len(buf)
         while True:
-            n = write(self._handle, buf)
+            try:
+                n = write(self._handle, buf)
+            except InterruptedError:
+                continue
             remaining -= n
             if remaining == 0:
                 break
@@ -376,7 +379,10 @@ class Connection(_ConnectionBase):
         handle = self._handle
         remaining = size
         while remaining > 0:
-            chunk = read(handle, remaining)
+            try:
+                chunk = read(handle, remaining)
+            except InterruptedError:
+                continue
             n = len(chunk)
             if n == 0:
                 if remaining == size:
@@ -394,14 +400,17 @@ class Connection(_ConnectionBase):
         if n > 16384:
             # The payload is large so Nagle's algorithm won't be triggered
             # and we'd better avoid the cost of concatenation.
-            self._send(header)
-            self._send(buf)
-        else:
+            chunks = [header, buf]
+        elif n > 0:
             # Issue # 20540: concatenate before sending, to avoid delays due
             # to Nagle's algorithm on a TCP socket.
-            # Also note we want to avoid sending a 0-length buffer separately,
-            # to avoid "broken pipe" errors if the other end closed the pipe.
-            self._send(header + buf)
+            chunks = [header + buf]
+        else:
+            # This code path is necessary to avoid "broken pipe" errors
+            # when sending a 0-length buffer if the other end closed the pipe.
+            chunks = [header]
+        for chunk in chunks:
+            self._send(chunk)
 
     def _recv_bytes(self, maxsize=None):
         buf = self._recv(4)
@@ -460,10 +469,9 @@ class Listener(object):
         '''
         Close the bound socket or named pipe of `self`.
         '''
-        listener = self._listener
-        if listener is not None:
+        if self._listener is not None:
+            self._listener.close()
             self._listener = None
-            listener.close()
 
     address = property(lambda self: self._listener._address)
     last_accepted = property(lambda self: self._listener._last_accepted)
@@ -590,18 +598,20 @@ class SocketListener(object):
             self._unlink = None
 
     def accept(self):
-        s, self._last_accepted = self._socket.accept()
+        while True:
+            try:
+                s, self._last_accepted = self._socket.accept()
+            except InterruptedError:
+                pass
+            else:
+                break
         s.setblocking(True)
         return Connection(s.detach())
 
     def close(self):
-        try:
-            self._socket.close()
-        finally:
-            unlink = self._unlink
-            if unlink is not None:
-                self._unlink = None
-                unlink()
+        self._socket.close()
+        if self._unlink is not None:
+            self._unlink()
 
 
 def SocketClient(address):
@@ -834,7 +844,7 @@ if sys.platform == 'win32':
                     try:
                         ov, err = _winapi.ReadFile(fileno(), 0, True)
                     except OSError as e:
-                        ov, err = None, e.winerror
+                        err = e.winerror
                         if err not in _ready_errors:
                             raise
                     if err == _winapi.ERROR_IO_PENDING:
@@ -843,16 +853,7 @@ if sys.platform == 'win32':
                     else:
                         # If o.fileno() is an overlapped pipe handle and
                         # err == 0 then there is a zero length message
-                        # in the pipe, but it HAS NOT been consumed...
-                        if ov and sys.getwindowsversion()[:2] >= (6, 2):
-                            # ... except on Windows 8 and later, where
-                            # the message HAS been consumed.
-                            try:
-                                _, err = ov.GetOverlappedResult(False)
-                            except OSError as e:
-                                err = e.winerror
-                            if not err and hasattr(o, '_got_empty_message'):
-                                o._got_empty_message = True
+                        # in the pipe, but it HAS NOT been consumed.
                         ready_objects.add(o)
                         timeout = 0
 

@@ -10,12 +10,6 @@
 #include <shadow.h>
 #endif
 
-#include "clinic/spwdmodule.c.h"
-
-/*[clinic input]
-module spwd
-[clinic start generated code]*/
-/*[clinic end generated code: output=da39a3ee5e6b4b0d input=c0b841b90a6a07ce]*/
 
 PyDoc_STRVAR(spwd__doc__,
 "This module provides access to the Unix shadow password database.\n\
@@ -113,25 +107,20 @@ static PyObject *mkspent(struct spwd *p)
 
 #ifdef HAVE_GETSPNAM
 
-/*[clinic input]
-spwd.getspnam
+PyDoc_STRVAR(spwd_getspnam__doc__,
+"getspnam(name) -> (sp_namp, sp_pwdp, sp_lstchg, sp_min, sp_max,\n\
+                    sp_warn, sp_inact, sp_expire, sp_flag)\n\
+Return the shadow password database entry for the given user name.\n\
+See spwd.__doc__ for more on shadow password database entries.");
 
-    arg: unicode
-    /
-
-Return the shadow password database entry for the given user name.
-
-See `help(spwd)` for more on shadow password database entries.
-[clinic start generated code]*/
-
-static PyObject *
-spwd_getspnam_impl(PyModuleDef *module, PyObject *arg)
-/*[clinic end generated code: output=9f6bbe51a4eb3b21 input=dd89429e6167a00f]*/
+static PyObject* spwd_getspnam(PyObject *self, PyObject *args)
 {
     char *name;
     struct spwd *p;
-    PyObject *bytes, *retval = NULL;
+    PyObject *arg, *bytes, *retval = NULL;
 
+    if (!PyArg_ParseTuple(args, "U:getspnam", &arg))
+        return NULL;
     if ((bytes = PyUnicode_EncodeFSDefault(arg)) == NULL)
         return NULL;
     if (PyBytes_AsStringAndSize(bytes, &name, NULL) == -1)
@@ -150,17 +139,14 @@ out:
 
 #ifdef HAVE_GETSPENT
 
-/*[clinic input]
-spwd.getspall
-
-Return a list of all available shadow password database entries, in arbitrary order.
-
-See `help(spwd)` for more on shadow password database entries.
-[clinic start generated code]*/
+PyDoc_STRVAR(spwd_getspall__doc__,
+"getspall() -> list_of_entries\n\
+Return a list of all available shadow password database entries, \
+in arbitrary order.\n\
+See spwd.__doc__ for more on shadow password database entries.");
 
 static PyObject *
-spwd_getspall_impl(PyModuleDef *module)
-/*[clinic end generated code: output=b12d8ec7bdb29612 input=b2c84b7857d622bd]*/
+spwd_getspall(PyObject *self, PyObject *args)
 {
     PyObject *d;
     struct spwd *p;
@@ -185,10 +171,10 @@ spwd_getspall_impl(PyModuleDef *module)
 
 static PyMethodDef spwd_methods[] = {
 #ifdef HAVE_GETSPNAM
-    SPWD_GETSPNAM_METHODDEF
+    {"getspnam",        spwd_getspnam, METH_VARARGS, spwd_getspnam__doc__},
 #endif
 #ifdef HAVE_GETSPENT
-    SPWD_GETSPALL_METHODDEF
+    {"getspall",        spwd_getspall, METH_NOARGS, spwd_getspall__doc__},
 #endif
     {NULL,              NULL}           /* sentinel */
 };

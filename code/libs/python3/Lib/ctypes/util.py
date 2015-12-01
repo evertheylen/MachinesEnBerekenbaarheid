@@ -19,8 +19,6 @@ if os.name == "nt":
         i = i + len(prefix)
         s, rest = sys.version[i:].split(" ", 1)
         majorVersion = int(s[:-2]) - 6
-        if majorVersion >= 13:
-            majorVersion += 1
         minorVersion = int(s[2:3]) / 10.0
         # I don't think paths are affected by minor version in version 6
         if majorVersion == 6:
@@ -38,12 +36,8 @@ if os.name == "nt":
             return None
         if version <= 6:
             clibname = 'msvcrt'
-        elif version <= 13:
-            clibname = 'msvcr%d' % (version * 10)
         else:
-            # CRT is no longer directly loadable. See issue23606 for the
-            # discussion about alternative approaches.
-            return None
+            clibname = 'msvcr%d' % (version * 10)
 
         # If python was built with in debug mode
         import importlib.machinery

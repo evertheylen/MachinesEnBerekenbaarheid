@@ -21,9 +21,7 @@ class OperatorsTest(unittest.TestCase):
             'add': '+',
             'sub': '-',
             'mul': '*',
-            'matmul': '@',
-            'truediv': '/',
-            'floordiv': '//',
+            'div': '/',
             'divmod': 'divmod',
             'pow': '**',
             'lshift': '<<',
@@ -54,6 +52,8 @@ class OperatorsTest(unittest.TestCase):
             'invert': '~',
             'int': 'int',
             'float': 'float',
+            'oct': 'oct',
+            'hex': 'hex',
         }
 
         for name, expr in list(self.unops.items()):
@@ -81,6 +81,12 @@ class OperatorsTest(unittest.TestCase):
 
     def binop_test(self, a, b, res, expr="a+b", meth="__add__"):
         d = {'a': a, 'b': b}
+
+        # XXX Hack so this passes before 2.3 when -Qnew is specified.
+        if meth == "__div__" and 1/2 == 0.5:
+            meth = "__truediv__"
+
+        if meth == '__divmod__': pass
 
         self.assertEqual(eval(expr, d), res)
         t = type(a)
@@ -215,7 +221,7 @@ class OperatorsTest(unittest.TestCase):
     def number_operators(self, a, b, skip=[]):
         dict = {'a': a, 'b': b}
 
-        for name, expr in self.binops.items():
+        for name, expr in list(self.binops.items()):
             if name not in skip:
                 name = "__%s__" % name
                 if hasattr(a, name):
@@ -255,7 +261,7 @@ class OperatorsTest(unittest.TestCase):
         # Testing complex operations...
         self.number_operators(100.0j, 3.0j, skip=['lt', 'le', 'gt', 'ge',
                                                   'int', 'float',
-                                                  'floordiv', 'divmod', 'mod'])
+                                                  'divmod', 'mod'])
 
         class Number(complex):
             __slots__ = ['prec']
@@ -1019,67 +1025,6 @@ order (MRO) for bases """
         x.foo = 1
         self.assertEqual(x.foo, 1)
         self.assertEqual(x.__dict__, {'foo': 1})
-
-    def test_object_class_assignment_between_heaptypes_and_nonheaptypes(self):
-        class SubType(types.ModuleType):
-            a = 1
-
-        m = types.ModuleType("m")
-        self.assertTrue(m.__class__ is types.ModuleType)
-        self.assertFalse(hasattr(m, "a"))
-
-        m.__class__ = SubType
-        self.assertTrue(m.__class__ is SubType)
-        self.assertTrue(hasattr(m, "a"))
-
-        m.__class__ = types.ModuleType
-        self.assertTrue(m.__class__ is types.ModuleType)
-        self.assertFalse(hasattr(m, "a"))
-
-        # Make sure that builtin immutable objects don't support __class__
-        # assignment, because the object instances may be interned.
-        # We set __slots__ = () to ensure that the subclasses are
-        # memory-layout compatible, and thus otherwise reasonable candidates
-        # for __class__ assignment.
-
-        # The following types have immutable instances, but are not
-        # subclassable and thus don't need to be checked:
-        #   NoneType, bool
-
-        class MyInt(int):
-            __slots__ = ()
-        with self.assertRaises(TypeError):
-            (1).__class__ = MyInt
-
-        class MyFloat(float):
-            __slots__ = ()
-        with self.assertRaises(TypeError):
-            (1.0).__class__ = MyFloat
-
-        class MyComplex(complex):
-            __slots__ = ()
-        with self.assertRaises(TypeError):
-            (1 + 2j).__class__ = MyComplex
-
-        class MyStr(str):
-            __slots__ = ()
-        with self.assertRaises(TypeError):
-            "a".__class__ = MyStr
-
-        class MyBytes(bytes):
-            __slots__ = ()
-        with self.assertRaises(TypeError):
-            b"a".__class__ = MyBytes
-
-        class MyTuple(tuple):
-            __slots__ = ()
-        with self.assertRaises(TypeError):
-            ().__class__ = MyTuple
-
-        class MyFrozenSet(frozenset):
-            __slots__ = ()
-        with self.assertRaises(TypeError):
-            frozenset().__class__ = MyFrozenSet
 
     def test_slots(self):
         # Testing __slots__...
@@ -2067,7 +2012,7 @@ order (MRO) for bases """
         self.assertIs(raw.fset, C.__dict__['setx'])
         self.assertIs(raw.fdel, C.__dict__['delx'])
 
-        for attr in "fget", "fset", "fdel":
+        for attr in "__doc__", "fget", "fset", "fdel":
             try:
                 setattr(raw, attr, 42)
             except AttributeError as msg:
@@ -2077,9 +2022,6 @@ order (MRO) for bases """
             else:
                 self.fail("expected AttributeError from trying to set readonly %r "
                           "attr on a property" % attr)
-
-        raw.__doc__ = 42
-        self.assertEqual(raw.__doc__, 42)
 
         class D(object):
             __getitem__ = property(lambda s: 1/0)
@@ -3068,6 +3010,8 @@ order (MRO) for bases """
         cant(object(), list)
         cant(list(), object)
         class Int(int): __slots__ = []
+        cant(2, Int)
+        cant(Int(), int)
         cant(True, int)
         cant(2, bool)
         o = object()
@@ -3387,7 +3331,7 @@ order (MRO) for bases """
         A.__call__ = A()
         try:
             A()()
-        except RecursionError:
+        except RuntimeError:
             pass
         else:
             self.fail("Recursion limit should have been reached for __call__()")
@@ -4216,9 +4160,9 @@ order (MRO) for bases """
                 ('__add__',      'x + y',                   'x += y'),
                 ('__sub__',      'x - y',                   'x -= y'),
                 ('__mul__',      'x * y',                   'x *= y'),
-                ('__matmul__',   'x @ y',                   'x @= y'),
-                ('__truediv__',  'x / y',                   'x /= y'),
-                ('__floordiv__', 'x // y',                  'x //= y'),
+                ('__truediv__',  'operator.truediv(x, y)',  None),
+                ('__floordiv__', 'operator.floordiv(x, y)', None),
+                ('__div__',      'x / y',                   'x /= y'),
                 ('__mod__',      'x % y',                   'x %= y'),
                 ('__divmod__',   'divmod(x, y)',            None),
                 ('__pow__',      'x ** y',                  'x **= y'),
@@ -4280,8 +4224,8 @@ order (MRO) for bases """
         # Also check type_getattro for correctness.
         class Meta(type):
             pass
-        class X(metaclass=Meta):
-            pass
+        class X(object):
+            __metaclass__ = Meta
         X.a = 42
         Meta.a = Descr("a")
         self.assertEqual(X.a, 42)
@@ -4362,8 +4306,8 @@ order (MRO) for bases """
             pass
         Foo.__repr__ = Foo.__str__
         foo = Foo()
-        self.assertRaises(RecursionError, str, foo)
-        self.assertRaises(RecursionError, repr, foo)
+        self.assertRaises(RuntimeError, str, foo)
+        self.assertRaises(RuntimeError, repr, foo)
 
     def test_mixing_slot_wrappers(self):
         class X(dict):
@@ -4477,61 +4421,6 @@ order (MRO) for bases """
             pass
         self.assertIn("__dict__", Base.__dict__)
         self.assertNotIn("__dict__", Sub.__dict__)
-
-    def test_bound_method_repr(self):
-        class Foo:
-            def method(self):
-                pass
-        self.assertRegex(repr(Foo().method),
-            r"<bound method .*Foo\.method of <.*Foo object at .*>>")
-
-
-        class Base:
-            def method(self):
-                pass
-        class Derived1(Base):
-            pass
-        class Derived2(Base):
-            def method(self):
-                pass
-        base = Base()
-        derived1 = Derived1()
-        derived2 = Derived2()
-        super_d2 = super(Derived2, derived2)
-        self.assertRegex(repr(base.method),
-            r"<bound method .*Base\.method of <.*Base object at .*>>")
-        self.assertRegex(repr(derived1.method),
-            r"<bound method .*Base\.method of <.*Derived1 object at .*>>")
-        self.assertRegex(repr(derived2.method),
-            r"<bound method .*Derived2\.method of <.*Derived2 object at .*>>")
-        self.assertRegex(repr(super_d2.method),
-            r"<bound method .*Base\.method of <.*Derived2 object at .*>>")
-
-        class Foo:
-            @classmethod
-            def method(cls):
-                pass
-        foo = Foo()
-        self.assertRegex(repr(foo.method), # access via instance
-            r"<bound method .*Foo\.method of <class '.*Foo'>>")
-        self.assertRegex(repr(Foo.method), # access via the class
-            r"<bound method .*Foo\.method of <class '.*Foo'>>")
-
-
-        class MyCallable:
-            def __call__(self, arg):
-                pass
-        func = MyCallable() # func has no __name__ or __qualname__ attributes
-        instance = object()
-        method = types.MethodType(func, instance)
-        self.assertRegex(repr(method),
-            r"<bound method \? of <object object at .*>>")
-        func.__name__ = "name"
-        self.assertRegex(repr(method),
-            r"<bound method name of <object object at .*>>")
-        func.__qualname__ = "qualname"
-        self.assertRegex(repr(method),
-            r"<bound method qualname of <object object at .*>>")
 
 
 class DictProxyTests(unittest.TestCase):
@@ -4647,15 +4536,26 @@ class PicklingTests(unittest.TestCase):
 
     def _check_reduce(self, proto, obj, args=(), kwargs={}, state=None,
                       listitems=None, dictitems=None):
-        if proto >= 2:
+        if proto >= 4:
             reduce_value = obj.__reduce_ex__(proto)
-            if kwargs:
-                self.assertEqual(reduce_value[0], copyreg.__newobj_ex__)
-                self.assertEqual(reduce_value[1], (type(obj), args, kwargs))
+            self.assertEqual(reduce_value[:3],
+                             (copyreg.__newobj_ex__,
+                              (type(obj), args, kwargs),
+                              state))
+            if listitems is not None:
+                self.assertListEqual(list(reduce_value[3]), listitems)
             else:
-                self.assertEqual(reduce_value[0], copyreg.__newobj__)
-                self.assertEqual(reduce_value[1], (type(obj),) + args)
-            self.assertEqual(reduce_value[2], state)
+                self.assertIsNone(reduce_value[3])
+            if dictitems is not None:
+                self.assertDictEqual(dict(reduce_value[4]), dictitems)
+            else:
+                self.assertIsNone(reduce_value[4])
+        elif proto >= 2:
+            reduce_value = obj.__reduce_ex__(proto)
+            self.assertEqual(reduce_value[:3],
+                             (copyreg.__newobj__,
+                              (type(obj),) + args,
+                              state))
             if listitems is not None:
                 self.assertListEqual(list(reduce_value[3]), listitems)
             else:

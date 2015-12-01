@@ -8,8 +8,8 @@ import shutil
 import sys
 import subprocess
 import tempfile
-from test.support import script_helper
-from test.support.script_helper import (spawn_python, kill_python, assert_python_ok,
+from test import script_helper
+from test.script_helper import (spawn_python, kill_python, assert_python_ok,
     assert_python_failure)
 
 
@@ -59,7 +59,7 @@ class CmdLineTest(unittest.TestCase):
 
     def test_xoptions(self):
         def get_xoptions(*args):
-            # use subprocess module directly because test.support.script_helper adds
+            # use subprocess module directly because test.script_helper adds
             # "-X faulthandler" to the command line
             args = (sys.executable, '-E') + args
             args += ('-c', 'import sys; print(sys._xoptions)')
@@ -271,11 +271,7 @@ class CmdLineTest(unittest.TestCase):
 
     def test_displayhook_unencodable(self):
         for encoding in ('ascii', 'latin-1', 'utf-8'):
-            # We are testing a PYTHON environment variable here, so we can't
-            # use -E, -I, or script_helper (which uses them).  So instead we do
-            # poor-man's isolation by deleting the PYTHON vars from env.
-            env = {key:value for (key,value) in os.environ.copy().items()
-                   if not key.startswith('PYTHON')}
+            env = os.environ.copy()
             env['PYTHONIOENCODING'] = encoding
             p = subprocess.Popen(
                 [sys.executable, '-i'],
@@ -344,8 +340,7 @@ class CmdLineTest(unittest.TestCase):
         # Issue #5319: if stdout.flush() fails at shutdown, an error should
         # be printed out.
         code = """if 1:
-            import os, sys, test.support
-            test.support.SuppressCrashReport().__enter__()
+            import os, sys
             sys.stdout.write('x')
             os.close(sys.stdout.fileno())"""
         rc, out, err = assert_python_ok('-c', code)
@@ -445,7 +440,7 @@ class CmdLineTest(unittest.TestCase):
         self.assertEqual(err.splitlines().count(b'Unknown option: -a'), 1)
         self.assertEqual(b'', out)
 
-    @unittest.skipIf(script_helper.interpreter_requires_environment(),
+    @unittest.skipIf(script_helper._interpreter_requires_environment(),
                      'Cannot run -I tests when PYTHON env vars are required.')
     def test_isolatedmode(self):
         self.verify_valid_flag('-I')

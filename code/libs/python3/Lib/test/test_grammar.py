@@ -1,8 +1,7 @@
 # Python test set -- part 1, grammar.
 # This just tests whether the parser accepts them all.
 
-from test.support import check_syntax_error
-import inspect
+from test.support import run_unittest, check_syntax_error
 import unittest
 import sys
 # testing import *
@@ -205,10 +204,7 @@ class GrammarTests(unittest.TestCase):
         d01()
         d01(1)
         d01(*(1,))
-        d01(*[] or [2])
-        d01(*() or (), *{} and (), **() or {})
         d01(**{'a':2})
-        d01(**{'a':2} or {})
         def d11(a, b=1): pass
         d11(1)
         d11(1, 2)
@@ -300,37 +296,33 @@ class GrammarTests(unittest.TestCase):
             return args, kwargs
         self.assertEqual(f(1, x=2, *[3, 4], y=5), ((1, 3, 4),
                                                     {'x':2, 'y':5}))
-        self.assertEqual(f(1, *(2,3), 4), ((1, 2, 3, 4), {}))
+        self.assertRaises(SyntaxError, eval, "f(1, *(2,3), 4)")
         self.assertRaises(SyntaxError, eval, "f(1, x=2, *(3,4), x=5)")
-        self.assertEqual(f(**{'eggs':'scrambled', 'spam':'fried'}),
-                         ((), {'eggs':'scrambled', 'spam':'fried'}))
-        self.assertEqual(f(spam='fried', **{'eggs':'scrambled'}),
-                         ((), {'eggs':'scrambled', 'spam':'fried'}))
 
         # argument annotation tests
         def f(x) -> list: pass
         self.assertEqual(f.__annotations__, {'return': list})
-        def f(x: int): pass
+        def f(x:int): pass
         self.assertEqual(f.__annotations__, {'x': int})
-        def f(*x: str): pass
+        def f(*x:str): pass
         self.assertEqual(f.__annotations__, {'x': str})
-        def f(**x: float): pass
+        def f(**x:float): pass
         self.assertEqual(f.__annotations__, {'x': float})
-        def f(x, y: 1+2): pass
+        def f(x, y:1+2): pass
         self.assertEqual(f.__annotations__, {'y': 3})
-        def f(a, b: 1, c: 2, d): pass
+        def f(a, b:1, c:2, d): pass
         self.assertEqual(f.__annotations__, {'b': 1, 'c': 2})
-        def f(a, b: 1, c: 2, d, e: 3 = 4, f=5, *g: 6): pass
+        def f(a, b:1, c:2, d, e:3=4, f=5, *g:6): pass
         self.assertEqual(f.__annotations__,
-                         {'b': 1, 'c': 2, 'e': 3, 'g': 6})
-        def f(a, b: 1, c: 2, d, e: 3 = 4, f=5, *g: 6, h: 7, i=8, j: 9 = 10,
-              **k: 11) -> 12: pass
+                          {'b': 1, 'c': 2, 'e': 3, 'g': 6})
+        def f(a, b:1, c:2, d, e:3=4, f=5, *g:6, h:7, i=8, j:9=10,
+              **k:11) -> 12: pass
         self.assertEqual(f.__annotations__,
-                         {'b': 1, 'c': 2, 'e': 3, 'g': 6, 'h': 7, 'j': 9,
-                          'k': 11, 'return': 12})
+                          {'b': 1, 'c': 2, 'e': 3, 'g': 6, 'h': 7, 'j': 9,
+                           'k': 11, 'return': 12})
         # Check for issue #20625 -- annotations mangling
         class Spam:
-            def f(self, *, __kw: 1):
+            def f(self, *, __kw:1):
                 pass
         class Ham(Spam): pass
         self.assertEqual(Spam.f.__annotations__, {'_Spam__kw': 1})
@@ -536,8 +528,7 @@ class GrammarTests(unittest.TestCase):
         # Not allowed at class scope
         check_syntax_error(self, "class foo:yield 1")
         check_syntax_error(self, "class foo:yield from ()")
-        # Check annotation refleak on SyntaxError
-        check_syntax_error(self, "def g(a:(yield)): pass")
+
 
     def test_raise(self):
         # 'raise' test [',' test]
@@ -1025,103 +1016,9 @@ class GrammarTests(unittest.TestCase):
         self.assertFalse((False is 2) is 3)
         self.assertFalse(False is 2 is 3)
 
-    def test_matrix_mul(self):
-        # This is not intended to be a comprehensive test, rather just to be few
-        # samples of the @ operator in test_grammar.py.
-        class M:
-            def __matmul__(self, o):
-                return 4
-            def __imatmul__(self, o):
-                self.other = o
-                return self
-        m = M()
-        self.assertEqual(m @ m, 4)
-        m @= 42
-        self.assertEqual(m.other, 42)
 
-    def test_async_await(self):
-        async = 1
-        await = 2
-        self.assertEqual(async, 1)
-
-        def async():
-            nonlocal await
-            await = 10
-        async()
-        self.assertEqual(await, 10)
-
-        self.assertFalse(bool(async.__code__.co_flags & inspect.CO_COROUTINE))
-
-        async def test():
-            def sum():
-                pass
-            if 1:
-                await someobj()
-
-        self.assertEqual(test.__name__, 'test')
-        self.assertTrue(bool(test.__code__.co_flags & inspect.CO_COROUTINE))
-
-        def decorator(func):
-            setattr(func, '_marked', True)
-            return func
-
-        @decorator
-        async def test2():
-            return 22
-        self.assertTrue(test2._marked)
-        self.assertEqual(test2.__name__, 'test2')
-        self.assertTrue(bool(test2.__code__.co_flags & inspect.CO_COROUTINE))
-
-    def test_async_for(self):
-        class Done(Exception): pass
-
-        class AIter:
-            async def __aiter__(self):
-                return self
-            async def __anext__(self):
-                raise StopAsyncIteration
-
-        async def foo():
-            async for i in AIter():
-                pass
-            async for i, j in AIter():
-                pass
-            async for i in AIter():
-                pass
-            else:
-                pass
-            raise Done
-
-        with self.assertRaises(Done):
-            foo().send(None)
-
-    def test_async_with(self):
-        class Done(Exception): pass
-
-        class manager:
-            async def __aenter__(self):
-                return (1, 2)
-            async def __aexit__(self, *exc):
-                return False
-
-        async def foo():
-            async with manager():
-                pass
-            async with manager() as x:
-                pass
-            async with manager() as (x, y):
-                pass
-            async with manager(), manager():
-                pass
-            async with manager() as x, manager() as y:
-                pass
-            async with manager() as x, manager():
-                pass
-            raise Done
-
-        with self.assertRaises(Done):
-            foo().send(None)
-
+def test_main():
+    run_unittest(TokenTests, GrammarTests)
 
 if __name__ == '__main__':
-    unittest.main()
+    test_main()

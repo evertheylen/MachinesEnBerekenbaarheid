@@ -243,13 +243,8 @@ static PyObject* fcicreate(PyObject* obj, PyObject* args)
     for (i=0; i < PyList_GET_SIZE(files); i++) {
         PyObject *item = PyList_GET_ITEM(files, i);
         char *filename, *cabname;
-
-        if (!PyArg_ParseTuple(item, "ss", &filename, &cabname)) {
-            PyErr_SetString(PyExc_TypeError, "FCICreate expects a list of tuples containing two strings");
-            FCIDestroy(hfci);
-            return NULL;
-        }
-
+        if (!PyArg_ParseTuple(item, "ss", &filename, &cabname))
+            goto err;
         if (!FCIAddFile(hfci, filename, cabname, FALSE,
             cb_getnextcabinet, cb_status, cb_getopeninfo,
             tcompTYPE_MSZIP))
@@ -265,11 +260,7 @@ static PyObject* fcicreate(PyObject* obj, PyObject* args)
     Py_INCREF(Py_None);
     return Py_None;
 err:
-    if(erf.fError)
-        PyErr_Format(PyExc_ValueError, "FCI error %d", erf.erfOper); /* XXX better error type */
-    else
-        PyErr_SetString(PyExc_ValueError, "FCI general error");
-
+    PyErr_Format(PyExc_ValueError, "FCI error %d", erf.erfOper); /* XXX better error type */
     FCIDestroy(hfci);
     return NULL;
 }

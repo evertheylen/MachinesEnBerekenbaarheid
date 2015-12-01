@@ -268,9 +268,9 @@ For example::
     .. method:: most_common([n])
 
         Return a list of the *n* most common elements and their counts from the
-        most common to the least.  If *n* is omitted or ``None``,
-        :func:`most_common` returns *all* elements in the counter.
-        Elements with equal counts are ordered arbitrarily:
+        most common to the least.  If *n* is not specified, :func:`most_common`
+        returns *all* elements in the counter.  Elements with equal counts are
+        ordered arbitrarily:
 
             >>> Counter('abracadabra').most_common(3)
             [('a', 5), ('r', 2), ('b', 2)]
@@ -333,7 +333,7 @@ counts, but the output will exclude results with counts of zero or less.
     >>> c | d                       # union:  max(c[x], d[x])
     Counter({'a': 3, 'b': 2})
 
-Unary addition and subtraction are shortcuts for adding an empty counter
+Unary addition and substraction are shortcuts for adding an empty counter
 or subtracting from an empty counter.
 
     >>> c = Counter(a=2, b=-4)
@@ -387,7 +387,7 @@ or subtracting from an empty counter.
       Section 4.6.3, Exercise 19*.
 
     * To enumerate all distinct multisets of a given size over a given set of
-      elements, see :func:`itertools.combinations_with_replacement`:
+      elements, see :func:`itertools.combinations_with_replacement`.
 
             map(Counter, combinations_with_replacement('ABC', 2)) --> AA AB AC BB BC CC
 
@@ -437,13 +437,6 @@ or subtracting from an empty counter.
         Remove all elements from the deque leaving it with length 0.
 
 
-    .. method:: copy()
-
-        Create a shallow copy of the deque.
-
-        .. versionadded:: 3.5
-
-
     .. method:: count(x)
 
         Count the number of deque elements equal to *x*.
@@ -464,22 +457,6 @@ or subtracting from an empty counter.
         elements in the iterable argument.
 
 
-    .. method:: index(x[, start[, stop]])
-
-        Return the position of *x* in the deque (at or after index *start*
-        and before index *stop*).  Returns the first match or raises
-        :exc:`ValueError` if not found.
-
-        .. versionadded:: 3.5
-
-
-    .. method:: insert(i, x)
-
-        Insert *x* into the deque at position *i*.
-
-        .. versionadded:: 3.5
-
-
     .. method:: pop()
 
         Remove and return an element from the right side of the deque. If no
@@ -494,7 +471,7 @@ or subtracting from an empty counter.
 
     .. method:: remove(value)
 
-        Remove the first occurrence of *value*.  If not found, raises a
+        Removed the first occurrence of *value*.  If not found, raises a
         :exc:`ValueError`.
 
 
@@ -526,9 +503,6 @@ In addition to the above, deques support iteration, pickling, ``len(d)``,
 the :keyword:`in` operator, and subscript references such as ``d[-1]``.  Indexed
 access is O(1) at both ends but slows to O(n) in the middle.  For fast random
 access, use lists instead.
-
-Starting in version 3.5, deques support ``__add__()``, ``__mul__()``,
-and ``__imul__()``.
 
 Example:
 
@@ -925,15 +899,6 @@ create a new named tuple type from the :attr:`_fields` attribute:
 
     >>> Point3D = namedtuple('Point3D', Point._fields + ('z',))
 
-Docstrings can be customized by making direct assignments to the ``__doc__``
-fields:
-
-   >>> Book = namedtuple('Book', ['id', 'title', 'authors'])
-   >>> Book.__doc__ = 'Hardcover book in active collection'
-   >>> Book.id.__doc__ = '13-digit ISBN'
-   >>> Book.title.__doc__ = 'Title of first printing'
-   >>> Book.author.__doc__ = 'List of authors sorted by last name'
-
 Default values can be implemented by using :meth:`_replace` to
 customize a prototype instance:
 
@@ -1017,15 +982,12 @@ The :class:`OrderedDict` constructor and :meth:`update` method both accept
 keyword arguments, but their order is lost because Python's function call
 semantics pass-in keyword arguments using a regular unordered dictionary.
 
-.. versionchanged:: 3.5
-   The items, keys, and values :term:`views <view>` of :class:`OrderedDict` now
-   support reverse iteration using :func:`reversed`.
 
 :class:`OrderedDict` Examples and Recipes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Since an ordered dictionary remembers its insertion order, it can be used
-in conjunction with sorting to make a sorted dictionary::
+in conjuction with sorting to make a sorted dictionary::
 
     >>> # regular unsorted dictionary
     >>> d = {'banana': 3, 'apple':4, 'pear': 1, 'orange': 2}

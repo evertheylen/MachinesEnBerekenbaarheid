@@ -1,4 +1,5 @@
 import os
+import types
 import shlex
 import sys
 import codecs
@@ -524,7 +525,7 @@ class IOBinding:
         if self.editwin.flist:
             self.editwin.update_recent_files_list(filename)
 
-def _io_binding(parent):  # htest #
+def _io_binding(parent):
     root = Tk()
     root.title("Test IOBinding")
     width, height, x, y = list(map(int, re.split('[x+]', parent.geometry())))
@@ -547,7 +548,7 @@ def _io_binding(parent):  # htest #
     text.pack()
     text.focus_set()
     editwin = MyEditWin(text)
-    IOBinding(editwin)
+    io = IOBinding(editwin)
 
 if __name__ == "__main__":
     from idlelib.idle_test.htest import run

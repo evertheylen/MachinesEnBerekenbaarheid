@@ -61,10 +61,6 @@ if 'posix' in _names:
     except ImportError:
         pass
 
-    import posix
-    __all__.extend(_get_exports_list(posix))
-    del posix
-
 elif 'nt' in _names:
     name = 'nt'
     linesep = '\r\n'
@@ -272,7 +268,7 @@ def renames(old, new):
     empty.  Works like rename, except creation of any intermediate
     directories needed to make the new pathname good is attempted
     first.  After the rename, directories corresponding to rightmost
-    path segments of the old name will be pruned until either the
+    path segments of the old name will be pruned way until either the
     whole path is consumed or a nonempty directory is found.
 
     Note: this function can fail with the new directory structure made
@@ -323,7 +319,7 @@ def walk(top, topdown=True, onerror=None, followlinks=False):
     the value of topdown, the list of subdirectories is retrieved before the
     tuples for the directory and its subdirectories are generated.
 
-    By default errors from the os.scandir() call are ignored.  If
+    By default errors from the os.listdir() call are ignored.  If
     optional arg 'onerror' is specified, it should be a function; it
     will be called with one argument, an OSError instance.  It can
     report the error to continue with the walk, or raise the exception
@@ -352,8 +348,7 @@ def walk(top, topdown=True, onerror=None, followlinks=False):
 
     """
 
-    dirs = []
-    nondirs = []
+    islink, join, isdir = path.islink, path.join, path.isdir
 
     # We may not have read permission for top, in which case we can't
     # get a list of the files the directory contains.  os.walk
@@ -361,71 +356,28 @@ def walk(top, topdown=True, onerror=None, followlinks=False):
     # minor reason when (say) a thousand readable directories are still
     # left to visit.  That logic is copied here.
     try:
-        # Note that scandir is global in this module due
+        # Note that listdir is global in this module due
         # to earlier import-*.
-        scandir_it = scandir(top)
-    except OSError as error:
+        names = listdir(top)
+    except OSError as err:
         if onerror is not None:
-            onerror(error)
+            onerror(err)
         return
 
-    while True:
-        try:
-            try:
-                entry = next(scandir_it)
-            except StopIteration:
-                break
-        except OSError as error:
-            if onerror is not None:
-                onerror(error)
-            return
-
-        try:
-            is_dir = entry.is_dir()
-        except OSError:
-            # If is_dir() raises an OSError, consider that the entry is not
-            # a directory, same behaviour than os.path.isdir().
-            is_dir = False
-
-        if is_dir:
-            dirs.append(entry.name)
+    dirs, nondirs = [], []
+    for name in names:
+        if isdir(join(top, name)):
+            dirs.append(name)
         else:
-            nondirs.append(entry.name)
+            nondirs.append(name)
 
-        if not topdown and is_dir:
-            # Bottom-up: recurse into sub-directory, but exclude symlinks to
-            # directories if followlinks is False
-            if followlinks:
-                walk_into = True
-            else:
-                try:
-                    is_symlink = entry.is_symlink()
-                except OSError:
-                    # If is_symlink() raises an OSError, consider that the
-                    # entry is not a symbolic link, same behaviour than
-                    # os.path.islink().
-                    is_symlink = False
-                walk_into = not is_symlink
-
-            if walk_into:
-                yield from walk(entry.path, topdown, onerror, followlinks)
-
-    # Yield before recursion if going top down
     if topdown:
         yield top, dirs, nondirs
-
-        # Recurse into sub-directories
-        islink, join = path.islink, path.join
-        for name in dirs:
-            new_path = join(top, name)
-            # Issue #23605: os.path.islink() is used instead of caching
-            # entry.is_symlink() result during the loop on os.scandir() because
-            # the caller can replace the directory entry during the "yield"
-            # above.
-            if followlinks or not islink(new_path):
-                yield from walk(new_path, topdown, onerror, followlinks)
-    else:
-        # Yield after recursion if going bottom up
+    for name in dirs:
+        new_path = join(top, name)
+        if followlinks or not islink(new_path):
+            yield from walk(new_path, topdown, onerror, followlinks)
+    if not topdown:
         yield top, dirs, nondirs
 
 __all__.append("walk")

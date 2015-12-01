@@ -314,11 +314,11 @@ Then::
     >>> str(Mood.funky)
     'my custom str! 1'
 
-The rules for what is allowed are as follows: names that start and end with a
-with a single underscore are reserved by enum and cannot be used; all other
-attributes defined within an enumeration will become members of this
-enumeration, with the exception of special methods (:meth:`__str__`,
-:meth:`__add__`, etc.) and descriptors (methods are also descriptors).
+The rules for what is allowed are as follows: _sunder_ names (starting and
+ending with a single underscore) are reserved by enum and cannot be used;
+all other attributes defined within an enumeration will become members of this
+enumeration, with the exception of *__dunder__* names and descriptors (methods
+are also descriptors).
 
 Note:  if your enumeration defines :meth:`__new__` and/or :meth:`__init__` then
 whatever value(s) were given to the enum member will be passed into those
@@ -400,8 +400,7 @@ The second argument is the *source* of enumeration member names.  It can be a
 whitespace-separated string of names, a sequence of names, a sequence of
 2-tuples with key/value pairs, or a mapping (e.g. dictionary) of names to
 values.  The last two options enable assigning arbitrary values to
-enumerations; the others auto-assign increasing integers starting with 1 (use
-the ``start`` parameter to specify a different starting value).  A
+enumerations; the others auto-assign increasing integers starting with 1.  A
 new class derived from :class:`Enum` is returned.  In other words, the above
 assignment to :class:`Animal` is equivalent to::
 
@@ -439,12 +438,12 @@ SomeData in the global scope::
 
 The complete signature is::
 
-    Enum(value='NewEnumName', names=<...>, *, module='...', qualname='...', type=<mixed-in class>, start=1)
+    Enum(value='NewEnumName', names=<...>, *, module='...', qualname='...', type=<mixed-in class>)
 
 :value: What the new Enum class will record as its name.
 
 :names: The Enum members.  This can be a whitespace or comma separated string
-  (values will start at 1 unless otherwise specified)::
+  (values will start at 1)::
 
     'red green blue' | 'red,green,blue' | 'red, green, blue'
 
@@ -465,11 +464,6 @@ The complete signature is::
 :qualname: where in module new Enum class can be found.
 
 :type: type to mix in to new Enum class.
-
-:start: number to start counting at if only names are passed in
-
-.. versionchanged:: 3.5
-   The *start* parameter was added.
 
 
 Derived Enumerations

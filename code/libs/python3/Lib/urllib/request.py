@@ -120,10 +120,9 @@ __all__ = [
     'Request', 'OpenerDirector', 'BaseHandler', 'HTTPDefaultErrorHandler',
     'HTTPRedirectHandler', 'HTTPCookieProcessor', 'ProxyHandler',
     'HTTPPasswordMgr', 'HTTPPasswordMgrWithDefaultRealm',
-    'HTTPPasswordMgrWithPriorAuth', 'AbstractBasicAuthHandler',
-    'HTTPBasicAuthHandler', 'ProxyBasicAuthHandler', 'AbstractDigestAuthHandler',
-    'HTTPDigestAuthHandler', 'ProxyDigestAuthHandler', 'HTTPHandler',
-    'FileHandler', 'FTPHandler', 'CacheFTPHandler', 'DataHandler',
+    'AbstractBasicAuthHandler', 'HTTPBasicAuthHandler', 'ProxyBasicAuthHandler',
+    'AbstractDigestAuthHandler', 'HTTPDigestAuthHandler', 'ProxyDigestAuthHandler',
+    'HTTPHandler', 'FileHandler', 'FTPHandler', 'CacheFTPHandler', 'DataHandler',
     'UnknownHandler', 'HTTPErrorProcessor',
     # Functions
     'urlopen', 'install_opener', 'build_opener',
@@ -230,7 +229,6 @@ def urlretrieve(url, filename=None, reporthook=None, data=None):
     return result
 
 def urlcleanup():
-    """Clean up temporary files from urlretrieve calls."""
     for temp_file in _url_tempfiles:
         try:
             os.unlink(temp_file)
@@ -837,37 +835,6 @@ class HTTPPasswordMgrWithDefaultRealm(HTTPPasswordMgr):
         return HTTPPasswordMgr.find_user_password(self, None, authuri)
 
 
-class HTTPPasswordMgrWithPriorAuth(HTTPPasswordMgrWithDefaultRealm):
-
-    def __init__(self, *args, **kwargs):
-        self.authenticated = {}
-        super().__init__(*args, **kwargs)
-
-    def add_password(self, realm, uri, user, passwd, is_authenticated=False):
-        self.update_authenticated(uri, is_authenticated)
-        # Add a default for prior auth requests
-        if realm is not None:
-            super().add_password(None, uri, user, passwd)
-        super().add_password(realm, uri, user, passwd)
-
-    def update_authenticated(self, uri, is_authenticated=False):
-        # uri could be a single URI or a sequence
-        if isinstance(uri, str):
-            uri = [uri]
-
-        for default_port in True, False:
-            for u in uri:
-                reduced_uri = self.reduce_uri(u, default_port)
-                self.authenticated[reduced_uri] = is_authenticated
-
-    def is_authenticated(self, authuri):
-        for default_port in True, False:
-            reduced_authuri = self.reduce_uri(authuri, default_port)
-            for uri in self.authenticated:
-                if self.is_suburi(uri, reduced_authuri):
-                    return self.authenticated[uri]
-
-
 class AbstractBasicAuthHandler:
 
     # XXX this allows for multiple auth-schemes, but will stupidly pick
@@ -921,31 +888,6 @@ class AbstractBasicAuthHandler:
             return self.parent.open(req, timeout=req.timeout)
         else:
             return None
-
-    def http_request(self, req):
-        if (not hasattr(self.passwd, 'is_authenticated') or
-           not self.passwd.is_authenticated(req.full_url)):
-            return req
-
-        if not req.has_header('Authorization'):
-            user, passwd = self.passwd.find_user_password(None, req.full_url)
-            credentials = '{0}:{1}'.format(user, passwd).encode()
-            auth_str = base64.standard_b64encode(credentials).decode()
-            req.add_unredirected_header('Authorization',
-                                        'Basic {}'.format(auth_str.strip()))
-        return req
-
-    def http_response(self, req, response):
-        if hasattr(self.passwd, 'is_authenticated'):
-            if 200 <= response.code < 300:
-                self.passwd.update_authenticated(req.full_url, True)
-            else:
-                self.passwd.update_authenticated(req.full_url, False)
-        return response
-
-    https_request = http_request
-    https_response = http_response
-
 
 
 class HTTPBasicAuthHandler(AbstractBasicAuthHandler, BaseHandler):
@@ -2298,11 +2240,7 @@ class ftpwrapper:
         self.timeout = timeout
         self.refcount = 0
         self.keepalive = persistent
-        try:
-            self.init()
-        except:
-            self.close()
-            raise
+        self.init()
 
     def init(self):
         import ftplib

@@ -7,10 +7,6 @@
 
 #include <time.h>
 
-#ifdef MS_WINDOWS
-#  include <winsock2.h>         /* struct timeval */
-#endif
-
 /* Differentiate between building the core module and building extension
  * modules.
  */
@@ -25,8 +21,6 @@ module datetime
 class datetime.datetime "PyDateTime_DateTime *" "&PyDateTime_DateTimeType"
 [clinic start generated code]*/
 /*[clinic end generated code: output=da39a3ee5e6b4b0d input=78142cb64b9e98bc]*/
-
-#include "clinic/_datetimemodule.c.h"
 
 /* We require that C int be at least 32 bits, and use int virtually
  * everywhere.  In just a few cases we use a temp long, where a Python
@@ -2465,7 +2459,7 @@ date_local_from_object(PyObject *cls, PyObject *obj)
     struct tm *tm;
     time_t t;
 
-    if (_PyTime_ObjectToTime_t(obj, &t, _PyTime_ROUND_FLOOR) == -1)
+    if (_PyTime_ObjectToTime_t(obj, &t, _PyTime_ROUND_DOWN) == -1)
         return NULL;
 
     tm = localtime(&t);
@@ -3811,6 +3805,29 @@ time_replace(PyDateTime_Time *self, PyObject *args, PyObject *kw)
     return clone;
 }
 
+static int
+time_bool(PyObject *self)
+{
+    PyObject *offset, *tzinfo;
+    int offsecs = 0;
+
+    if (TIME_GET_SECOND(self) || TIME_GET_MICROSECOND(self)) {
+        /* Since utcoffset is in whole minutes, nothing can
+         * alter the conclusion that this is nonzero.
+         */
+        return 1;
+    }
+    tzinfo = GET_TIME_TZINFO(self);
+    if (tzinfo != Py_None) {
+        offset = call_utcoffset(tzinfo, Py_None);
+        if (offset == NULL)
+            return -1;
+        offsecs = GET_TD_DAYS(offset)*86400 + GET_TD_SECONDS(offset);
+        Py_DECREF(offset);
+    }
+    return (TIME_GET_MINUTE(self)*60 - offsecs + TIME_GET_HOUR(self)*3600) != 0;
+}
+
 /* Pickle support, a simple use of __reduce__. */
 
 /* Let basestate be the non-tzinfo data string.
@@ -3878,6 +3895,19 @@ PyDoc_STR("time([hour[, minute[, second[, microsecond[, tzinfo]]]]]) --> a time 
 All arguments are optional. tzinfo may be None, or an instance of\n\
 a tzinfo subclass. The remaining arguments may be ints.\n");
 
+static PyNumberMethods time_as_number = {
+    0,                                          /* nb_add */
+    0,                                          /* nb_subtract */
+    0,                                          /* nb_multiply */
+    0,                                          /* nb_remainder */
+    0,                                          /* nb_divmod */
+    0,                                          /* nb_power */
+    0,                                          /* nb_negative */
+    0,                                          /* nb_positive */
+    0,                                          /* nb_absolute */
+    (inquiry)time_bool,                         /* nb_bool */
+};
+
 static PyTypeObject PyDateTime_TimeType = {
     PyVarObject_HEAD_INIT(NULL, 0)
     "datetime.time",                            /* tp_name */
@@ -3889,7 +3919,7 @@ static PyTypeObject PyDateTime_TimeType = {
     0,                                          /* tp_setattr */
     0,                                          /* tp_reserved */
     (reprfunc)time_repr,                        /* tp_repr */
-    0,                                          /* tp_as_number */
+    &time_as_number,                            /* tp_as_number */
     0,                                          /* tp_as_sequence */
     0,                                          /* tp_as_mapping */
     (hashfunc)time_hash,                        /* tp_hash */
@@ -4097,11 +4127,8 @@ datetime_from_timestamp(PyObject *cls, TM_FUNC f, PyObject *timestamp,
     time_t timet;
     long us;
 
-    if (_PyTime_ObjectToTimeval(timestamp,
-                                &timet, &us, _PyTime_ROUND_FLOOR) == -1)
+    if (_PyTime_ObjectToTimeval(timestamp, &timet, &us, _PyTime_ROUND_DOWN) == -1)
         return NULL;
-    assert(0 <= us && us <= 999999);
-
     return datetime_from_timet_and_us(cls, f, timet, (int)us, tzinfo);
 }
 
@@ -4112,14 +4139,10 @@ datetime_from_timestamp(PyObject *cls, TM_FUNC f, PyObject *timestamp,
 static PyObject *
 datetime_best_possible(PyObject *cls, TM_FUNC f, PyObject *tzinfo)
 {
-    _PyTime_t ts = _PyTime_GetSystemClock();
-    struct timeval tv;
-
-    if (_PyTime_AsTimeval(ts, &tv, _PyTime_ROUND_FLOOR) < 0)
-        return NULL;
-    assert(0 <= tv.tv_usec && tv.tv_usec <= 999999);
-
-    return datetime_from_timet_and_us(cls, f, tv.tv_sec, tv.tv_usec, tzinfo);
+    _PyTime_timeval t;
+    _PyTime_gettimeofday(&t);
+    return datetime_from_timet_and_us(cls, f, t.tv_sec, (int)t.tv_usec,
+                                      tzinfo);
 }
 
 /*[clinic input]
@@ -4135,9 +4158,43 @@ Returns new datetime object representing current time local to tz.
 If no tz is specified, uses local timezone.
 [clinic start generated code]*/
 
+PyDoc_STRVAR(datetime_datetime_now__doc__,
+"now($type, /, tz=None)\n"
+"--\n"
+"\n"
+"Returns new datetime object representing current time local to tz.\n"
+"\n"
+"  tz\n"
+"    Timezone object.\n"
+"\n"
+"If no tz is specified, uses local timezone.");
+
+#define DATETIME_DATETIME_NOW_METHODDEF    \
+    {"now", (PyCFunction)datetime_datetime_now, METH_VARARGS|METH_KEYWORDS|METH_CLASS, datetime_datetime_now__doc__},
+
+static PyObject *
+datetime_datetime_now_impl(PyTypeObject *type, PyObject *tz);
+
+static PyObject *
+datetime_datetime_now(PyTypeObject *type, PyObject *args, PyObject *kwargs)
+{
+    PyObject *return_value = NULL;
+    static char *_keywords[] = {"tz", NULL};
+    PyObject *tz = Py_None;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+        "|O:now", _keywords,
+        &tz))
+        goto exit;
+    return_value = datetime_datetime_now_impl(type, tz);
+
+exit:
+    return return_value;
+}
+
 static PyObject *
 datetime_datetime_now_impl(PyTypeObject *type, PyObject *tz)
-/*[clinic end generated code: output=b3386e5345e2b47a input=80d09869c5267d00]*/
+/*[clinic end generated code: output=583c5637e3c843fa input=80d09869c5267d00]*/
 {
     PyObject *self;
 
@@ -4999,7 +5056,8 @@ static PyMethodDef datetime_methods[] = {
 
     {"utcfromtimestamp", (PyCFunction)datetime_utcfromtimestamp,
      METH_VARARGS | METH_CLASS,
-     PyDoc_STR("Construct a naive UTC datetime from a POSIX timestamp.")},
+     PyDoc_STR("timestamp -> UTC datetime from a POSIX timestamp "
+               "(like time.time()).")},
 
     {"strptime", (PyCFunction)datetime_strptime,
      METH_VARARGS | METH_CLASS,

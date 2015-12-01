@@ -19,13 +19,6 @@
 #include "Python.h"
 #include "structmember.h"
 #include "hashlib.h"
-#include "pystrhex.h"
-
-/*[clinic input]
-module _sha512
-class SHA512Type "SHAobject *" "&PyType_Type"
-[clinic start generated code]*/
-/*[clinic end generated code: output=da39a3ee5e6b4b0d input=81a3ccde92bcfe8d]*/
 
 #ifdef PY_LONG_LONG /* If no PY_LONG_LONG, don't compile anything! */
 
@@ -55,8 +48,6 @@ typedef struct {
     int local;                          /* unprocessed amount in data */
     int digestsize;
 } SHAobject;
-
-#include "clinic/sha512module.c.h"
 
 /* When run on a little-endian CPU we need to perform byte reversal on an
    array of longwords. */
@@ -468,15 +459,10 @@ SHA512_dealloc(PyObject *ptr)
 
 /* External methods for a hash object */
 
-/*[clinic input]
-SHA512Type.copy
-
-Return a copy of the hash object.
-[clinic start generated code]*/
+PyDoc_STRVAR(SHA512_copy__doc__, "Return a copy of the hash object.");
 
 static PyObject *
-SHA512Type_copy_impl(SHAobject *self)
-/*[clinic end generated code: output=adea896ed3164821 input=9f5f31e6c457776a]*/
+SHA512_copy(SHAobject *self, PyObject *unused)
 {
     SHAobject *newobj;
 
@@ -492,15 +478,11 @@ SHA512Type_copy_impl(SHAobject *self)
     return (PyObject *)newobj;
 }
 
-/*[clinic input]
-SHA512Type.digest
-
-Return the digest value as a string of binary data.
-[clinic start generated code]*/
+PyDoc_STRVAR(SHA512_digest__doc__,
+"Return the digest value as a string of binary data.");
 
 static PyObject *
-SHA512Type_digest_impl(SHAobject *self)
-/*[clinic end generated code: output=1080bbeeef7dde1b input=60c2cede9e023018]*/
+SHA512_digest(SHAobject *self, PyObject *unused)
 {
     unsigned char digest[SHA_DIGESTSIZE];
     SHAobject temp;
@@ -510,40 +492,53 @@ SHA512Type_digest_impl(SHAobject *self)
     return PyBytes_FromStringAndSize((const char *)digest, self->digestsize);
 }
 
-/*[clinic input]
-SHA512Type.hexdigest
-
-Return the digest value as a string of hexadecimal digits.
-[clinic start generated code]*/
+PyDoc_STRVAR(SHA512_hexdigest__doc__,
+"Return the digest value as a string of hexadecimal digits.");
 
 static PyObject *
-SHA512Type_hexdigest_impl(SHAobject *self)
-/*[clinic end generated code: output=7373305b8601e18b input=498b877b25cbe0a2]*/
+SHA512_hexdigest(SHAobject *self, PyObject *unused)
 {
     unsigned char digest[SHA_DIGESTSIZE];
     SHAobject temp;
+    PyObject *retval;
+    Py_UCS1 *hex_digest;
+    int i, j;
 
     /* Get the raw (binary) digest value */
     SHAcopy(self, &temp);
     sha512_final(digest, &temp);
 
-    return _Py_strhex((const char *)digest, self->digestsize);
+    /* Create a new string */
+    retval = PyUnicode_New(self->digestsize * 2, 127);
+    if (!retval)
+            return NULL;
+    hex_digest = PyUnicode_1BYTE_DATA(retval);
+
+    /* Make hex version of the digest */
+    for (i=j=0; i<self->digestsize; i++) {
+        unsigned char c;
+        c = (digest[i] >> 4) & 0xf;
+        hex_digest[j++] = Py_hexdigits[c];
+        c = (digest[i] & 0xf);
+        hex_digest[j++] = Py_hexdigits[c];
+    }
+#ifdef Py_DEBUG
+    assert(_PyUnicode_CheckConsistency(retval, 1));
+#endif
+    return retval;
 }
 
-/*[clinic input]
-SHA512Type.update
-
-    obj: object
-    /
-
-Update this hash object's state with the provided string.
-[clinic start generated code]*/
+PyDoc_STRVAR(SHA512_update__doc__,
+"Update this hash object's state with the provided string.");
 
 static PyObject *
-SHA512Type_update(SHAobject *self, PyObject *obj)
-/*[clinic end generated code: output=1cf333e73995a79e input=ded2b46656566283]*/
+SHA512_update(SHAobject *self, PyObject *args)
 {
+    PyObject *obj;
     Py_buffer buf;
+
+    if (!PyArg_ParseTuple(args, "O:update", &obj))
+        return NULL;
 
     GET_BUFFER_VIEW_OR_ERROUT(obj, &buf);
 
@@ -553,16 +548,12 @@ SHA512Type_update(SHAobject *self, PyObject *obj)
     Py_INCREF(Py_None);
     return Py_None;
 }
-/*[clinic input]
-dump buffer
-[clinic start generated code]*/
-/*[clinic end generated code: output=da39a3ee5e6b4b0d input=524ce2e021e4eba6]*/
 
 static PyMethodDef SHA_methods[] = {
-    SHA512TYPE_COPY_METHODDEF
-    SHA512TYPE_DIGEST_METHODDEF
-    SHA512TYPE_HEXDIGEST_METHODDEF
-    SHA512TYPE_UPDATE_METHODDEF
+    {"copy",      (PyCFunction)SHA512_copy,      METH_NOARGS, SHA512_copy__doc__},
+    {"digest",    (PyCFunction)SHA512_digest,    METH_NOARGS, SHA512_digest__doc__},
+    {"hexdigest", (PyCFunction)SHA512_hexdigest, METH_NOARGS, SHA512_hexdigest__doc__},
+    {"update",    (PyCFunction)SHA512_update,    METH_VARARGS, SHA512_update__doc__},
     {NULL,        NULL}         /* sentinel */
 };
 
@@ -669,26 +660,27 @@ static PyTypeObject SHA512type = {
 
 /* The single module-level function: new() */
 
-/*[clinic input]
-_sha512.sha512
-
-    string: object(c_default="NULL") = b''
-
-Return a new SHA-512 hash object; optionally initialized with a string.
-[clinic start generated code]*/
+PyDoc_STRVAR(SHA512_new__doc__,
+"Return a new SHA-512 hash object; optionally initialized with a string.");
 
 static PyObject *
-_sha512_sha512_impl(PyModuleDef *module, PyObject *string)
-/*[clinic end generated code: output=da13bc0a94da6de3 input=e69bad9ae9b6a308]*/
+SHA512_new(PyObject *self, PyObject *args, PyObject *kwdict)
 {
+    static char *kwlist[] = {"string", NULL};
     SHAobject *new;
+    PyObject *data_obj = NULL;
     Py_buffer buf;
 
-    if (string)
-        GET_BUFFER_VIEW_OR_ERROUT(string, &buf);
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "|O:new", kwlist,
+                                     &data_obj)) {
+        return NULL;
+    }
+
+    if (data_obj)
+        GET_BUFFER_VIEW_OR_ERROUT(data_obj, &buf);
 
     if ((new = newSHA512object()) == NULL) {
-        if (string)
+        if (data_obj)
             PyBuffer_Release(&buf);
         return NULL;
     }
@@ -697,11 +689,11 @@ _sha512_sha512_impl(PyModuleDef *module, PyObject *string)
 
     if (PyErr_Occurred()) {
         Py_DECREF(new);
-        if (string)
+        if (data_obj)
             PyBuffer_Release(&buf);
         return NULL;
     }
-    if (string) {
+    if (data_obj) {
         sha512_update(new, buf.buf, buf.len);
         PyBuffer_Release(&buf);
     }
@@ -709,26 +701,27 @@ _sha512_sha512_impl(PyModuleDef *module, PyObject *string)
     return (PyObject *)new;
 }
 
-/*[clinic input]
-_sha512.sha384
-
-    string: object(c_default="NULL") = b''
-
-Return a new SHA-384 hash object; optionally initialized with a string.
-[clinic start generated code]*/
+PyDoc_STRVAR(SHA384_new__doc__,
+"Return a new SHA-384 hash object; optionally initialized with a string.");
 
 static PyObject *
-_sha512_sha384_impl(PyModuleDef *module, PyObject *string)
-/*[clinic end generated code: output=ac731aea5509174d input=c9327788d4ea4545]*/
+SHA384_new(PyObject *self, PyObject *args, PyObject *kwdict)
 {
+    static char *kwlist[] = {"string", NULL};
     SHAobject *new;
+    PyObject *data_obj = NULL;
     Py_buffer buf;
 
-    if (string)
-        GET_BUFFER_VIEW_OR_ERROUT(string, &buf);
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "|O:new", kwlist,
+                                     &data_obj)) {
+        return NULL;
+    }
+
+    if (data_obj)
+        GET_BUFFER_VIEW_OR_ERROUT(data_obj, &buf);
 
     if ((new = newSHA384object()) == NULL) {
-        if (string)
+        if (data_obj)
             PyBuffer_Release(&buf);
         return NULL;
     }
@@ -737,11 +730,11 @@ _sha512_sha384_impl(PyModuleDef *module, PyObject *string)
 
     if (PyErr_Occurred()) {
         Py_DECREF(new);
-        if (string)
+        if (data_obj)
             PyBuffer_Release(&buf);
         return NULL;
     }
-    if (string) {
+    if (data_obj) {
         sha512_update(new, buf.buf, buf.len);
         PyBuffer_Release(&buf);
     }
@@ -750,16 +743,11 @@ _sha512_sha384_impl(PyModuleDef *module, PyObject *string)
 }
 
 
-/*[clinic input]
-dump buffer
-[clinic start generated code]*/
-/*[clinic end generated code: output=da39a3ee5e6b4b0d input=524ce2e021e4eba6]*/
-
 /* List of functions exported by this module */
 
 static struct PyMethodDef SHA_functions[] = {
-    _SHA512_SHA512_METHODDEF
-    _SHA512_SHA384_METHODDEF
+    {"sha512", (PyCFunction)SHA512_new, METH_VARARGS|METH_KEYWORDS, SHA512_new__doc__},
+    {"sha384", (PyCFunction)SHA384_new, METH_VARARGS|METH_KEYWORDS, SHA384_new__doc__},
     {NULL,      NULL}            /* Sentinel */
 };
 

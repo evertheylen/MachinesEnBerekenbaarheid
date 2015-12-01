@@ -325,15 +325,6 @@ which, when run, will produce::
 
     MainThread: Look out!
 
-.. versionchanged:: 3.5
-   Prior to Python 3.5, the :class:`QueueListener` always passed every message
-   received from the queue to every handler it was initialized with. (This was
-   because it was assumed that level filtering was all done on the other side,
-   where the queue is filled.) From 3.5 onwards, this behaviour can be changed
-   by passing a keyword argument ``respect_handler_level=True`` to the
-   listener's constructor. When this is done, the listener compares the level
-   of each message with the handler's level, and only passes a message to a
-   handler if it's appropriate to do so.
 
 .. _network-logging:
 
@@ -1417,7 +1408,7 @@ works::
     def worker_process(config):
         """
         A number of these are spawned for the purpose of illustration. In
-        practice, they could be a heterogeneous bunch of processes rather than
+        practice, they could be a heterogenous bunch of processes rather than
         ones which are identical to each other.
 
         This initialises logging according to the specified configuration,
@@ -1689,7 +1680,7 @@ as in the following complete example::
 
     def main():
         logging.basicConfig(level=logging.INFO, format='%(message)s')
-        logging.info(_('message 1', set_value={1, 2, 3}, snowman='\u2603'))
+        logging.info(_('message 1', set_value=set([1, 2, 3]), snowman='\u2603'))
 
     if __name__ == '__main__':
         main()

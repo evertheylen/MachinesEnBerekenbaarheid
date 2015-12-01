@@ -7,7 +7,6 @@
 .. sectionauthor:: Marc-André Lemburg <mal@lemburg.com>
 .. sectionauthor:: Martin v. Löwis <martin@v.loewis.de>
 
-**Source code:** :source:`Lib/codecs.py`
 
 .. index::
    single: Unicode
@@ -30,9 +29,10 @@ module features are restricted to use specifically with
 The module defines the following functions for encoding and decoding with
 any codec:
 
-.. function:: encode(obj, encoding='utf-8', errors='strict')
+.. function:: encode(obj, [encoding[, errors]])
 
-   Encodes *obj* using the codec registered for *encoding*.
+   Encodes *obj* using the codec registered for *encoding*. The default
+   encoding is ``utf-8``.
 
    *Errors* may be given to set the desired error handling scheme. The
    default error handler is ``'strict'`` meaning that encoding errors raise
@@ -40,9 +40,10 @@ any codec:
    :exc:`UnicodeEncodeError`). Refer to :ref:`codec-base-classes` for more
    information on codec error handling.
 
-.. function:: decode(obj, encoding='utf-8', errors='strict')
+.. function:: decode(obj, [encoding[, errors]])
 
-   Decodes *obj* using the codec registered for *encoding*.
+   Decodes *obj* using the codec registered for *encoding*. The default
+   encoding is ``utf-8``.
 
    *Errors* may be given to set the desired error handling scheme. The
    default error handler is ``'strict'`` meaning that decoding errors raise
@@ -102,6 +103,7 @@ The full details for each codec can also be looked up directly:
 
 To simplify access to the various codec components, the module provides
 these additional functions which use :func:`lookup` for the codec lookup:
+
 
 .. function:: getencoder(encoding)
 
@@ -272,7 +274,6 @@ implement the file protocols. Codec authors also need to define how the
 codec will handle encoding and decoding errors.
 
 
-.. _surrogateescape:
 .. _error-handlers:
 
 Error Handlers
@@ -314,13 +315,9 @@ The following error handlers are only applicable to
 |                         | reference (only for encoding).  Implemented   |
 |                         | in :func:`xmlcharrefreplace_errors`.          |
 +-------------------------+-----------------------------------------------+
-| ``'backslashreplace'``  | Replace with backslashed escape sequences.    |
-|                         | Implemented in                                |
-|                         | :func:`backslashreplace_errors`.              |
-+-------------------------+-----------------------------------------------+
-| ``'namereplace'``       | Replace with ``\N{...}`` escape sequences     |
+| ``'backslashreplace'``  | Replace with backslashed escape sequences     |
 |                         | (only for encoding).  Implemented in          |
-|                         | :func:`namereplace_errors`.                   |
+|                         | :func:`backslashreplace_errors`.              |
 +-------------------------+-----------------------------------------------+
 | ``'surrogateescape'``   | On decoding, replace byte with individual     |
 |                         | surrogate code ranging from ``U+DC80`` to     |
@@ -346,13 +343,6 @@ In addition, the following error handler is specific to the given codecs:
 
 .. versionchanged:: 3.4
    The ``'surrogatepass'`` error handlers now works with utf-16\* and utf-32\* codecs.
-
-.. versionadded:: 3.5
-   The ``'namereplace'`` error handler.
-
-.. versionchanged:: 3.5
-   The ``'backslashreplace'`` error handlers now works with decoding and
-   translating.
 
 The set of allowed values can be extended by registering a new named error
 handler:
@@ -403,7 +393,7 @@ functions:
    Implements the ``'replace'`` error handling (for :term:`text encodings
    <text encoding>` only): substitutes ``'?'`` for encoding errors
    (to be encoded by the codec), and ``'\ufffd'`` (the Unicode replacement
-   character) for decoding errors.
+   character, ``'�'``) for decoding errors.
 
 
 .. function:: ignore_errors(exception)
@@ -421,17 +411,9 @@ functions:
 
 .. function:: backslashreplace_errors(exception)
 
-   Implements the ``'backslashreplace'`` error handling (for
-   :term:`text encodings <text encoding>` only): malformed data is
-   replaced by a backslashed escape sequence.
-
-.. function:: namereplace_errors(exception)
-
-   Implements the ``'namereplace'`` error handling (for encoding with
+   Implements the ``'backslashreplace'`` error handling (for encoding with
    :term:`text encodings <text encoding>` only): the
-   unencodable character is replaced by a ``\N{...}`` escape sequence.
-
-   .. versionadded:: 3.5
+   unencodable character is replaced by a backslashed escape sequence.
 
 
 .. _codec-objects:
@@ -454,8 +436,8 @@ function interfaces of the stateless encoder and decoder:
    It defaults to ``'strict'`` handling.
 
    The method may not store state in the :class:`Codec` instance. Use
-   :class:`StreamWriter` for codecs which have to keep state in order to make
-   encoding efficient.
+   :class:`StreamCodec` for codecs which have to keep state in order to make
+   encoding/decoding efficient.
 
    The encoder must be able to handle zero length input and return an empty object
    of the output object type in this situation.
@@ -476,8 +458,8 @@ function interfaces of the stateless encoder and decoder:
    It defaults to ``'strict'`` handling.
 
    The method may not store state in the :class:`Codec` instance. Use
-   :class:`StreamReader` for codecs which have to keep state in order to make
-   decoding efficient.
+   :class:`StreamCodec` for codecs which have to keep state in order to make
+   encoding/decoding efficient.
 
    The decoder must be able to handle zero length input and return an empty object
    of the output object type in this situation.
@@ -1160,15 +1142,7 @@ particular, the following variants typically exist:
 +-----------------+--------------------------------+--------------------------------+
 | koi8_r          |                                | Russian                        |
 +-----------------+--------------------------------+--------------------------------+
-| koi8_t          |                                | Tajik                          |
-|                 |                                |                                |
-|                 |                                | .. versionadded:: 3.5          |
-+-----------------+--------------------------------+--------------------------------+
 | koi8_u          |                                | Ukrainian                      |
-+-----------------+--------------------------------+--------------------------------+
-| kz1048          | kz_1048, strk1048_2002, rk1048 | Kazakh                         |
-|                 |                                |                                |
-|                 |                                | .. versionadded:: 3.5          |
 +-----------------+--------------------------------+--------------------------------+
 | mac_cyrillic    | maccyrillic                    | Bulgarian, Byelorussian,       |
 |                 |                                | Macedonian, Russian, Serbian   |
@@ -1470,3 +1444,4 @@ This module implements a variant of the UTF-8 codec: On encoding a UTF-8 encoded
 BOM will be prepended to the UTF-8 encoded bytes. For the stateful encoder this
 is only done once (on the first write to the byte stream).  For decoding an
 optional UTF-8 encoded BOM at the start of the data will be skipped.
+

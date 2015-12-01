@@ -46,7 +46,7 @@ static pysqlite_StatementKind detect_statement_type(const char* statement)
 
     dst = buf;
     *dst = 0;
-    while (Py_ISALPHA(*src) && (dst - buf) < ((Py_ssize_t)sizeof(buf) - 2)) {
+    while (Py_ISALPHA(*src) && dst - buf < sizeof(buf) - 2) {
         *dst++ = Py_TOLOWER(*src++);
     }
 
@@ -334,7 +334,11 @@ PyObject* _pysqlite_fetch_one_row(pysqlite_Cursor* self)
                 if (self->connection->text_factory == (PyObject*)&PyUnicode_Type) {
                     converted = PyUnicode_FromStringAndSize(val_str, nbytes);
                     if (!converted) {
+#ifdef Py_DEBUG
+                        /* in debug mode, type_call() fails with an assertion
+                           error if an exception is set when it is called */
                         PyErr_Clear();
+#endif
                         colname = sqlite3_column_name(self->statement->st, i);
                         if (!colname) {
                             colname = "<unknown column name>";

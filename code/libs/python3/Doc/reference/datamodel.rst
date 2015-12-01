@@ -616,16 +616,6 @@ Callable types
       exception is raised and the iterator will have reached the end of the set of
       values to be returned.
 
-   Coroutine functions
-      .. index::
-         single: coroutine; function
-
-      A function or method which is defined using :keyword:`async def` is called
-      a :dfn:`coroutine function`.  Such a function, when called, returns a
-      :term:`coroutine` object.  It may contain :keyword:`await` expressions,
-      as well as :keyword:`async with` and :keyword:`async for` statements. See
-      also the :ref:`coroutine-objects` section.
-
    Built-in functions
       .. index::
          object: built-in function
@@ -1276,14 +1266,10 @@ Basic customization
    context (e.g., in the condition of an ``if`` statement), Python will call
    :func:`bool` on the value to determine if the result is true or false.
 
-   By default, :meth:`__ne__` delegates to :meth:`__eq__` and
-   inverts the result unless it is ``NotImplemented``.  There are no other
-   implied relationships among the comparison operators, for example,
-   the truth of ``(x<y or x==y)`` does not imply ``x<=y``.
-   To automatically generate ordering operations from a single root operation,
-   see :func:`functools.total_ordering`.
-
-   See the paragraph on :meth:`__hash__` for
+   There are no implied relationships among the comparison operators. The truth
+   of ``x==y`` does not imply that ``x!=y`` is false.  Accordingly, when
+   defining :meth:`__eq__`, one should also define :meth:`__ne__` so that the
+   operators will behave as expected.  See the paragraph on :meth:`__hash__` for
    some important notes on creating :term:`hashable` objects which support
    custom comparison operations and are usable as dictionary keys.
 
@@ -1292,11 +1278,11 @@ Basic customization
    rather, :meth:`__lt__` and :meth:`__gt__` are each other's reflection,
    :meth:`__le__` and :meth:`__ge__` are each other's reflection, and
    :meth:`__eq__` and :meth:`__ne__` are their own reflection.
-   If the operands are of different types, and right operand's type is
-   a direct or indirect subclass of the left operand's type,
-   the reflected method of the right operand has priority, otherwise
-   the left operand's method has priority.  Virtual subclassing is
-   not considered.
+
+   Arguments to rich comparison methods are never coerced.
+
+   To automatically generate ordering operations from a single root operation,
+   see :func:`functools.total_ordering`.
 
 .. method:: object.__hash__(self)
 
@@ -2000,7 +1986,6 @@ left undefined.
 .. method:: object.__add__(self, other)
             object.__sub__(self, other)
             object.__mul__(self, other)
-            object.__matmul__(self, other)
             object.__truediv__(self, other)
             object.__floordiv__(self, other)
             object.__mod__(self, other)
@@ -2017,16 +2002,15 @@ left undefined.
       builtin: pow
       builtin: pow
 
-   These methods are called to implement the binary arithmetic operations
-   (``+``, ``-``, ``*``, ``@``, ``/``, ``//``, ``%``, :func:`divmod`,
-   :func:`pow`, ``**``, ``<<``, ``>>``, ``&``, ``^``, ``|``).  For instance, to
-   evaluate the expression ``x + y``, where *x* is an instance of a class that
-   has an :meth:`__add__` method, ``x.__add__(y)`` is called.  The
-   :meth:`__divmod__` method should be the equivalent to using
-   :meth:`__floordiv__` and :meth:`__mod__`; it should not be related to
-   :meth:`__truediv__`.  Note that :meth:`__pow__` should be defined to accept
-   an optional third argument if the ternary version of the built-in :func:`pow`
-   function is to be supported.
+   These methods are called to implement the binary arithmetic operations (``+``,
+   ``-``, ``*``, ``/``, ``//``, ``%``, :func:`divmod`, :func:`pow`, ``**``, ``<<``,
+   ``>>``, ``&``, ``^``, ``|``).  For instance, to evaluate the expression
+   ``x + y``, where *x* is an instance of a class that has an :meth:`__add__`
+   method, ``x.__add__(y)`` is called.  The :meth:`__divmod__` method should be the
+   equivalent to using :meth:`__floordiv__` and :meth:`__mod__`; it should not be
+   related to :meth:`__truediv__`.  Note that :meth:`__pow__` should be defined
+   to accept an optional third argument if the ternary version of the built-in
+   :func:`pow` function is to be supported.
 
    If one of those methods does not support the operation with the supplied
    arguments, it should return ``NotImplemented``.
@@ -2035,7 +2019,6 @@ left undefined.
 .. method:: object.__radd__(self, other)
             object.__rsub__(self, other)
             object.__rmul__(self, other)
-            object.__rmatmul__(self, other)
             object.__rtruediv__(self, other)
             object.__rfloordiv__(self, other)
             object.__rmod__(self, other)
@@ -2051,14 +2034,14 @@ left undefined.
       builtin: divmod
       builtin: pow
 
-   These methods are called to implement the binary arithmetic operations
-   (``+``, ``-``, ``*``, ``@``, ``/``, ``//``, ``%``, :func:`divmod`,
-   :func:`pow`, ``**``, ``<<``, ``>>``, ``&``, ``^``, ``|``) with reflected
-   (swapped) operands.  These functions are only called if the left operand does
-   not support the corresponding operation and the operands are of different
-   types. [#]_ For instance, to evaluate the expression ``x - y``, where *y* is
-   an instance of a class that has an :meth:`__rsub__` method, ``y.__rsub__(x)``
-   is called if ``x.__sub__(y)`` returns *NotImplemented*.
+   These methods are called to implement the binary arithmetic operations (``+``,
+   ``-``, ``*``, ``/``, ``//``, ``%``, :func:`divmod`, :func:`pow`, ``**``,
+   ``<<``, ``>>``, ``&``, ``^``, ``|``) with reflected (swapped) operands.
+   These functions are only called if the left operand does not support the
+   corresponding operation and the operands are of different types. [#]_  For
+   instance, to evaluate the expression ``x - y``, where *y* is an instance of
+   a class that has an :meth:`__rsub__` method, ``y.__rsub__(x)`` is called if
+   ``x.__sub__(y)`` returns *NotImplemented*.
 
    .. index:: builtin: pow
 
@@ -2076,7 +2059,6 @@ left undefined.
 .. method:: object.__iadd__(self, other)
             object.__isub__(self, other)
             object.__imul__(self, other)
-            object.__imatmul__(self, other)
             object.__itruediv__(self, other)
             object.__ifloordiv__(self, other)
             object.__imod__(self, other)
@@ -2088,17 +2070,17 @@ left undefined.
             object.__ior__(self, other)
 
    These methods are called to implement the augmented arithmetic assignments
-   (``+=``, ``-=``, ``*=``, ``@=``, ``/=``, ``//=``, ``%=``, ``**=``, ``<<=``,
-   ``>>=``, ``&=``, ``^=``, ``|=``).  These methods should attempt to do the
-   operation in-place (modifying *self*) and return the result (which could be,
-   but does not have to be, *self*).  If a specific method is not defined, the
-   augmented assignment falls back to the normal methods.  For instance, if *x*
-   is an instance of a class with an :meth:`__iadd__` method, ``x += y`` is
-   equivalent to ``x = x.__iadd__(y)`` . Otherwise, ``x.__add__(y)`` and
-   ``y.__radd__(x)`` are considered, as with the evaluation of ``x + y``. In
-   certain situations, augmented assignment can result in unexpected errors (see
-   :ref:`faq-augmented-assignment-tuple-error`), but this behavior is in fact
-   part of the data model.
+   (``+=``, ``-=``, ``*=``, ``/=``, ``//=``, ``%=``, ``**=``, ``<<=``, ``>>=``,
+   ``&=``, ``^=``, ``|=``).  These methods should attempt to do the operation
+   in-place (modifying *self*) and return the result (which could be, but does
+   not have to be, *self*).  If a specific method is not defined, the augmented
+   assignment falls back to the normal methods.  For instance, if *x* is an
+   instance of a class with an :meth:`__iadd__` method, ``x += y`` is equivalent
+   to ``x = x.__iadd__(y)`` . Otherwise, ``x.__add__(y)`` and ``y.__radd__(x)``
+   are considered, as with the evaluation of ``x + y``. In certain situations,
+   augmented assignment can result in unexpected errors (see
+   :ref:`faq-augmented-assignment-tuple-error`), but this behavior is in
+   fact part of the data model.
 
 
 .. method:: object.__neg__(self)
@@ -2240,9 +2222,9 @@ correctness, implicit special method lookup generally also bypasses the
 :meth:`__getattribute__` method even of the object's metaclass::
 
    >>> class Meta(type):
-   ...     def __getattribute__(*args):
-   ...         print("Metaclass getattribute invoked")
-   ...         return type.__getattribute__(*args)
+   ...    def __getattribute__(*args):
+   ...       print("Metaclass getattribute invoked")
+   ...       return type.__getattribute__(*args)
    ...
    >>> class C(object, metaclass=Meta):
    ...     def __len__(self):
@@ -2266,155 +2248,6 @@ provides significant scope for speed optimisations within the
 interpreter, at the cost of some flexibility in the handling of
 special methods (the special method *must* be set on the class
 object itself in order to be consistently invoked by the interpreter).
-
-
-.. index::
-   single: coroutine
-
-Coroutines
-==========
-
-
-Awaitable Objects
------------------
-
-An :term:`awaitable` object generally implements an :meth:`__await__` method.
-:term:`Coroutine` objects returned from :keyword:`async def` functions
-are awaitable.
-
-.. note::
-
-   The :term:`generator iterator` objects returned from generators
-   decorated with :func:`types.coroutine` or :func:`asyncio.coroutine`
-   are also awaitable, but they do not implement :meth:`__await__`.
-
-.. method:: object.__await__(self)
-
-   Must return an :term:`iterator`.  Should be used to implement
-   :term:`awaitable` objects.  For instance, :class:`asyncio.Future` implements
-   this method to be compatible with the :keyword:`await` expression.
-
-.. versionadded:: 3.5
-
-.. seealso:: :pep:`492` for additional information about awaitable objects.
-
-
-.. _coroutine-objects:
-
-Coroutine Objects
------------------
-
-:term:`Coroutine` objects are :term:`awaitable` objects.
-A coroutine's execution can be controlled by calling :meth:`__await__` and
-iterating over the result.  When the coroutine has finished executing and
-returns, the iterator raises :exc:`StopIteration`, and the exception's
-:attr:`~StopIteration.value` attribute holds the return value.  If the
-coroutine raises an exception, it is propagated by the iterator.  Coroutines
-should not directly raise unhandled :exc:`StopIteration` exceptions.
-
-Coroutines also have the methods listed below, which are analogous to
-those of generators (see :ref:`generator-methods`).  However, unlike
-generators, coroutines do not directly support iteration.
-
-.. method:: coroutine.send(value)
-
-   Starts or resumes execution of the coroutine.  If *value* is ``None``,
-   this is equivalent to advancing the iterator returned by
-   :meth:`__await__`.  If *value* is not ``None``, this method delegates
-   to the :meth:`~generator.send` method of the iterator that caused
-   the coroutine to suspend.  The result (return value,
-   :exc:`StopIteration`, or other exception) is the same as when
-   iterating over the :meth:`__await__` return value, described above.
-
-.. method:: coroutine.throw(type[, value[, traceback]])
-
-   Raises the specified exception in the coroutine.  This method delegates
-   to the :meth:`~generator.throw` method of the iterator that caused
-   the coroutine to suspend, if it has such a method.  Otherwise,
-   the exception is raised at the suspension point.  The result
-   (return value, :exc:`StopIteration`, or other exception) is the same as
-   when iterating over the :meth:`__await__` return value, described
-   above.  If the exception is not caught in the coroutine, it propagates
-   back to the caller.
-
-.. method:: coroutine.close()
-
-   Causes the coroutine to clean itself up and exit.  If the coroutine
-   is suspended, this method first delegates to the :meth:`~generator.close`
-   method of the iterator that caused the coroutine to suspend, if it
-   has such a method.  Then it raises :exc:`GeneratorExit` at the
-   suspension point, causing the coroutine to immediately clean itself up.
-   Finally, the coroutine is marked as having finished executing, even if
-   it was never started.
-
-   Coroutine objects are automatically closed using the above process when
-   they are about to be destroyed.
-
-
-Asynchronous Iterators
-----------------------
-
-An *asynchronous iterable* is able to call asynchronous code in its
-``__aiter__`` implementation, and an *asynchronous iterator* can call
-asynchronous code in its ``__anext__`` method.
-
-Asynchronous iterators can be used in a :keyword:`async for` statement.
-
-.. method:: object.__aiter__(self)
-
-   Must return an *awaitable* resulting in an *asynchronous iterator* object.
-
-.. method:: object.__anext__(self)
-
-   Must return an *awaitable* resulting in a next value of the iterator.  Should
-   raise a :exc:`StopAsyncIteration` error when the iteration is over.
-
-An example of an asynchronous iterable object::
-
-    class Reader:
-        async def readline(self):
-            ...
-
-        async def __aiter__(self):
-            return self
-
-        async def __anext__(self):
-            val = await self.readline()
-            if val == b'':
-                raise StopAsyncIteration
-            return val
-
-.. versionadded:: 3.5
-
-
-Asynchronous Context Managers
------------------------------
-
-An *asynchronous context manager* is a *context manager* that is able to
-suspend execution in its ``__aenter__`` and ``__aexit__`` methods.
-
-Asynchronous context managers can be used in a :keyword:`async with` statement.
-
-.. method:: object.__aenter__(self)
-
-   This method is semantically similar to the :meth:`__enter__`, with only
-   difference that it must return an *awaitable*.
-
-.. method:: object.__aexit__(self, exc_type, exc_value, traceback)
-
-   This method is semantically similar to the :meth:`__exit__`, with only
-   difference that it must return an *awaitable*.
-
-An example of an asynchronous context manager class::
-
-    class AsyncContextManager:
-        async def __aenter__(self):
-            await log('entering context')
-
-        async def __aexit__(self, exc_type, exc, tb):
-            await log('exiting context')
-
-.. versionadded:: 3.5
 
 
 .. rubric:: Footnotes

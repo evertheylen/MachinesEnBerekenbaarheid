@@ -71,7 +71,6 @@ class POP3:
             UIDL [msg]              uidl(msg = None)
             CAPA                    capa()
             STLS                    stls()
-            UTF8                    utf8()
 
     Raises one exception: 'error_proto'.
 
@@ -137,7 +136,7 @@ class POP3:
         # so only possibilities are ...LF, ...CRLF, CR...LF
         if line[-2:] == CRLF:
             return line[:-2], octets
-        if line[:1] == CR:
+        if line[0] == CR:
             return line[1:-1], octets
         return line[:-1], octets
 
@@ -277,23 +276,18 @@ class POP3:
 
     def close(self):
         """Close the connection without assuming anything about it."""
-        try:
-            file = self.file
-            self.file = None
-            if file is not None:
-                file.close()
-        finally:
-            sock = self.sock
-            self.sock = None
-            if sock is not None:
-                try:
-                    sock.shutdown(socket.SHUT_RDWR)
-                except OSError as e:
-                    # The server might already have closed the connection
-                    if e.errno != errno.ENOTCONN:
-                        raise
-                finally:
-                    sock.close()
+        if self.file is not None:
+            self.file.close()
+        if self.sock is not None:
+            try:
+                self.sock.shutdown(socket.SHUT_RDWR)
+            except OSError as e:
+                # The server might already have closed the connection
+                if e.errno != errno.ENOTCONN:
+                    raise
+            finally:
+                self.sock.close()
+        self.file = self.sock = None
 
     #__del__ = quit
 
@@ -347,12 +341,6 @@ class POP3:
         if which is not None:
             return self._shortcmd('UIDL %s' % which)
         return self._longcmd('UIDL')
-
-
-    def utf8(self):
-        """Try to enter UTF-8 mode (see RFC 6856). Returns server response.
-        """
-        return self._shortcmd('UTF8')
 
 
     def capa(self):

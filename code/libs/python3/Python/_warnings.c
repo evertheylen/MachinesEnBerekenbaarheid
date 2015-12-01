@@ -101,7 +101,7 @@ get_default_action(void)
 }
 
 
-/* The item is a new reference. */
+/* The item is a borrowed reference. */
 static PyObject*
 get_filter(PyObject *category, PyObject *text, Py_ssize_t lineno,
            PyObject *module, PyObject **item)
@@ -132,15 +132,14 @@ get_filter(PyObject *category, PyObject *text, Py_ssize_t lineno,
         Py_ssize_t ln;
         int is_subclass, good_msg, good_mod;
 
-        tmp_item = PyList_GET_ITEM(_filters, i);
-        if (!PyTuple_Check(tmp_item) || PyTuple_GET_SIZE(tmp_item) != 5) {
+        tmp_item = *item = PyList_GET_ITEM(_filters, i);
+        if (PyTuple_Size(tmp_item) != 5) {
             PyErr_Format(PyExc_ValueError,
                          MODULE_NAME ".filters item %zd isn't a 5-tuple", i);
             return NULL;
         }
 
         /* Python code: action, msg, cat, mod, ln = item */
-        Py_INCREF(tmp_item);
         action = PyTuple_GET_ITEM(tmp_item, 0);
         msg = PyTuple_GET_ITEM(tmp_item, 1);
         cat = PyTuple_GET_ITEM(tmp_item, 2);
@@ -148,43 +147,28 @@ get_filter(PyObject *category, PyObject *text, Py_ssize_t lineno,
         ln_obj = PyTuple_GET_ITEM(tmp_item, 4);
 
         good_msg = check_matched(msg, text);
-        if (good_msg == -1) {
-            Py_DECREF(tmp_item);
+        if (good_msg == -1)
             return NULL;
-        }
 
         good_mod = check_matched(mod, module);
-        if (good_mod == -1) {
-            Py_DECREF(tmp_item);
+        if (good_mod == -1)
             return NULL;
-        }
 
         is_subclass = PyObject_IsSubclass(category, cat);
-        if (is_subclass == -1) {
-            Py_DECREF(tmp_item);
+        if (is_subclass == -1)
             return NULL;
-        }
 
         ln = PyLong_AsSsize_t(ln_obj);
-        if (ln == -1 && PyErr_Occurred()) {
-            Py_DECREF(tmp_item);
+        if (ln == -1 && PyErr_Occurred())
             return NULL;
-        }
 
-        if (good_msg && is_subclass && good_mod && (ln == 0 || lineno == ln)) {
-            *item = tmp_item;
+        if (good_msg && is_subclass && good_mod && (ln == 0 || lineno == ln))
             return action;
-        }
-
-        Py_DECREF(tmp_item);
     }
 
     action = get_default_action();
-    if (action != NULL) {
-        Py_INCREF(Py_None);
-        *item = Py_None;
+    if (action != NULL)
         return action;
-    }
 
     PyErr_SetString(PyExc_ValueError,
                     MODULE_NAME ".defaultaction not found");
@@ -365,7 +349,7 @@ warn_explicit(PyObject *category, PyObject *message,
               PyObject *module, PyObject *registry, PyObject *sourceline)
 {
     PyObject *key = NULL, *text = NULL, *result = NULL, *lineno_obj = NULL;
-    PyObject *item = NULL;
+    PyObject *item = Py_None;
     PyObject *action;
     int rc;
 
@@ -504,71 +488,12 @@ warn_explicit(PyObject *category, PyObject *message,
     Py_INCREF(result);
 
  cleanup:
-    Py_XDECREF(item);
     Py_XDECREF(key);
     Py_XDECREF(text);
     Py_XDECREF(lineno_obj);
     Py_DECREF(module);
     Py_XDECREF(message);
     return result;  /* Py_None or NULL. */
-}
-
-static int
-is_internal_frame(PyFrameObject *frame)
-{
-    static PyObject *importlib_string = NULL;
-    static PyObject *bootstrap_string = NULL;
-    PyObject *filename;
-    int contains;
-
-    if (importlib_string == NULL) {
-        importlib_string = PyUnicode_FromString("importlib");
-        if (importlib_string == NULL) {
-            return 0;
-        }
-
-        bootstrap_string = PyUnicode_FromString("_bootstrap");
-        if (bootstrap_string == NULL) {
-            Py_DECREF(importlib_string);
-            return 0;
-        }
-        Py_INCREF(importlib_string);
-        Py_INCREF(bootstrap_string);
-    }
-
-    if (frame == NULL || frame->f_code == NULL ||
-            frame->f_code->co_filename == NULL) {
-        return 0;
-    }
-    filename = frame->f_code->co_filename;
-    if (!PyUnicode_Check(filename)) {
-        return 0;
-    }
-    contains = PyUnicode_Contains(filename, importlib_string);
-    if (contains < 0) {
-        return 0;
-    }
-    else if (contains > 0) {
-        contains = PyUnicode_Contains(filename, bootstrap_string);
-        if (contains < 0) {
-            return 0;
-        }
-        else if (contains > 0) {
-            return 1;
-        }
-    }
-
-    return 0;
-}
-
-static PyFrameObject *
-next_external_frame(PyFrameObject *frame)
-{
-    do {
-        frame = frame->f_back;
-    } while (frame != NULL && is_internal_frame(frame));
-
-    return frame;
 }
 
 /* filename, module, and registry are new refs, globals is borrowed */
@@ -581,18 +506,8 @@ setup_context(Py_ssize_t stack_level, PyObject **filename, int *lineno,
 
     /* Setup globals and lineno. */
     PyFrameObject *f = PyThreadState_GET()->frame;
-    // Stack level comparisons to Python code is off by one as there is no
-    // warnings-related stack level to avoid.
-    if (stack_level <= 0 || is_internal_frame(f)) {
-        while (--stack_level > 0 && f != NULL) {
-            f = f->f_back;
-        }
-    }
-    else {
-        while (--stack_level > 0 && f != NULL) {
-            f = next_external_frame(f);
-        }
-    }
+    while (--stack_level > 0 && f != NULL)
+        f = f->f_back;
 
     if (f == NULL) {
         globals = PyThreadState_Get()->interp->sysdict;
@@ -648,12 +563,13 @@ setup_context(Py_ssize_t stack_level, PyObject **filename, int *lineno,
         data = PyUnicode_DATA(*filename);
 
 #define ascii_lower(c) ((c <= 127) ? Py_TOLOWER(c) : 0)
-        /* if filename.lower().endswith(".pyc"): */
+        /* if filename.lower().endswith((".pyc", ".pyo")): */
         if (len >= 4 &&
             PyUnicode_READ(kind, data, len-4) == '.' &&
             ascii_lower(PyUnicode_READ(kind, data, len-3)) == 'p' &&
             ascii_lower(PyUnicode_READ(kind, data, len-2)) == 'y' &&
-            ascii_lower(PyUnicode_READ(kind, data, len-1)) == 'c')
+            (ascii_lower(PyUnicode_READ(kind, data, len-1)) == 'c' ||
+                ascii_lower(PyUnicode_READ(kind, data, len-1)) == 'o'))
         {
             *filename = PyUnicode_Substring(*filename, 0,
                                             PyUnicode_GET_LENGTH(*filename)-1);
@@ -721,17 +637,16 @@ get_category(PyObject *message, PyObject *category)
 
     if (rc == 1)
         category = (PyObject*)message->ob_type;
-    else if (category == NULL || category == Py_None)
+    else if (category == NULL)
         category = PyExc_UserWarning;
 
     /* Validate category. */
     rc = PyObject_IsSubclass(category, PyExc_Warning);
-    /* category is not a subclass of PyExc_Warning or
-       PyObject_IsSubclass raised an error */
-    if (rc == -1 || rc == 0) {
-        PyErr_Format(PyExc_TypeError,
-                     "category must be a Warning subclass, not '%s'",
-                     Py_TYPE(category)->tp_name);
+    if (rc == -1)
+        return NULL;
+    if (rc == 0) {
+        PyErr_SetString(PyExc_ValueError,
+                        "category is not a subclass of Warning");
         return NULL;
     }
 

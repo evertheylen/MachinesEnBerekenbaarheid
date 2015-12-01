@@ -19,7 +19,6 @@
  * $Id$
  */
 
-#define PY_SSIZE_T_CLEAN
 #include "Python.h"
 #include "structmember.h"
 
@@ -52,8 +51,8 @@ typedef struct {
     char    *devicename;              /* name of the device file */
     int      fd;                      /* file descriptor */
     int      mode;                    /* file mode (O_RDONLY, etc.) */
-    Py_ssize_t icount;                /* input count */
-    Py_ssize_t ocount;                /* output count */
+    int      icount;                  /* input count */
+    int      ocount;                  /* output count */
     uint32_t afmts;                   /* audio formats supported by hardware */
 } oss_audio_t;
 
@@ -117,8 +116,11 @@ newossobject(PyObject *arg)
        provides a special ioctl() for non-blocking read/write, which is
        exposed via oss_nonblock() below. */
     fd = _Py_open(devicename, imode|O_NONBLOCK);
-    if (fd == -1)
+
+    if (fd == -1) {
+        PyErr_SetFromErrnoWithFilename(PyExc_IOError, devicename);
         return NULL;
+    }
 
     /* And (try to) put it back in blocking mode so we get the
        expected write() semantics. */
@@ -178,8 +180,10 @@ newossmixerobject(PyObject *arg)
     }
 
     fd = _Py_open(devicename, O_RDWR);
-    if (fd == -1)
+    if (fd == -1) {
+        PyErr_SetFromErrnoWithFilename(PyExc_IOError, devicename);
         return NULL;
+    }
 
     if ((self = PyObject_New(oss_mixer_t, &OSSMixerType)) == NULL) {
         close(fd);
@@ -400,25 +404,29 @@ oss_post(oss_audio_t *self, PyObject *args)
 static PyObject *
 oss_read(oss_audio_t *self, PyObject *args)
 {
-    Py_ssize_t size, count;
+    int size, count;
+    char *cp;
     PyObject *rv;
 
     if (!_is_fd_valid(self->fd))
         return NULL;
 
-    if (!PyArg_ParseTuple(args, "n:read", &size))
+    if (!PyArg_ParseTuple(args, "i:read", &size))
         return NULL;
-
     rv = PyBytes_FromStringAndSize(NULL, size);
     if (rv == NULL)
         return NULL;
+    cp = PyBytes_AS_STRING(rv);
 
-    count = _Py_read(self->fd, PyBytes_AS_STRING(rv), size);
-    if (count == -1) {
+    Py_BEGIN_ALLOW_THREADS
+    count = read(self->fd, cp, size);
+    Py_END_ALLOW_THREADS
+
+    if (count < 0) {
+        PyErr_SetFromErrno(PyExc_IOError);
         Py_DECREF(rv);
         return NULL;
     }
-
     self->icount += count;
     _PyBytes_Resize(&rv, count);
     return rv;
@@ -427,32 +435,33 @@ oss_read(oss_audio_t *self, PyObject *args)
 static PyObject *
 oss_write(oss_audio_t *self, PyObject *args)
 {
-    Py_buffer data;
-    Py_ssize_t rv;
+    char *cp;
+    int rv, size;
 
     if (!_is_fd_valid(self->fd))
         return NULL;
 
-    if (!PyArg_ParseTuple(args, "y*:write", &data)) {
+    if (!PyArg_ParseTuple(args, "y#:write", &cp, &size)) {
         return NULL;
     }
 
-    rv = _Py_write(self->fd, data.buf, data.len);
-    PyBuffer_Release(&data);
-    if (rv == -1)
-        return NULL;
+    Py_BEGIN_ALLOW_THREADS
+    rv = write(self->fd, cp, size);
+    Py_END_ALLOW_THREADS
 
-    self->ocount += rv;
+    if (rv == -1) {
+        return PyErr_SetFromErrno(PyExc_IOError);
+    } else {
+        self->ocount += rv;
+    }
     return PyLong_FromLong(rv);
 }
 
 static PyObject *
 oss_writeall(oss_audio_t *self, PyObject *args)
 {
-    Py_buffer data;
-    const char *cp;
-    Py_ssize_t size;
-    Py_ssize_t rv;
+    char *cp;
+    int rv, size;
     fd_set write_set_fds;
     int select_rv;
 
@@ -466,50 +475,41 @@ oss_writeall(oss_audio_t *self, PyObject *args)
     if (!_is_fd_valid(self->fd))
         return NULL;
 
-    if (!PyArg_ParseTuple(args, "y*:writeall", &data))
+    if (!PyArg_ParseTuple(args, "y#:write", &cp, &size))
         return NULL;
 
     if (!_PyIsSelectable_fd(self->fd)) {
         PyErr_SetString(PyExc_ValueError,
                         "file descriptor out of range for select");
-        PyBuffer_Release(&data);
         return NULL;
     }
     /* use select to wait for audio device to be available */
     FD_ZERO(&write_set_fds);
     FD_SET(self->fd, &write_set_fds);
-    cp = (const char *)data.buf;
-    size = data.len;
 
     while (size > 0) {
         Py_BEGIN_ALLOW_THREADS
         select_rv = select(self->fd+1, NULL, &write_set_fds, NULL, NULL);
         Py_END_ALLOW_THREADS
-
-        assert(select_rv != 0);   /* no timeout, can't expire */
-        if (select_rv == -1) {
-            PyBuffer_Release(&data);
+        assert(select_rv != 0);         /* no timeout, can't expire */
+        if (select_rv == -1)
             return PyErr_SetFromErrno(PyExc_IOError);
-        }
 
-        rv = _Py_write(self->fd, cp, Py_MIN(size, INT_MAX));
+        Py_BEGIN_ALLOW_THREADS
+        rv = write(self->fd, cp, size);
+        Py_END_ALLOW_THREADS
         if (rv == -1) {
-            /* buffer is full, try again */
-            if (errno == EAGAIN) {
-                PyErr_Clear();
+            if (errno == EAGAIN) {      /* buffer is full, try again */
+                errno = 0;
                 continue;
-            }
-            /* it's a real error */
-            PyBuffer_Release(&data);
-            return NULL;
+            } else                      /* it's a real error */
+                return PyErr_SetFromErrno(PyExc_IOError);
+        } else {                        /* wrote rv bytes */
+            self->ocount += rv;
+            size -= rv;
+            cp += rv;
         }
-
-        /* wrote rv bytes */
-        self->ocount += rv;
-        size -= rv;
-        cp += rv;
     }
-    PyBuffer_Release(&data);
     Py_INCREF(Py_None);
     return Py_None;
 }

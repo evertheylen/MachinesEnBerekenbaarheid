@@ -710,5 +710,16 @@ LAERTES
 """
 
 
+def test_main():
+    support.run_unittest(
+        VersionTestCase,
+        ChecksumTestCase,
+        ChecksumBigBufferTestCase,
+        ExceptionTestCase,
+        CompressTestCase,
+        CompressObjectTestCase
+    )
+
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main() # XXX
+    ###test_main()

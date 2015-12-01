@@ -19,7 +19,7 @@ import logging
 import struct
 import operator
 import test.support
-import test.support.script_helper
+import test.script_helper
 
 
 # Skip tests if _multiprocessing wasn't built.
@@ -712,27 +712,6 @@ class _TestQueue(BaseTestCase):
 
         for p in workers:
             p.join()
-
-    def test_no_import_lock_contention(self):
-        with test.support.temp_cwd():
-            module_name = 'imported_by_an_imported_module'
-            with open(module_name + '.py', 'w') as f:
-                f.write("""if 1:
-                    import multiprocessing
-
-                    q = multiprocessing.Queue()
-                    q.put('knock knock')
-                    q.get(timeout=3)
-                    q.close()
-                    del q
-                """)
-
-            with test.support.DirsOnSysPath(os.getcwd()):
-                try:
-                    __import__(module_name)
-                except pyqueue.Empty:
-                    self.fail("Probable regression on import lock contention;"
-                              " see Issue #22853")
 
     def test_timeout(self):
         q = multiprocessing.Queue()
@@ -1660,14 +1639,6 @@ def sqr(x, wait=0.0):
 def mul(x, y):
     return x*y
 
-class SayWhenError(ValueError): pass
-
-def exception_throwing_generator(total, when):
-    for i in range(total):
-        if i == when:
-            raise SayWhenError("Somebody said when")
-        yield i
-
 class _TestPool(BaseTestCase):
 
     @classmethod
@@ -1766,56 +1737,12 @@ class _TestPool(BaseTestCase):
             self.assertEqual(next(it), i*i)
         self.assertRaises(StopIteration, it.__next__)
 
-    def test_imap_handle_iterable_exception(self):
-        if self.TYPE == 'manager':
-            self.skipTest('test not appropriate for {}'.format(self.TYPE))
-
-        it = self.pool.imap(sqr, exception_throwing_generator(10, 3), 1)
-        for i in range(3):
-            self.assertEqual(next(it), i*i)
-        self.assertRaises(SayWhenError, it.__next__)
-
-        # SayWhenError seen at start of problematic chunk's results
-        it = self.pool.imap(sqr, exception_throwing_generator(20, 7), 2)
-        for i in range(6):
-            self.assertEqual(next(it), i*i)
-        self.assertRaises(SayWhenError, it.__next__)
-        it = self.pool.imap(sqr, exception_throwing_generator(20, 7), 4)
-        for i in range(4):
-            self.assertEqual(next(it), i*i)
-        self.assertRaises(SayWhenError, it.__next__)
-
     def test_imap_unordered(self):
         it = self.pool.imap_unordered(sqr, list(range(1000)))
         self.assertEqual(sorted(it), list(map(sqr, list(range(1000)))))
 
         it = self.pool.imap_unordered(sqr, list(range(1000)), chunksize=53)
         self.assertEqual(sorted(it), list(map(sqr, list(range(1000)))))
-
-    def test_imap_unordered_handle_iterable_exception(self):
-        if self.TYPE == 'manager':
-            self.skipTest('test not appropriate for {}'.format(self.TYPE))
-
-        it = self.pool.imap_unordered(sqr,
-                                      exception_throwing_generator(10, 3),
-                                      1)
-        expected_values = list(map(sqr, list(range(10))))
-        with self.assertRaises(SayWhenError):
-            # imap_unordered makes it difficult to anticipate the SayWhenError
-            for i in range(10):
-                value = next(it)
-                self.assertIn(value, expected_values)
-                expected_values.remove(value)
-
-        it = self.pool.imap_unordered(sqr,
-                                      exception_throwing_generator(20, 7),
-                                      2)
-        expected_values = list(map(sqr, list(range(20))))
-        with self.assertRaises(SayWhenError):
-            for i in range(20):
-                value = next(it)
-                self.assertIn(value, expected_values)
-                expected_values.remove(value)
 
     def test_make_pool(self):
         self.assertRaises(ValueError, multiprocessing.Pool, -1)
@@ -2093,12 +2020,6 @@ SERIALIZER = 'xmlrpclib'
 class _TestRemoteManager(BaseTestCase):
 
     ALLOWED_TYPES = ('manager',)
-    values = ['hello world', None, True, 2.25,
-              'hall\xe5 v\xe4rlden',
-              '\u043f\u0440\u0438\u0432\u0456\u0442 \u0441\u0432\u0456\u0442',
-              b'hall\xe5 v\xe4rlden',
-             ]
-    result = values[:]
 
     @classmethod
     def _putter(cls, address, authkey):
@@ -2107,8 +2028,7 @@ class _TestRemoteManager(BaseTestCase):
             )
         manager.connect()
         queue = manager.get_queue()
-        # Note that xmlrpclib will deserialize object as a list not a tuple
-        queue.put(tuple(cls.values))
+        queue.put(('hello world', None, True, 2.25))
 
     def test_remote(self):
         authkey = os.urandom(32)
@@ -2128,7 +2048,8 @@ class _TestRemoteManager(BaseTestCase):
         manager2.connect()
         queue = manager2.get_queue()
 
-        self.assertEqual(queue.get(), self.result)
+        # Note that xmlrpclib will deserialize object as a list not a tuple
+        self.assertEqual(queue.get(), ['hello world', None, True, 2.25])
 
         # Because we are using xmlrpclib for serialization instead of
         # pickle this will cause a serialization error.
@@ -2624,7 +2545,7 @@ class _TestPicklingConnections(BaseTestCase):
 
         l = socket.socket()
         l.bind((test.support.HOST, 0))
-        l.listen()
+        l.listen(1)
         conn.send(l.getsockname())
         new_conn, addr = l.accept()
         conn.send(new_conn)
@@ -3271,7 +3192,7 @@ class TestWait(unittest.TestCase):
         from multiprocessing.connection import wait
         l = socket.socket()
         l.bind((test.support.HOST, 0))
-        l.listen()
+        l.listen(4)
         addr = l.getsockname()
         readers = []
         procs = []
@@ -3483,13 +3404,13 @@ class TestNoForkBomb(unittest.TestCase):
         sm = multiprocessing.get_start_method()
         name = os.path.join(os.path.dirname(__file__), 'mp_fork_bomb.py')
         if sm != 'fork':
-            rc, out, err = test.support.script_helper.assert_python_failure(name, sm)
-            self.assertEqual(out, b'')
-            self.assertIn(b'RuntimeError', err)
+            rc, out, err = test.script_helper.assert_python_failure(name, sm)
+            self.assertEqual('', out.decode('ascii'))
+            self.assertIn('RuntimeError', err.decode('ascii'))
         else:
-            rc, out, err = test.support.script_helper.assert_python_ok(name, sm)
-            self.assertEqual(out.rstrip(), b'123')
-            self.assertEqual(err, b'')
+            rc, out, err = test.script_helper.assert_python_ok(name, sm)
+            self.assertEqual('123', out.decode('ascii').rstrip())
+            self.assertEqual('', err.decode('ascii'))
 
 #
 # Issue #17555: ForkAwareThreadLock

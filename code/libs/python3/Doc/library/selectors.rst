@@ -45,7 +45,6 @@ Classes hierarchy::
    +-- SelectSelector
    +-- PollSelector
    +-- EpollSelector
-   +-- DevpollSelector
    +-- KqueueSelector
 
 
@@ -159,12 +158,6 @@ below:
           timeout has elapsed if the current process receives a signal: in this
           case, an empty list will be returned.
 
-      .. versionchanged:: 3.5
-         The selector is now retried with a recomputed timeout when interrupted
-         by a signal if the signal handler did not raise an exception (see
-         :pep:`475` for the rationale), instead of returning an empty list
-         of events before the timeout.
-
    .. method:: close()
 
       Close the selector.
@@ -214,16 +207,6 @@ below:
       This returns the file descriptor used by the underlying
       :func:`select.epoll` object.
 
-.. class:: DevpollSelector()
-
-   :func:`select.devpoll`-based selector.
-
-   .. method:: fileno()
-
-      This returns the file descriptor used by the underlying
-      :func:`select.devpoll` object.
-
-   .. versionadded:: 3.5
 
 .. class:: KqueueSelector()
 

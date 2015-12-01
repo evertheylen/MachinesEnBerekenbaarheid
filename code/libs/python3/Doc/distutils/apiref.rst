@@ -868,31 +868,23 @@ tarballs or zipfiles.
 
    Create an archive file (eg. ``zip`` or ``tar``).  *base_name*  is the name of
    the file to create, minus any format-specific extension;  *format* is the
-   archive format: one of ``zip``, ``tar``, ``gztar``, ``bztar``, ``xztar``, or
-   ``ztar``. *root_dir* is a directory that will be the root directory of the
-   archive; ie. we typically ``chdir`` into *root_dir* before  creating the
-   archive.  *base_dir* is the directory where we start  archiving from; ie.
-   *base_dir* will be the common prefix of all files and directories in the
-   archive.  *root_dir* and *base_dir* both default to the current directory.
-   Returns the name of the archive file.
-
-   .. versionchanged: 3.5
-      Added support for the ``xztar`` format.
+   archive format: one of ``zip``, ``tar``,  ``ztar``, or ``gztar``. *root_dir* is
+   a directory that will be the root directory of the archive; ie. we typically
+   ``chdir`` into *root_dir* before  creating the archive.  *base_dir* is the
+   directory where we start  archiving from; ie. *base_dir* will be the common
+   prefix of all files and directories in the archive.  *root_dir* and *base_dir*
+   both default to the current directory.  Returns the name of the archive file.
 
 
 .. function:: make_tarball(base_name, base_dir[, compress='gzip', verbose=0, dry_run=0])
 
    'Create an (optional compressed) archive as a tar file from all files in and
-   under *base_dir*. *compress* must be ``'gzip'`` (the default),
-   ``'bzip2'``, ``'xz'``, ``'compress'``, or ``None``.  For the ``'compress'``
-   method the compression utility named by :program:`compress` must be on the
-   default program search path, so this is probably Unix-specific.  The output
-   tar file will be named :file:`base_dir.tar`, possibly plus the appropriate
-   compression extension (``.gz``, ``.bz2``, ``.xz`` or ``.Z``).  Return the
-   output filename.
-
-   .. versionchanged: 3.5
-      Added support for the ``xz`` compression.
+   under *base_dir*. *compress* must be ``'gzip'`` (the default),  ``'compress'``,
+   ``'bzip2'``, or ``None``.  Both :program:`tar` and the compression utility named
+   by *compress* must be on the  default program search path, so this is probably
+   Unix-specific.  The  output tar file will be named :file:`base_dir.tar`,
+   possibly plus the appropriate compression extension (:file:`.gz`, :file:`.bz2`
+   or :file:`.Z`).  Return the output filename.
 
 
 .. function:: make_zipfile(base_name, base_dir[, verbose=0, dry_run=0])
@@ -1107,13 +1099,13 @@ other utility module.
    during the build of Python), not the OS version of the current system.
 
    For universal binary builds on Mac OS X the architecture value reflects
-   the universal binary status instead of the architecture of the current
+   the univeral binary status instead of the architecture of the current
    processor. For 32-bit universal binaries the architecture is ``fat``,
    for 64-bit universal binaries the architecture is ``fat64``, and
    for 4-way universal binaries the architecture is ``universal``. Starting
    from Python 2.7 and Python 3.2 the architecture ``fat3`` is used for
    a 3-way universal build (ppc, i386, x86_64) and ``intel`` is used for
-   a universal build with the i386 and x86_64 architectures
+   a univeral build with the i386 and x86_64 architectures
 
    Examples of returned values on Mac OS X:
 
@@ -1201,12 +1193,12 @@ other utility module.
 
 .. function:: byte_compile(py_files[, optimize=0, force=0, prefix=None, base_dir=None, verbose=1, dry_run=0, direct=None])
 
-   Byte-compile a collection of Python source files to :file:`.pyc` files in a
-   :file:`__pycache__` subdirectory (see :pep:`3147` and :pep:`488`).
+   Byte-compile a collection of Python source files to either :file:`.pyc` or
+   :file:`.pyo` files in a :file:`__pycache__` subdirectory (see :pep:`3147`).
    *py_files* is a list of files to compile; any files that don't end in
    :file:`.py` are silently skipped.  *optimize* must be one of the following:
 
-   * ``0`` - don't optimize
+   * ``0`` - don't optimize (generate :file:`.pyc`)
    * ``1`` - normal optimization (like ``python -O``)
    * ``2`` - extra optimization (like ``python -OO``)
 
@@ -1230,12 +1222,9 @@ other utility module.
    doing, leave it set to ``None``.
 
    .. versionchanged:: 3.2.3
-      Create ``.pyc`` files with an :func:`import magic tag
+      Create ``.pyc`` or ``.pyo`` files with an :func:`import magic tag
       <imp.get_tag>` in their name, in a :file:`__pycache__` subdirectory
       instead of files without tag in the current directory.
-
-   .. versionchanged: 3.5
-      Create ``.pyc`` files according to :pep:`488`.
 
 
 .. function:: rfc822_escape(header)

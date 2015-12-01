@@ -34,7 +34,7 @@ import suspicious
 
 
 ISSUE_URI = 'https://bugs.python.org/issue%s'
-SOURCE_URI = 'https://hg.python.org/cpython/file/3.5/%s'
+SOURCE_URI = 'https://hg.python.org/cpython/file/3.4/%s'
 
 # monkey-patch reST parser to disable alphabetic and roman enumerated lists
 from docutils.parsers.rst.states import Body
@@ -140,25 +140,6 @@ class PyDecoratorFunction(PyDecoratorMixin, PyModulelevel):
 
 
 class PyDecoratorMethod(PyDecoratorMixin, PyClassmember):
-    def run(self):
-        self.name = 'py:method'
-        return PyClassmember.run(self)
-
-
-class PyCoroutineMixin(object):
-    def handle_signature(self, sig, signode):
-        ret = super(PyCoroutineMixin, self).handle_signature(sig, signode)
-        signode.insert(0, addnodes.desc_annotation('coroutine ', 'coroutine '))
-        return ret
-
-
-class PyCoroutineFunction(PyCoroutineMixin, PyModulelevel):
-    def run(self):
-        self.name = 'py:function'
-        return PyModulelevel.run(self)
-
-
-class PyCoroutineMethod(PyCoroutineMixin, PyClassmember):
     def run(self):
         self.name = 'py:method'
         return PyClassmember.run(self)
@@ -366,7 +347,5 @@ def setup(app):
     app.add_description_unit('2to3fixer', '2to3fixer', '%s (2to3 fixer)')
     app.add_directive_to_domain('py', 'decorator', PyDecoratorFunction)
     app.add_directive_to_domain('py', 'decoratormethod', PyDecoratorMethod)
-    app.add_directive_to_domain('py', 'coroutinefunction', PyCoroutineFunction)
-    app.add_directive_to_domain('py', 'coroutinemethod', PyCoroutineMethod)
     app.add_directive('miscnews', MiscNews)
     return {'version': '1.0', 'parallel_read_safe': True}

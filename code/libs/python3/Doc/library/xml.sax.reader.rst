@@ -100,10 +100,8 @@ The :class:`XMLReader` interface supports the following methods:
    system identifier (a string identifying the input source -- typically a file
    name or an URL), a file-like object, or an :class:`InputSource` object. When
    :meth:`parse` returns, the input is completely processed, and the parser object
-   can be discarded or reset.
-
-   .. versionchanged:: 3.5
-      Added support of character streams.
+   can be discarded or reset. As a limitation, the current implementation only
+   accepts byte streams; processing of character streams is for further study.
 
 
 .. method:: XMLReader.getContentHandler()
@@ -290,7 +288,8 @@ InputSource Objects
 
 .. method:: InputSource.setByteStream(bytefile)
 
-   Set the byte stream (a :term:`binary file`) for this input source.
+   Set the byte stream (a Python file-like object which does not perform
+   byte-to-character conversion) for this input source.
 
    The SAX parser will ignore this if there is also a character stream specified,
    but it will use a byte stream in preference to opening a URI connection itself.
@@ -309,7 +308,8 @@ InputSource Objects
 
 .. method:: InputSource.setCharacterStream(charfile)
 
-   Set the character stream (a :term:`text file`) for this input source.
+   Set the character stream for this input source. (The stream must be a Python 1.6
+   Unicode-wrapped file-like that performs conversion to strings.)
 
    If there is a character stream specified, the SAX parser will ignore any byte
    stream and will not attempt to open a URI connection to the system identifier.

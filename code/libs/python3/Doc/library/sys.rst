@@ -167,7 +167,7 @@ always available.
 
 .. data:: dont_write_bytecode
 
-   If this is true, Python won't try to write ``.pyc`` files on the
+   If this is true, Python won't try to write ``.pyc`` or ``.pyo`` files on the
    import of source modules.  This value is initially set to ``True`` or
    ``False`` depending on the :option:`-B` command line option and the
    :envvar:`PYTHONDONTWRITEBYTECODE` environment variable, but you can set it
@@ -576,18 +576,6 @@ always available.
       *service_pack_major*, *suite_mask*, and *product_type*.
 
 
-.. function:: get_coroutine_wrapper()
-
-   Returns ``None``, or a wrapper set by :func:`set_coroutine_wrapper`.
-
-   .. versionadded:: 3.5
-      See :pep:`492` for more details.
-
-   .. note::
-      This function has been added on a provisional basis (see :pep:`411`
-      for details.)  Use it only for debugging purposes.
-
-
 .. data:: hash_info
 
    A :term:`struct sequence` giving parameters of the numeric hash
@@ -728,14 +716,6 @@ always available.
 
    Interned strings are not immortal; you must keep a reference to the return
    value of :func:`intern` around to benefit from it.
-
-
-.. function:: is_finalizing()
-
-   Return :const:`True` if the Python interpreter is
-   :term:`shutting down <interpreter shutdown>`, :const:`False` otherwise.
-
-   .. versionadded:: 3.5
 
 
 .. data:: last_type
@@ -1073,46 +1053,6 @@ always available.
       thus not likely to be implemented elsewhere.
 
 
-.. function:: set_coroutine_wrapper(wrapper)
-
-   Allows intercepting creation of :term:`coroutine` objects (only ones that
-   are created by an :keyword:`async def` function; generators decorated with
-   :func:`types.coroutine` or :func:`asyncio.coroutine` will not be
-   intercepted).
-
-   The *wrapper* argument must be either:
-
-   * a callable that accepts one argument (a coroutine object);
-   * ``None``, to reset the wrapper.
-
-   If called twice, the new wrapper replaces the previous one.  The function
-   is thread-specific.
-
-   The *wrapper* callable cannot define new coroutines directly or indirectly::
-
-        def wrapper(coro):
-            async def wrap(coro):
-                return await coro
-            return wrap(coro)
-        sys.set_coroutine_wrapper(wrapper)
-
-        async def foo():
-            pass
-
-        # The following line will fail with a RuntimeError, because
-        # ``wrapper`` creates a ``wrap(coro)`` coroutine:
-        foo()
-
-   See also :func:`get_coroutine_wrapper`.
-
-   .. versionadded:: 3.5
-      See :pep:`492` for more details.
-
-   .. note::
-      This function has been added on a provisional basis (see :pep:`411`
-      for details.)  Use it only for debugging purposes.
-
-
 .. data:: stdin
           stdout
           stderr
@@ -1283,3 +1223,4 @@ always available.
 .. rubric:: Citations
 
 .. [C99] ISO/IEC 9899:1999.  "Programming languages -- C."  A public draft of this standard is available at http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1256.pdf\ .
+

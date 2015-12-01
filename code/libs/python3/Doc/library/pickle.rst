@@ -26,9 +26,9 @@ avoid confusion, the terms used here are "pickling" and "unpickling".
 
 .. warning::
 
-   The :mod:`pickle` module is not secure against erroneous or maliciously
-   constructed data.  Never unpickle data received from an untrusted or
-   unauthenticated source.
+   The :mod:`pickle` module is not intended to be secure against erroneous or
+   maliciously constructed data.  Never unpickle data received from an untrusted
+   or unauthenticated source.
 
 
 Relationship to other Python modules
@@ -425,7 +425,7 @@ The following types can be pickled:
 Attempts to pickle unpicklable objects will raise the :exc:`PicklingError`
 exception; when this happens, an unspecified number of bytes may have already
 been written to the underlying file.  Trying to pickle a highly recursive data
-structure may exceed the maximum recursion depth, a :exc:`RecursionError` will be
+structure may exceed the maximum recursion depth, a :exc:`RuntimeError` will be
 raised in this case.  You can carefully raise this limit with
 :func:`sys.setrecursionlimit`.
 
@@ -859,7 +859,7 @@ For the simplest code, use the :func:`dump` and :func:`load` functions. ::
    data = {
        'a': [1, 2.0, 3, 4+6j],
        'b': ("character string", b"byte string"),
-       'c': {None, True, False}
+       'c': set([None, True, False])
    }
 
    with open('data.pickle', 'wb') as f:

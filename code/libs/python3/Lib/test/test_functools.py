@@ -7,10 +7,6 @@ import sys
 from test import support
 import unittest
 from weakref import proxy
-try:
-    import threading
-except ImportError:
-    threading = None
 
 import functools
 
@@ -81,11 +77,9 @@ class TestPartial:
         # exercise special code paths for no keyword args in
         # either the partial object or the caller
         p = self.partial(capture)
-        self.assertEqual(p.keywords, {})
         self.assertEqual(p(), ((), {}))
         self.assertEqual(p(a=1), ((), {'a':1}))
         p = self.partial(capture, a=1)
-        self.assertEqual(p.keywords, {'a':1})
         self.assertEqual(p(), ((), {'a':1}))
         self.assertEqual(p(b=2), ((), {'a':1, 'b':2}))
         # keyword args in the call override those in the partial object
@@ -137,16 +131,6 @@ class TestPartial:
         join = self.partial(''.join)
         self.assertEqual(join(data), '0123456789')
 
-    def test_nested_optimization(self):
-        partial = self.partial
-        # Only "true" partial is optimized
-        if partial.__name__ != 'partial':
-            return
-        inner = partial(signature, 'asdf')
-        nested = partial(inner, bar=True)
-        flat = partial(signature, 'asdf', bar=True)
-        self.assertEqual(signature(nested), signature(flat))
-
 
 @unittest.skipUnless(c_functools, 'requires the C _functools module')
 class TestPartialC(TestPartial, unittest.TestCase):
@@ -171,9 +155,9 @@ class TestPartialC(TestPartial, unittest.TestCase):
     def test_repr(self):
         args = (object(), object())
         args_repr = ', '.join(repr(a) for a in args)
-        kwargs = {'a': object(), 'b': object()}
-        kwargs_reprs = ['a={a!r}, b={b!r}'.format_map(kwargs),
-                        'b={b!r}, a={a!r}'.format_map(kwargs)]
+        #kwargs = {'a': object(), 'b': object()}
+        kwargs = {'a': object()}
+        kwargs_repr = ', '.join("%s=%r" % (k, v) for k, v in kwargs.items())
         if self.partial is c_functools.partial:
             name = 'functools.partial'
         else:
@@ -188,14 +172,12 @@ class TestPartialC(TestPartial, unittest.TestCase):
                          repr(f))
 
         f = self.partial(capture, **kwargs)
-        self.assertIn(repr(f),
-                      ['{}({!r}, {})'.format(name, capture, kwargs_repr)
-                       for kwargs_repr in kwargs_reprs])
+        self.assertEqual('{}({!r}, {})'.format(name, capture, kwargs_repr),
+                         repr(f))
 
         f = self.partial(capture, *args, **kwargs)
-        self.assertIn(repr(f),
-                      ['{}({!r}, {}, {})'.format(name, capture, args_repr, kwargs_repr)
-                       for kwargs_repr in kwargs_reprs])
+        self.assertEqual('{}({!r}, {}, {})'.format(name, capture, args_repr, kwargs_repr),
+                         repr(f))
 
     def test_pickle(self):
         f = self.partial(signature, 'asdf', bar=True)
@@ -898,30 +880,12 @@ class TestTotalOrdering(unittest.TestCase):
             with self.assertRaises(TypeError):
                 a <= b
 
-    def test_pickle(self):
-        for proto in range(4, pickle.HIGHEST_PROTOCOL + 1):
-            for name in '__lt__', '__gt__', '__le__', '__ge__':
-                with self.subTest(method=name, proto=proto):
-                    method = getattr(Orderable_LT, name)
-                    method_copy = pickle.loads(pickle.dumps(method, proto))
-                    self.assertIs(method_copy, method)
-
-@functools.total_ordering
-class Orderable_LT:
-    def __init__(self, value):
-        self.value = value
-    def __lt__(self, other):
-        return self.value < other.value
-    def __eq__(self, other):
-        return self.value == other.value
-
-
-class TestLRU:
+class TestLRU(unittest.TestCase):
 
     def test_lru(self):
         def orig(x, y):
             return 3 * x + y
-        f = self.module.lru_cache(maxsize=20)(orig)
+        f = functools.lru_cache(maxsize=20)(orig)
         hits, misses, maxsize, currsize = f.cache_info()
         self.assertEqual(maxsize, 20)
         self.assertEqual(currsize, 0)
@@ -959,7 +923,7 @@ class TestLRU:
         self.assertEqual(currsize, 1)
 
         # test size zero (which means "never-cache")
-        @self.module.lru_cache(0)
+        @functools.lru_cache(0)
         def f():
             nonlocal f_cnt
             f_cnt += 1
@@ -975,7 +939,7 @@ class TestLRU:
         self.assertEqual(currsize, 0)
 
         # test size one
-        @self.module.lru_cache(1)
+        @functools.lru_cache(1)
         def f():
             nonlocal f_cnt
             f_cnt += 1
@@ -991,7 +955,7 @@ class TestLRU:
         self.assertEqual(currsize, 1)
 
         # test size two
-        @self.module.lru_cache(2)
+        @functools.lru_cache(2)
         def f(x):
             nonlocal f_cnt
             f_cnt += 1
@@ -1008,7 +972,7 @@ class TestLRU:
         self.assertEqual(currsize, 2)
 
     def test_lru_with_maxsize_none(self):
-        @self.module.lru_cache(maxsize=None)
+        @functools.lru_cache(maxsize=None)
         def fib(n):
             if n < 2:
                 return n
@@ -1016,26 +980,17 @@ class TestLRU:
         self.assertEqual([fib(n) for n in range(16)],
             [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610])
         self.assertEqual(fib.cache_info(),
-            self.module._CacheInfo(hits=28, misses=16, maxsize=None, currsize=16))
+            functools._CacheInfo(hits=28, misses=16, maxsize=None, currsize=16))
         fib.cache_clear()
         self.assertEqual(fib.cache_info(),
-            self.module._CacheInfo(hits=0, misses=0, maxsize=None, currsize=0))
-
-    def test_lru_with_maxsize_negative(self):
-        @self.module.lru_cache(maxsize=-10)
-        def eq(n):
-            return n
-        for i in (0, 1):
-            self.assertEqual([eq(n) for n in range(150)], list(range(150)))
-        self.assertEqual(eq.cache_info(),
-            self.module._CacheInfo(hits=0, misses=300, maxsize=-10, currsize=1))
+            functools._CacheInfo(hits=0, misses=0, maxsize=None, currsize=0))
 
     def test_lru_with_exceptions(self):
         # Verify that user_function exceptions get passed through without
         # creating a hard-to-read chained exception.
         # http://bugs.python.org/issue13177
         for maxsize in (None, 128):
-            @self.module.lru_cache(maxsize)
+            @functools.lru_cache(maxsize)
             def func(i):
                 return 'abc'[i]
             self.assertEqual(func(0), 'a')
@@ -1048,7 +1003,7 @@ class TestLRU:
 
     def test_lru_with_types(self):
         for maxsize in (None, 128):
-            @self.module.lru_cache(maxsize=maxsize, typed=True)
+            @functools.lru_cache(maxsize=maxsize, typed=True)
             def square(x):
                 return x * x
             self.assertEqual(square(3), 9)
@@ -1063,7 +1018,7 @@ class TestLRU:
             self.assertEqual(square.cache_info().misses, 4)
 
     def test_lru_with_keyword_args(self):
-        @self.module.lru_cache()
+        @functools.lru_cache()
         def fib(n):
             if n < 2:
                 return n
@@ -1073,13 +1028,13 @@ class TestLRU:
             [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610]
         )
         self.assertEqual(fib.cache_info(),
-            self.module._CacheInfo(hits=28, misses=16, maxsize=128, currsize=16))
+            functools._CacheInfo(hits=28, misses=16, maxsize=128, currsize=16))
         fib.cache_clear()
         self.assertEqual(fib.cache_info(),
-            self.module._CacheInfo(hits=0, misses=0, maxsize=128, currsize=0))
+            functools._CacheInfo(hits=0, misses=0, maxsize=128, currsize=0))
 
     def test_lru_with_keyword_args_maxsize_none(self):
-        @self.module.lru_cache(maxsize=None)
+        @functools.lru_cache(maxsize=None)
         def fib(n):
             if n < 2:
                 return n
@@ -1087,100 +1042,15 @@ class TestLRU:
         self.assertEqual([fib(n=number) for number in range(16)],
             [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610])
         self.assertEqual(fib.cache_info(),
-            self.module._CacheInfo(hits=28, misses=16, maxsize=None, currsize=16))
+            functools._CacheInfo(hits=28, misses=16, maxsize=None, currsize=16))
         fib.cache_clear()
         self.assertEqual(fib.cache_info(),
-            self.module._CacheInfo(hits=0, misses=0, maxsize=None, currsize=0))
-
-    def test_lru_cache_decoration(self):
-        def f(zomg: 'zomg_annotation'):
-            """f doc string"""
-            return 42
-        g = self.module.lru_cache()(f)
-        for attr in self.module.WRAPPER_ASSIGNMENTS:
-            self.assertEqual(getattr(g, attr), getattr(f, attr))
-
-    @unittest.skipUnless(threading, 'This test requires threading.')
-    def test_lru_cache_threaded(self):
-        n, m = 5, 11
-        def orig(x, y):
-            return 3 * x + y
-        f = self.module.lru_cache(maxsize=n*m)(orig)
-        hits, misses, maxsize, currsize = f.cache_info()
-        self.assertEqual(currsize, 0)
-
-        start = threading.Event()
-        def full(k):
-            start.wait(10)
-            for _ in range(m):
-                self.assertEqual(f(k, 0), orig(k, 0))
-
-        def clear():
-            start.wait(10)
-            for _ in range(2*m):
-                f.cache_clear()
-
-        orig_si = sys.getswitchinterval()
-        sys.setswitchinterval(1e-6)
-        try:
-            # create n threads in order to fill cache
-            threads = [threading.Thread(target=full, args=[k])
-                       for k in range(n)]
-            with support.start_threads(threads):
-                start.set()
-
-            hits, misses, maxsize, currsize = f.cache_info()
-            if self.module is py_functools:
-                # XXX: Why can be not equal?
-                self.assertLessEqual(misses, n)
-                self.assertLessEqual(hits, m*n - misses)
-            else:
-                self.assertEqual(misses, n)
-                self.assertEqual(hits, m*n - misses)
-            self.assertEqual(currsize, n)
-
-            # create n threads in order to fill cache and 1 to clear it
-            threads = [threading.Thread(target=clear)]
-            threads += [threading.Thread(target=full, args=[k])
-                        for k in range(n)]
-            start.clear()
-            with support.start_threads(threads):
-                start.set()
-        finally:
-            sys.setswitchinterval(orig_si)
-
-    @unittest.skipUnless(threading, 'This test requires threading.')
-    def test_lru_cache_threaded2(self):
-        # Simultaneous call with the same arguments
-        n, m = 5, 7
-        start = threading.Barrier(n+1)
-        pause = threading.Barrier(n+1)
-        stop = threading.Barrier(n+1)
-        @self.module.lru_cache(maxsize=m*n)
-        def f(x):
-            pause.wait(10)
-            return 3 * x
-        self.assertEqual(f.cache_info(), (0, 0, m*n, 0))
-        def test():
-            for i in range(m):
-                start.wait(10)
-                self.assertEqual(f(i), 3 * i)
-                stop.wait(10)
-        threads = [threading.Thread(target=test) for k in range(n)]
-        with support.start_threads(threads):
-            for i in range(m):
-                start.wait(10)
-                stop.reset()
-                pause.wait(10)
-                start.reset()
-                stop.wait(10)
-                pause.reset()
-                self.assertEqual(f.cache_info(), (0, (i+1)*n, m*n, i+1))
+            functools._CacheInfo(hits=0, misses=0, maxsize=None, currsize=0))
 
     def test_need_for_rlock(self):
         # This will deadlock on an LRU cache that uses a regular lock
 
-        @self.module.lru_cache(maxsize=10)
+        @functools.lru_cache(maxsize=10)
         def test_func(x):
             'Used to demonstrate a reentrant lru_cache call within a single thread'
             return x
@@ -1207,43 +1077,6 @@ class TestLRU:
             @functools.lru_cache
             def f():
                 pass
-
-    def test_lru_method(self):
-        class X(int):
-            f_cnt = 0
-            @self.module.lru_cache(2)
-            def f(self, x):
-                self.f_cnt += 1
-                return x*10+self
-        a = X(5)
-        b = X(5)
-        c = X(7)
-        self.assertEqual(X.f.cache_info(), (0, 0, 2, 0))
-
-        for x in 1, 2, 2, 3, 1, 1, 1, 2, 3, 3:
-            self.assertEqual(a.f(x), x*10 + 5)
-        self.assertEqual((a.f_cnt, b.f_cnt, c.f_cnt), (6, 0, 0))
-        self.assertEqual(X.f.cache_info(), (4, 6, 2, 2))
-
-        for x in 1, 2, 1, 1, 1, 1, 3, 2, 2, 2:
-            self.assertEqual(b.f(x), x*10 + 5)
-        self.assertEqual((a.f_cnt, b.f_cnt, c.f_cnt), (6, 4, 0))
-        self.assertEqual(X.f.cache_info(), (10, 10, 2, 2))
-
-        for x in 2, 1, 1, 1, 1, 2, 1, 3, 2, 1:
-            self.assertEqual(c.f(x), x*10 + 7)
-        self.assertEqual((a.f_cnt, b.f_cnt, c.f_cnt), (6, 4, 5))
-        self.assertEqual(X.f.cache_info(), (15, 15, 2, 2))
-
-        self.assertEqual(a.f.cache_info(), X.f.cache_info())
-        self.assertEqual(b.f.cache_info(), X.f.cache_info())
-        self.assertEqual(c.f.cache_info(), X.f.cache_info())
-
-class TestLRUC(TestLRU, unittest.TestCase):
-    module = c_functools
-
-class TestLRUPy(TestLRU, unittest.TestCase):
-    module = py_functools
 
 
 class TestSingleDispatch(unittest.TestCase):
@@ -1721,5 +1554,32 @@ class TestSingleDispatch(unittest.TestCase):
         functools.WeakKeyDictionary = _orig_wkd
 
 
+def test_main(verbose=None):
+    test_classes = (
+        TestPartialC,
+        TestPartialPy,
+        TestPartialCSubclass,
+        TestPartialMethod,
+        TestUpdateWrapper,
+        TestTotalOrdering,
+        TestCmpToKeyC,
+        TestCmpToKeyPy,
+        TestWraps,
+        TestReduce,
+        TestLRU,
+        TestSingleDispatch,
+    )
+    support.run_unittest(*test_classes)
+
+    # verify reference counting
+    if verbose and hasattr(sys, "gettotalrefcount"):
+        import gc
+        counts = [None] * 5
+        for i in range(len(counts)):
+            support.run_unittest(*test_classes)
+            gc.collect()
+            counts[i] = sys.gettotalrefcount()
+        print(counts)
+
 if __name__ == '__main__':
-    unittest.main()
+    test_main(verbose=True)

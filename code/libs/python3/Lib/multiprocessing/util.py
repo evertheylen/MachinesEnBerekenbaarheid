@@ -212,11 +212,10 @@ class Finalize(object):
             obj = None
 
         if obj is None:
-            return '<%s object, dead>' % self.__class__.__name__
+            return '<Finalize object, dead>'
 
-        x = '<%s object, callback=%s' % (
-                self.__class__.__name__,
-                getattr(self._callback, '__name__', self._callback))
+        x = '<Finalize object, callback=%s' % \
+            getattr(self._callback, '__name__', self._callback)
         if self._args:
             x += ', args=' + str(self._args)
         if self._kwargs:
@@ -327,13 +326,6 @@ class ForkAwareThreadLock(object):
         self._lock = threading.Lock()
         self.acquire = self._lock.acquire
         self.release = self._lock.release
-
-    def __enter__(self):
-        return self._lock.__enter__()
-
-    def __exit__(self, *args):
-        return self._lock.__exit__(*args)
-
 
 class ForkAwareLocal(threading.local):
     def __init__(self):

@@ -36,7 +36,6 @@ from test.support import import_fresh_module
 from randdec import randfloat, all_unary, all_binary, all_ternary
 from randdec import unary_optarg, binary_optarg, ternary_optarg
 from formathelper import rand_format, rand_locale
-from _pydecimal import _dec_from_triple
 
 C = import_fresh_module('decimal', fresh=['_decimal'])
 P = import_fresh_module('decimal', blocked=['_decimal'])
@@ -127,7 +126,7 @@ ContextFunctions = {
 
 # Functions that require a restricted exponent range for reasonable runtimes.
 UnaryRestricted = [
-  '__ceil__', '__floor__', '__int__', '__trunc__',
+  '__ceil__', '__floor__', '__int__', '__long__', '__trunc__',
   'to_integral', 'to_integral_value'
 ]
 
@@ -371,7 +370,7 @@ class SkipHandler:
         return abs(a - b)
 
     def standard_ulp(self, dec, prec):
-        return _dec_from_triple(0, '1', dec._exp+len(dec._int)-prec)
+        return P._dec_from_triple(0, '1', dec._exp+len(dec._int)-prec)
 
     def rounding_direction(self, x, mode):
         """Determine the effective direction of the rounding when
@@ -402,10 +401,10 @@ class SkipHandler:
         # Convert infinities to the largest representable number + 1.
         x = exact
         if exact.is_infinite():
-            x = _dec_from_triple(exact._sign, '10', context.p.Emax)
+            x = P._dec_from_triple(exact._sign, '10', context.p.Emax)
         y = rounded
         if rounded.is_infinite():
-            y = _dec_from_triple(rounded._sign, '10', context.p.Emax)
+            y = P._dec_from_triple(rounded._sign, '10', context.p.Emax)
 
         # err = (rounded - exact) / ulp(rounded)
         self.maxctx.prec = p * 2

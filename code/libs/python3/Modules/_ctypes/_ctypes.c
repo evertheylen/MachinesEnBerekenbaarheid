@@ -301,7 +301,7 @@ _ctypes_alloc_format_string_with_shape(int ndim, const Py_ssize_t *shape,
     char *new_prefix;
     char *result;
     char buf[32];
-    Py_ssize_t prefix_len;
+    int prefix_len;
     int k;
 
     prefix_len = 32 * ndim + 3;
@@ -593,7 +593,7 @@ CDataType_in_dll(PyObject *type, PyObject *args)
 #ifdef __CYGWIN__
 /* dlerror() isn't very helpful on cygwin */
         PyErr_Format(PyExc_ValueError,
-                     "symbol '%s' not found",
+                     "symbol '%s' not found (%s) ",
                      name);
 #else
         PyErr_SetString(PyExc_ValueError, ctypes_dlerror());
@@ -2819,9 +2819,8 @@ _PyCData_set(CDataObject *dst, PyObject *type, SETFUNC setfunc, PyObject *value,
                src->b_ptr,
                size);
 
-        if (PyCPointerTypeObject_Check(type)) {
-            /* XXX */
-        }
+        if (PyCPointerTypeObject_Check(type))
+            /* XXX */;
 
         value = GetKeepedObjects(src);
         if (value == NULL)
@@ -3280,7 +3279,7 @@ PyCFuncPtr_FromDll(PyTypeObject *type, PyObject *args, PyObject *kwds)
 #ifdef __CYGWIN__
 /* dlerror() isn't very helpful on cygwin */
         PyErr_Format(PyExc_AttributeError,
-                     "function '%s' not found",
+                     "function '%s' not found (%s) ",
                      name);
 #else
         PyErr_SetString(PyExc_AttributeError, ctypes_dlerror());
@@ -3863,7 +3862,7 @@ PyCFuncPtr_call(PyCFuncPtrObject *self, PyObject *inargs, PyObject *kwds)
                                                    self,
                                                    callargs,
                                                    NULL);
-        /* If the errcheck function failed, return NULL.
+        /* If the errcheck funtion failed, return NULL.
            If the errcheck function returned callargs unchanged,
            continue normal processing.
            If the errcheck function returned something else,
@@ -4306,11 +4305,8 @@ Array_subscript(PyObject *myself, PyObject *item)
                                               slicelen);
             }
 
-            dest = PyMem_New(wchar_t, slicelen);
-            if (dest == NULL) {
-                PyErr_NoMemory();
-                return NULL;
-            }
+            dest = (wchar_t *)PyMem_Malloc(
+                                    slicelen * sizeof(wchar_t));
 
             for (cur = start, i = 0; i < slicelen;
                  cur += step, i++) {
@@ -4990,7 +4986,7 @@ Pointer_subscript(PyObject *myself, PyObject *item)
                 return PyUnicode_FromWideChar(ptr + start,
                                               len);
             }
-            dest = PyMem_New(wchar_t, len);
+            dest = (wchar_t *)PyMem_Malloc(len * sizeof(wchar_t));
             if (dest == NULL)
                 return PyErr_NoMemory();
             for (cur = start, i = 0; i < len; cur += step, i++) {

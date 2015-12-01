@@ -1,22 +1,19 @@
 import unittest, string
+from test import support
 
 
 class ModuleTest(unittest.TestCase):
 
     def test_attrs(self):
-        # While the exact order of the items in these attributes is not
-        # technically part of the "language spec", in practice there is almost
-        # certainly user code that depends on the order, so de-facto it *is*
-        # part of the spec.
-        self.assertEqual(string.whitespace, ' \t\n\r\x0b\x0c')
-        self.assertEqual(string.ascii_lowercase, 'abcdefghijklmnopqrstuvwxyz')
-        self.assertEqual(string.ascii_uppercase, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')
-        self.assertEqual(string.ascii_letters, string.ascii_lowercase + string.ascii_uppercase)
-        self.assertEqual(string.digits, '0123456789')
-        self.assertEqual(string.hexdigits, string.digits + 'abcdefABCDEF')
-        self.assertEqual(string.octdigits, '01234567')
-        self.assertEqual(string.punctuation, '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~')
-        self.assertEqual(string.printable, string.digits + string.ascii_lowercase + string.ascii_uppercase + string.punctuation + string.whitespace)
+        string.whitespace
+        string.ascii_lowercase
+        string.ascii_uppercase
+        string.ascii_letters
+        string.digits
+        string.hexdigits
+        string.octdigits
+        string.punctuation
+        string.printable
 
     def test_capwords(self):
         self.assertEqual(string.capwords('abc def ghi'), 'Abc Def Ghi')
@@ -34,21 +31,6 @@ class ModuleTest(unittest.TestCase):
         self.assertEqual(fmt.format("foo"), "foo")
         self.assertEqual(fmt.format("foo{0}", "bar"), "foobar")
         self.assertEqual(fmt.format("foo{1}{0}-{1}", "bar", 6), "foo6bar-6")
-        self.assertRaises(TypeError, fmt.format)
-        self.assertRaises(TypeError, string.Formatter.format)
-
-    def test_format_keyword_arguments(self):
-        fmt = string.Formatter()
-        self.assertEqual(fmt.format("-{arg}-", arg='test'), '-test-')
-        self.assertRaises(KeyError, fmt.format, "-{arg}-")
-        self.assertEqual(fmt.format("-{self}-", self='test'), '-test-')
-        self.assertRaises(KeyError, fmt.format, "-{self}-")
-        self.assertEqual(fmt.format("-{format_string}-", format_string='test'),
-                         '-test-')
-        self.assertRaises(KeyError, fmt.format, "-{format_string}-")
-        with self.assertWarnsRegex(DeprecationWarning, "format_string"):
-            self.assertEqual(fmt.format(arg='test', format_string="-{arg}-"),
-                             '-test-')
 
     def test_auto_numbering(self):
         fmt = string.Formatter()
@@ -185,5 +167,8 @@ class ModuleTest(unittest.TestCase):
         self.assertIn("recursion", str(err.exception))
 
 
+def test_main():
+    support.run_unittest(ModuleTest)
+
 if __name__ == "__main__":
-    unittest.main()
+    test_main()

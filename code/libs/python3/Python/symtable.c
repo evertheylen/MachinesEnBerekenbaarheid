@@ -47,6 +47,7 @@ ste_new(struct symtable *st, identifier name, _Py_block_ty block,
     ste->ste_directives = NULL;
 
     ste->ste_type = block;
+    ste->ste_unoptimized = 0;
     ste->ste_nested = 0;
     ste->ste_free = 0;
     ste->ste_varargs = 0;
@@ -112,6 +113,7 @@ static PyMemberDef ste_memberlist[] = {
     {"symbols",  T_OBJECT, OFF(ste_symbols), READONLY},
     {"varnames", T_OBJECT, OFF(ste_varnames), READONLY},
     {"children", T_OBJECT, OFF(ste_children), READONLY},
+    {"optimized",T_INT,    OFF(ste_unoptimized), READONLY},
     {"nested",   T_INT,    OFF(ste_nested), READONLY},
     {"type",     T_INT,    OFF(ste_type), READONLY},
     {"lineno",   T_INT,    OFF(ste_lineno), READONLY},
@@ -180,7 +182,7 @@ static int symtable_visit_slice(struct symtable *st, slice_ty);
 static int symtable_visit_params(struct symtable *st, asdl_seq *args);
 static int symtable_visit_argannotations(struct symtable *st, asdl_seq *args);
 static int symtable_implicit_arg(struct symtable *st, int pos);
-static int symtable_visit_annotations(struct symtable *st, stmt_ty s, arguments_ty, expr_ty);
+static int symtable_visit_annotations(struct symtable *st, stmt_ty s);
 static int symtable_visit_withitem(struct symtable *st, withitem_ty item);
 
 
@@ -269,6 +271,7 @@ PySymtable_BuildObject(mod_ty mod, PyObject *filename, PyFutureFeatures *future)
     }
 
     st->st_top = st->st_cur;
+    st->st_cur->ste_unoptimized = OPT_TOPLEVEL;
     switch (mod->kind) {
     case Module_kind:
         seq = mod->v.Module.body;
@@ -580,6 +583,35 @@ drop_class_free(PySTEntryObject *ste, PyObject *free)
     return 1;
 }
 
+/* Check for illegal statements in unoptimized namespaces */
+static int
+check_unoptimized(const PySTEntryObject* ste) {
+    const char* trailer;
+
+    if (ste->ste_type != FunctionBlock || !ste->ste_unoptimized
+        || !(ste->ste_free || ste->ste_child_free))
+        return 1;
+
+    trailer = (ste->ste_child_free ?
+                   "contains a nested function with free variables" :
+                   "is a nested function");
+
+    switch (ste->ste_unoptimized) {
+    case OPT_TOPLEVEL: /* import * at top-level is fine */
+        return 1;
+    case OPT_IMPORT_STAR:
+        PyErr_Format(PyExc_SyntaxError,
+                     "import * is not allowed in function '%U' because it %s",
+                     ste->ste_name, trailer);
+        break;
+    }
+
+    PyErr_SyntaxLocationObject(ste->ste_table->st_filename,
+                               ste->ste_opt_lineno,
+                               ste->ste_opt_col_offset);
+    return 0;
+}
+
 /* Enter the final scope information into the ste_symbols dict.
  *
  * All arguments are dicts.  Modifies symbols, others are read-only.
@@ -821,6 +853,8 @@ analyze_block(PySTEntryObject *ste, PyObject *bound, PyObject *free,
     /* Records the results of the analysis in the symbol table entry */
     if (!update_symbols(ste->ste_symbols, scopes, bound, newfree,
                         ste->ste_type == ClassBlock))
+        goto error;
+    if (!check_unoptimized(ste))
         goto error;
 
     temp = PyNumber_InPlaceOr(free, newfree);
@@ -1083,13 +1117,13 @@ error:
     } \
 }
 
-#define VISIT_SEQ_WITH_NULL(ST, TYPE, SEQ) {     \
+#define VISIT_KWONLYDEFAULTS(ST, KW_DEFAULTS) { \
     int i = 0; \
-    asdl_seq *seq = (SEQ); /* avoid variable capture */ \
+    asdl_seq *seq = (KW_DEFAULTS); /* avoid variable capture */ \
     for (i = 0; i < asdl_seq_LEN(seq); i++) { \
-        TYPE ## _ty elt = (TYPE ## _ty)asdl_seq_GET(seq, i); \
+        expr_ty elt = (expr_ty)asdl_seq_GET(seq, i); \
         if (!elt) continue; /* can be NULL */ \
-        if (!symtable_visit_ ## TYPE((ST), elt)) \
+        if (!symtable_visit_expr((ST), elt)) \
             VISIT_QUIT((ST), 0);             \
     } \
 }
@@ -1135,7 +1169,7 @@ static int
 symtable_visit_stmt(struct symtable *st, stmt_ty s)
 {
     if (++st->recursion_depth > st->recursion_limit) {
-        PyErr_SetString(PyExc_RecursionError,
+        PyErr_SetString(PyExc_RuntimeError,
                         "maximum recursion depth exceeded during compilation");
         VISIT_QUIT(st, 0);
     }
@@ -1146,9 +1180,9 @@ symtable_visit_stmt(struct symtable *st, stmt_ty s)
         if (s->v.FunctionDef.args->defaults)
             VISIT_SEQ(st, expr, s->v.FunctionDef.args->defaults);
         if (s->v.FunctionDef.args->kw_defaults)
-            VISIT_SEQ_WITH_NULL(st, expr, s->v.FunctionDef.args->kw_defaults);
-        if (!symtable_visit_annotations(st, s, s->v.FunctionDef.args,
-                                        s->v.FunctionDef.returns))
+            VISIT_KWONLYDEFAULTS(st,
+                               s->v.FunctionDef.args->kw_defaults);
+        if (!symtable_visit_annotations(st, s))
             VISIT_QUIT(st, 0);
         if (s->v.FunctionDef.decorator_list)
             VISIT_SEQ(st, expr, s->v.FunctionDef.decorator_list);
@@ -1167,6 +1201,10 @@ symtable_visit_stmt(struct symtable *st, stmt_ty s)
             VISIT_QUIT(st, 0);
         VISIT_SEQ(st, expr, s->v.ClassDef.bases);
         VISIT_SEQ(st, keyword, s->v.ClassDef.keywords);
+        if (s->v.ClassDef.starargs)
+            VISIT(st, expr, s->v.ClassDef.starargs);
+        if (s->v.ClassDef.kwargs)
+            VISIT(st, expr, s->v.ClassDef.kwargs);
         if (s->v.ClassDef.decorator_list)
             VISIT_SEQ(st, expr, s->v.ClassDef.decorator_list);
         if (!symtable_enter_block(st, s->v.ClassDef.name, ClassBlock,
@@ -1238,9 +1276,21 @@ symtable_visit_stmt(struct symtable *st, stmt_ty s)
         break;
     case Import_kind:
         VISIT_SEQ(st, alias, s->v.Import.names);
+        /* XXX Don't have the lineno available inside
+           visit_alias */
+        if (st->st_cur->ste_unoptimized && !st->st_cur->ste_opt_lineno) {
+            st->st_cur->ste_opt_lineno = s->lineno;
+            st->st_cur->ste_opt_col_offset = s->col_offset;
+        }
         break;
     case ImportFrom_kind:
         VISIT_SEQ(st, alias, s->v.ImportFrom.names);
+        /* XXX Don't have the lineno available inside
+           visit_alias */
+        if (st->st_cur->ste_unoptimized && !st->st_cur->ste_opt_lineno) {
+            st->st_cur->ste_opt_lineno = s->lineno;
+            st->st_cur->ste_opt_col_offset = s->col_offset;
+        }
         break;
     case Global_kind: {
         int i;
@@ -1316,39 +1366,6 @@ symtable_visit_stmt(struct symtable *st, stmt_ty s)
         VISIT_SEQ(st, withitem, s->v.With.items);
         VISIT_SEQ(st, stmt, s->v.With.body);
         break;
-    case AsyncFunctionDef_kind:
-        if (!symtable_add_def(st, s->v.AsyncFunctionDef.name, DEF_LOCAL))
-            VISIT_QUIT(st, 0);
-        if (s->v.AsyncFunctionDef.args->defaults)
-            VISIT_SEQ(st, expr, s->v.AsyncFunctionDef.args->defaults);
-        if (s->v.AsyncFunctionDef.args->kw_defaults)
-            VISIT_SEQ_WITH_NULL(st, expr,
-                                s->v.AsyncFunctionDef.args->kw_defaults);
-        if (!symtable_visit_annotations(st, s, s->v.AsyncFunctionDef.args,
-                                        s->v.AsyncFunctionDef.returns))
-            VISIT_QUIT(st, 0);
-        if (s->v.AsyncFunctionDef.decorator_list)
-            VISIT_SEQ(st, expr, s->v.AsyncFunctionDef.decorator_list);
-        if (!symtable_enter_block(st, s->v.AsyncFunctionDef.name,
-                                  FunctionBlock, (void *)s, s->lineno,
-                                  s->col_offset))
-            VISIT_QUIT(st, 0);
-        VISIT(st, arguments, s->v.AsyncFunctionDef.args);
-        VISIT_SEQ(st, stmt, s->v.AsyncFunctionDef.body);
-        if (!symtable_exit_block(st, s))
-            VISIT_QUIT(st, 0);
-        break;
-    case AsyncWith_kind:
-        VISIT_SEQ(st, withitem, s->v.AsyncWith.items);
-        VISIT_SEQ(st, stmt, s->v.AsyncWith.body);
-        break;
-    case AsyncFor_kind:
-        VISIT(st, expr, s->v.AsyncFor.target);
-        VISIT(st, expr, s->v.AsyncFor.iter);
-        VISIT_SEQ(st, stmt, s->v.AsyncFor.body);
-        if (s->v.AsyncFor.orelse)
-            VISIT_SEQ(st, stmt, s->v.AsyncFor.orelse);
-        break;
     }
     VISIT_QUIT(st, 1);
 }
@@ -1357,7 +1374,7 @@ static int
 symtable_visit_expr(struct symtable *st, expr_ty e)
 {
     if (++st->recursion_depth > st->recursion_limit) {
-        PyErr_SetString(PyExc_RecursionError,
+        PyErr_SetString(PyExc_RuntimeError,
                         "maximum recursion depth exceeded during compilation");
         VISIT_QUIT(st, 0);
     }
@@ -1378,7 +1395,8 @@ symtable_visit_expr(struct symtable *st, expr_ty e)
         if (e->v.Lambda.args->defaults)
             VISIT_SEQ(st, expr, e->v.Lambda.args->defaults);
         if (e->v.Lambda.args->kw_defaults)
-            VISIT_SEQ_WITH_NULL(st, expr, e->v.Lambda.args->kw_defaults);
+            VISIT_KWONLYDEFAULTS(st,
+                                 e->v.Lambda.args->kw_defaults);
         if (!symtable_enter_block(st, lambda,
                                   FunctionBlock, (void *)e, e->lineno,
                                   e->col_offset))
@@ -1395,7 +1413,7 @@ symtable_visit_expr(struct symtable *st, expr_ty e)
         VISIT(st, expr, e->v.IfExp.orelse);
         break;
     case Dict_kind:
-        VISIT_SEQ_WITH_NULL(st, expr, e->v.Dict.keys);
+        VISIT_SEQ(st, expr, e->v.Dict.keys);
         VISIT_SEQ(st, expr, e->v.Dict.values);
         break;
     case Set_kind:
@@ -1426,10 +1444,6 @@ symtable_visit_expr(struct symtable *st, expr_ty e)
         VISIT(st, expr, e->v.YieldFrom.value);
         st->st_cur->ste_generator = 1;
         break;
-    case Await_kind:
-        VISIT(st, expr, e->v.Await.value);
-        st->st_cur->ste_generator = 1;
-        break;
     case Compare_kind:
         VISIT(st, expr, e->v.Compare.left);
         VISIT_SEQ(st, expr, e->v.Compare.comparators);
@@ -1437,7 +1451,11 @@ symtable_visit_expr(struct symtable *st, expr_ty e)
     case Call_kind:
         VISIT(st, expr, e->v.Call.func);
         VISIT_SEQ(st, expr, e->v.Call.args);
-        VISIT_SEQ_WITH_NULL(st, keyword, e->v.Call.keywords);
+        VISIT_SEQ(st, keyword, e->v.Call.keywords);
+        if (e->v.Call.starargs)
+            VISIT(st, expr, e->v.Call.starargs);
+        if (e->v.Call.kwargs)
+            VISIT(st, expr, e->v.Call.kwargs);
         break;
     case Num_kind:
     case Str_kind:
@@ -1530,9 +1548,10 @@ symtable_visit_argannotations(struct symtable *st, asdl_seq *args)
 }
 
 static int
-symtable_visit_annotations(struct symtable *st, stmt_ty s,
-                           arguments_ty a, expr_ty returns)
+symtable_visit_annotations(struct symtable *st, stmt_ty s)
 {
+    arguments_ty a = s->v.FunctionDef.args;
+
     if (a->args && !symtable_visit_argannotations(st, a->args))
         return 0;
     if (a->vararg && a->vararg->annotation)
@@ -1541,8 +1560,8 @@ symtable_visit_annotations(struct symtable *st, stmt_ty s,
         VISIT(st, expr, a->kwarg->annotation);
     if (a->kwonlyargs && !symtable_visit_argannotations(st, a->kwonlyargs))
         return 0;
-    if (returns)
-        VISIT(st, expr, returns);
+    if (s->v.FunctionDef.returns)
+        VISIT(st, expr, s->v.FunctionDef.returns);
     return 1;
 }
 
@@ -1627,6 +1646,7 @@ symtable_visit_alias(struct symtable *st, alias_ty a)
             Py_DECREF(store_name);
             return 0;
         }
+        st->st_cur->ste_unoptimized |= OPT_IMPORT_STAR;
         Py_DECREF(store_name);
         return 1;
     }

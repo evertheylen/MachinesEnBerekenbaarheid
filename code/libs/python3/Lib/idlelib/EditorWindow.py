@@ -13,6 +13,7 @@ import traceback
 import webbrowser
 
 from idlelib.MultiCall import MultiCallCreator
+from idlelib import idlever
 from idlelib import WindowList
 from idlelib import SearchDialog
 from idlelib import GrepDialog
@@ -124,6 +125,7 @@ class EditorWindow(object):
                     EditorWindow.help_url = 'file://' + EditorWindow.help_url
             else:
                 EditorWindow.help_url = "https://docs.python.org/%d.%d/" % sys.version_info[:2]
+        currentTheme=idleConf.CurrentTheme()
         self.flist = flist
         root = root or flist.root
         self.root = root
@@ -230,7 +232,13 @@ class EditorWindow(object):
         vbar['command'] = text.yview
         vbar.pack(side=RIGHT, fill=Y)
         text['yscrollcommand'] = vbar.set
-        text['font'] = idleConf.GetFont(self.root, 'main', 'EditorWindow')
+        fontWeight = 'normal'
+        if idleConf.GetOption('main', 'EditorWindow', 'font-bold', type='bool'):
+            fontWeight='bold'
+        text.config(font=(idleConf.GetOption('main', 'EditorWindow', 'font'),
+                          idleConf.GetOption('main', 'EditorWindow',
+                                             'font-size', type='int'),
+                          fontWeight))
         text_frame.pack(side=LEFT, fill=BOTH, expand=1)
         text.pack(side=TOP, fill=BOTH, expand=1)
         text.focus_set()
@@ -344,19 +352,19 @@ class EditorWindow(object):
 
 
     def _filename_to_unicode(self, filename):
-        """Return filename as BMP unicode so diplayable in Tk."""
-        # Decode bytes to unicode.
-        if isinstance(filename, bytes):
+        """convert filename to unicode in order to display it in Tk"""
+        if isinstance(filename, str) or not filename:
+            return filename
+        else:
             try:
-                filename = filename.decode(self.filesystemencoding)
+                return filename.decode(self.filesystemencoding)
             except UnicodeDecodeError:
+                # XXX
                 try:
-                    filename = filename.decode(self.encoding)
+                    return filename.decode(self.encoding)
                 except UnicodeDecodeError:
                     # byte-to-byte conversion
-                    filename = filename.decode('iso8859-1')
-        # Replace non-BMP char with diamond questionmark.
-        return re.sub('[\U00010000-\U0010FFFF]', '\ufffd', filename)
+                    return filename.decode('iso8859-1')
 
     def new_callback(self, event):
         dirname, basename = self.io.defaultfilename()
@@ -441,15 +449,14 @@ class EditorWindow(object):
         self.menudict = menudict = {}
         for name, label in self.menu_specs:
             underline, label = prepstr(label)
-            menudict[name] = menu = Menu(mbar, name=name, tearoff=0)
+            menudict[name] = menu = Menu(mbar, name=name)
             mbar.add_cascade(label=label, menu=menu, underline=underline)
         if macosxSupport.isCarbonTk():
             # Insert the application menu
-            menudict['application'] = menu = Menu(mbar, name='apple',
-                                                  tearoff=0)
+            menudict['application'] = menu = Menu(mbar, name='apple')
             mbar.add_cascade(label='IDLE', menu=menu)
         self.fill_menus()
-        self.recent_files_menu = Menu(self.menubar, tearoff=0)
+        self.recent_files_menu = Menu(self.menubar)
         self.menudict['file'].insert_cascade(3, label='Recent Files',
                                              underline=0,
                                              menu=self.recent_files_menu)
@@ -707,7 +714,7 @@ class EditorWindow(object):
         cmd = [sys.executable,
                '-c',
                'from turtledemo.__main__ import main; main()']
-        subprocess.Popen(cmd, shell=False)
+        p = subprocess.Popen(cmd, shell=False)
 
     def gotoline(self, lineno):
         if lineno is not None and lineno > 0:
@@ -791,8 +798,13 @@ class EditorWindow(object):
     def ResetFont(self):
         "Update the text widgets' font if it is changed"
         # Called from configDialog.py
-
-        self.text['font'] = idleConf.GetFont(self.root, 'main','EditorWindow')
+        fontWeight='normal'
+        if idleConf.GetOption('main','EditorWindow','font-bold',type='bool'):
+            fontWeight='bold'
+        self.text.config(font=(idleConf.GetOption('main','EditorWindow','font'),
+                idleConf.GetOption('main','EditorWindow','font-size',
+                                   type='int'),
+                fontWeight))
 
     def RemoveKeybindings(self):
         "Remove the keybindings before they are changed."

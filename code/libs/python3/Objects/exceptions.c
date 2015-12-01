@@ -473,13 +473,6 @@ SimpleExtendsException(PyExc_Exception, TypeError,
 
 
 /*
- *    StopAsyncIteration extends Exception
- */
-SimpleExtendsException(PyExc_Exception, StopAsyncIteration,
-                       "Signal the end from iterator.__anext__().");
-
-
-/*
  *    StopIteration extends Exception
  */
 
@@ -1231,11 +1224,6 @@ SimpleExtendsException(PyExc_Exception, EOFError,
 SimpleExtendsException(PyExc_Exception, RuntimeError,
                        "Unspecified run-time error.");
 
-/*
- *    RecursionError extends RuntimeError
- */
-SimpleExtendsException(PyExc_RuntimeError, RecursionError,
-                       "Recursion limit exceeded.");
 
 /*
  *    NotImplementedError extends RuntimeError
@@ -2385,7 +2373,7 @@ SimpleExtendsException(PyExc_Warning, ResourceWarning,
 
 
 
-/* Pre-computed RecursionError instance for when recursion depth is reached.
+/* Pre-computed RuntimeError instance for when recursion depth is reached.
    Meant to be used when normalizing the exception for exceeding the recursion
    depth will cause its own infinite recursion.
 */
@@ -2480,7 +2468,6 @@ _PyExc_Init(PyObject *bltinmod)
     PRE_INIT(BaseException)
     PRE_INIT(Exception)
     PRE_INIT(TypeError)
-    PRE_INIT(StopAsyncIteration)
     PRE_INIT(StopIteration)
     PRE_INIT(GeneratorExit)
     PRE_INIT(SystemExit)
@@ -2489,7 +2476,6 @@ _PyExc_Init(PyObject *bltinmod)
     PRE_INIT(OSError)
     PRE_INIT(EOFError)
     PRE_INIT(RuntimeError)
-    PRE_INIT(RecursionError)
     PRE_INIT(NotImplementedError)
     PRE_INIT(NameError)
     PRE_INIT(UnboundLocalError)
@@ -2552,7 +2538,6 @@ _PyExc_Init(PyObject *bltinmod)
     POST_INIT(BaseException)
     POST_INIT(Exception)
     POST_INIT(TypeError)
-    POST_INIT(StopAsyncIteration)
     POST_INIT(StopIteration)
     POST_INIT(GeneratorExit)
     POST_INIT(SystemExit)
@@ -2566,7 +2551,6 @@ _PyExc_Init(PyObject *bltinmod)
 #endif
     POST_INIT(EOFError)
     POST_INIT(RuntimeError)
-    POST_INIT(RecursionError)
     POST_INIT(NotImplementedError)
     POST_INIT(NameError)
     POST_INIT(UnboundLocalError)
@@ -2650,9 +2634,9 @@ _PyExc_Init(PyObject *bltinmod)
     preallocate_memerrors();
 
     if (!PyExc_RecursionErrorInst) {
-        PyExc_RecursionErrorInst = BaseException_new(&_PyExc_RecursionError, NULL, NULL);
+        PyExc_RecursionErrorInst = BaseException_new(&_PyExc_RuntimeError, NULL, NULL);
         if (!PyExc_RecursionErrorInst)
-            Py_FatalError("Cannot pre-allocate RecursionError instance for "
+            Py_FatalError("Cannot pre-allocate RuntimeError instance for "
                             "recursion errors");
         else {
             PyBaseExceptionObject *err_inst =
@@ -2661,15 +2645,15 @@ _PyExc_Init(PyObject *bltinmod)
             PyObject *exc_message;
             exc_message = PyUnicode_FromString("maximum recursion depth exceeded");
             if (!exc_message)
-                Py_FatalError("cannot allocate argument for RecursionError "
+                Py_FatalError("cannot allocate argument for RuntimeError "
                                 "pre-allocation");
             args_tuple = PyTuple_Pack(1, exc_message);
             if (!args_tuple)
-                Py_FatalError("cannot allocate tuple for RecursionError "
+                Py_FatalError("cannot allocate tuple for RuntimeError "
                                 "pre-allocation");
             Py_DECREF(exc_message);
             if (BaseException_init(err_inst, args_tuple, NULL))
-                Py_FatalError("init of pre-allocated RecursionError failed");
+                Py_FatalError("init of pre-allocated RuntimeError failed");
             Py_DECREF(args_tuple);
         }
     }
@@ -2734,7 +2718,7 @@ _PyErr_TrySetFromCause(const char *format, ...)
     same_basic_size = (
         caught_type_size == base_exc_size ||
         (PyType_SUPPORTS_WEAKREFS(caught_type) &&
-            (caught_type_size == base_exc_size + (Py_ssize_t)sizeof(PyObject *))
+            (caught_type_size == base_exc_size + sizeof(PyObject *))
         )
     );
     if (caught_type->tp_init != (initproc)BaseException_init ||

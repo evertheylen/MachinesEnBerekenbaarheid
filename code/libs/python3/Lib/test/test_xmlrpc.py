@@ -287,7 +287,7 @@ class DateTimeTestCase(unittest.TestCase):
     def test_repr(self):
         d = datetime.datetime(2007,1,2,3,4,5)
         t = xmlrpclib.DateTime(d)
-        val ="<DateTime '20070102T03:04:05' at %#x>" % id(t)
+        val ="<DateTime '20070102T03:04:05' at %x>" % id(t)
         self.assertEqual(repr(t), val)
 
     def test_decode(self):
@@ -713,23 +713,6 @@ class SimpleServerTestCase(BaseServerTestCase):
         conn.request('POST', '/RPC2 HTTP/1.0\r\nContent-Length: 100\r\n\r\nbye')
         conn.close()
 
-    def test_context_manager(self):
-        with xmlrpclib.ServerProxy(URL) as server:
-            server.add(2, 3)
-            self.assertNotEqual(server('transport')._connection,
-                                (None, None))
-        self.assertEqual(server('transport')._connection,
-                         (None, None))
-
-    def test_context_manager_method_error(self):
-        try:
-            with xmlrpclib.ServerProxy(URL) as server:
-                server.add(2, "a")
-        except xmlrpclib.Fault:
-            pass
-        self.assertEqual(server('transport')._connection,
-                         (None, None))
-
 
 class MultiPathServerTestCase(BaseServerTestCase):
     threadFunc = staticmethod(http_multi_server)
@@ -908,8 +891,8 @@ class GzipUtilTestCase(unittest.TestCase):
         data = b'\0' * (max_gzip_decode + 1)
         encoded = xmlrpclib.gzip_encode(data)
 
-        with self.assertRaisesRegex(ValueError,
-                                    "max gzipped payload length exceeded"):
+        with self.assertRaisesRegexp(ValueError,
+                                     "max gzipped payload length exceeded"):
             xmlrpclib.gzip_decode(encoded)
 
         xmlrpclib.gzip_decode(encoded, max_decode=-1)
@@ -935,7 +918,6 @@ class ServerProxyTestCase(unittest.TestCase):
         t = xmlrpclib.Transport()
         p = xmlrpclib.ServerProxy(self.url, transport=t)
         self.assertEqual(p('transport'), t)
-
 
 # This is a contrived way to make a failure occur on the server side
 # in order to test the _send_traceback_header flag on the server

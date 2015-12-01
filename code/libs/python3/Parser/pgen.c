@@ -136,12 +136,11 @@ addnfa(nfagrammar *gr, char *name)
 
 static char REQNFMT[] = "metacompile: less than %d children\n";
 
-#define REQN(i, count) do { \
+#define REQN(i, count) \
     if (i < count) { \
         fprintf(stderr, REQNFMT, count); \
         Py_FatalError("REQN"); \
-    } \
-} while (0)
+    } else
 
 #else
 #define REQN(i, count)  /* empty */

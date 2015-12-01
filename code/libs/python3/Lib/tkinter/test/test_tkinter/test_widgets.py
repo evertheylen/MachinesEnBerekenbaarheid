@@ -920,9 +920,8 @@ class ScrollbarTest(AbstractWidgetTest, unittest.TestCase):
         sb = self.create()
         for e in ('arrow1', 'slider', 'arrow2'):
             sb.activate(e)
-            self.assertEqual(sb.activate(), e)
         sb.activate('')
-        self.assertIsNone(sb.activate())
+        self.assertRaises(TypeError, sb.activate)
         self.assertRaises(TypeError, sb.activate, 'arrow1', 'arrow2')
 
     def test_set(self):
@@ -932,8 +931,8 @@ class ScrollbarTest(AbstractWidgetTest, unittest.TestCase):
         self.assertRaises(TclError, sb.set, 'abc', 'def')
         self.assertRaises(TclError, sb.set, 0.6, 'def')
         self.assertRaises(TclError, sb.set, 0.6, None)
-        self.assertRaises(TypeError, sb.set, 0.6)
-        self.assertRaises(TypeError, sb.set, 0.6, 0.7, 0.8)
+        self.assertRaises(TclError, sb.set, 0.6)
+        self.assertRaises(TclError, sb.set, 0.6, 0.7, 0.8)
 
 
 @add_standard_options(StandardOptionsTests)
@@ -1041,7 +1040,7 @@ class PanedWindowTest(AbstractWidgetTest, unittest.TestCase):
     def test_paneconfigure_height(self):
         p, b, c = self.create2()
         self.check_paneconfigure(p, b, 'height', 10, 10,
-                                 stringify=get_tk_patchlevel() < (8, 5, 11))
+                                 stringify=tcl_version < (8, 5))
         self.check_paneconfigure_bad(p, b, 'height',
                                      'bad screen distance "badValue"')
 
@@ -1089,7 +1088,7 @@ class PanedWindowTest(AbstractWidgetTest, unittest.TestCase):
     def test_paneconfigure_width(self):
         p, b, c = self.create2()
         self.check_paneconfigure(p, b, 'width', 10, 10,
-                                 stringify=get_tk_patchlevel() < (8, 5, 11))
+                                 stringify=tcl_version < (8, 5))
         self.check_paneconfigure_bad(p, b, 'width',
                                      'bad screen distance "badValue"')
 

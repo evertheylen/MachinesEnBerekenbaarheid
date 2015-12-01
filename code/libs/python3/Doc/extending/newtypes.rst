@@ -80,7 +80,7 @@ Moving on, we come to the crunch --- the type object. ::
        0,                         /* tp_print */
        0,                         /* tp_getattr */
        0,                         /* tp_setattr */
-       0,                         /* tp_as_async */
+       0,                         /* tp_reserved */
        0,                         /* tp_repr */
        0,                         /* tp_as_number */
        0,                         /* tp_as_sequence */
@@ -383,8 +383,7 @@ is used to initialize an object after it's created. Unlike the new method, we
 can't guarantee that the initializer is called.  The initializer isn't called
 when unpickling objects and it can be overridden.  Our initializer accepts
 arguments to provide initial values for our instance. Initializers always accept
-positional and keyword arguments. Initializers should return either 0 on
-success or -1 on error.
+positional and keyword arguments.
 
 Initializers can be called multiple times.  Anyone can call the :meth:`__init__`
 method on our objects.  For this reason, we have to be extra careful when
@@ -1206,7 +1205,7 @@ Here is an example::
    {
        if (strcmp(name, "data") == 0)
        {
-           return PyLong_FromLong(obj->data);
+           return PyInt_FromLong(obj->data);
        }
 
        PyErr_Format(PyExc_AttributeError,

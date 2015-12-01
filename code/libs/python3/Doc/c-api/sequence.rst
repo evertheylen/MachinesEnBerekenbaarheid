@@ -107,9 +107,8 @@ Sequence Protocol
 
 .. c:function:: PyObject* PySequence_List(PyObject *o)
 
-   Return a list object with the same contents as the sequence or iterable *o*,
-   or *NULL* on failure.  The returned list is guaranteed to be new.  This is
-   equivalent to the Python expression ``list(o)``.
+   Return a list object with the same contents as the arbitrary sequence *o*.  The
+   returned list is guaranteed to be new.
 
 
 .. c:function:: PyObject* PySequence_Tuple(PyObject *o)

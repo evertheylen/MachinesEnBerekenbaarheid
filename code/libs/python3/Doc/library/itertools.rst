@@ -87,15 +87,10 @@ loops that truncate the stream.
 
 .. function:: accumulate(iterable[, func])
 
-    Make an iterator that returns accumulated sums, or accumulated
-    results of other binary functions (specified via the optional
-    *func* argument).  If *func* is supplied, it should be a function
-    of two arguments. Elements of the input *iterable* may be any type
-    that can be accepted as arguments to *func*. (For example, with
-    the default operation of addition, elements may be any addable
-    type including :class:`~decimal.Decimal` or
-    :class:`~fractions.Fraction`.) If the input iterable is empty, the
-    output iterable will also be empty.
+    Make an iterator that returns accumulated sums. Elements may be any addable
+    type including :class:`~decimal.Decimal` or :class:`~fractions.Fraction`.
+    If the optional *func* argument is supplied, it should be a function of two
+    arguments and it will be used instead of addition.
 
     Equivalent to::
 
@@ -104,10 +99,7 @@ loops that truncate the stream.
             # accumulate([1,2,3,4,5]) --> 1 3 6 10 15
             # accumulate([1,2,3,4,5], operator.mul) --> 1 2 6 24 120
             it = iter(iterable)
-            try:
-                total = next(it)
-            except StopIteration:
-                return
+            total = next(it)
             yield total
             for element in it:
                 total = func(total, element)
@@ -408,10 +400,7 @@ loops that truncate the stream.
           def _grouper(self, tgtkey):
               while self.currkey == tgtkey:
                   yield self.currvalue
-                  try:
-                      self.currvalue = next(self.it)
-                  except StopIteration:
-                      return
+                  self.currvalue = next(self.it)    # Exit on StopIteration
                   self.currkey = self.keyfunc(self.currvalue)
 
 
@@ -435,10 +424,7 @@ loops that truncate the stream.
           # islice('ABCDEFG', 0, None, 2) --> A C E G
           s = slice(*args)
           it = iter(range(s.start or 0, s.stop or sys.maxsize, s.step or 1))
-          try:
-              nexti = next(it)
-          except StopIteration:
-              return
+          nexti = next(it)
           for i, element in enumerate(iterable):
               if i == nexti:
                   yield element
@@ -596,10 +582,7 @@ loops that truncate the stream.
             def gen(mydeque):
                 while True:
                     if not mydeque:             # when the local deque is empty
-                        try:
-                            newval = next(it)   # fetch a new value and
-                        except StopIteration:
-                            return
+                        newval = next(it)       # fetch a new value and
                         for d in deques:        # load it to all the deques
                             d.append(newval)
                     yield mydeque.popleft()
@@ -673,11 +656,6 @@ which incur interpreter overhead.
    def tabulate(function, start=0):
        "Return function(0), function(1), ..."
        return map(function, count(start))
-
-   def tail(n, iterable):
-       "Return an iterator over the last n items"
-       # tail(3, 'ABCDEFG') --> E F G
-       return iter(collections.deque(iterable, maxlen=n))
 
    def consume(iterator, n):
        "Advance the iterator n-steps ahead. If n is none, consume entirely."

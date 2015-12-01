@@ -248,7 +248,7 @@ _set_char(const char *name, Py_UCS4 *target, PyObject *src, Py_UCS4 dflt)
             len = PyUnicode_GetLength(src);
             if (len > 1) {
                 PyErr_Format(PyExc_TypeError,
-                    "\"%s\" must be a 1-character string",
+                    "\"%s\" must be an 1-character string",
                     name);
                 return -1;
             }
@@ -290,7 +290,7 @@ dialect_check_quoting(int quoting)
     StyleDesc *qs;
 
     for (qs = quote_styles; qs->name; qs++) {
-        if ((int)qs->style == quoting)
+        if (qs->style == quoting)
             return 0;
     }
     PyErr_Format(PyExc_TypeError, "bad \"quoting\" value");
@@ -432,7 +432,7 @@ dialect_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
         goto err;
     if (self->delimiter == 0) {
         PyErr_SetString(PyExc_TypeError,
-                        "\"delimiter\" must be a 1-character string");
+                        "\"delimiter\" must be an 1-character string");
         goto err;
     }
     if (quotechar == Py_None && quoting == NULL)
@@ -1009,7 +1009,7 @@ join_reset(WriterObj *self)
  */
 static Py_ssize_t
 join_append_data(WriterObj *self, unsigned int field_kind, void *field_data,
-                 Py_ssize_t field_len, int *quoted,
+                 Py_ssize_t field_len, int quote_empty, int *quoted,
                  int copy_phase)
 {
     DialectObj *dialect = self->dialect;
@@ -1071,6 +1071,18 @@ join_append_data(WriterObj *self, unsigned int field_kind, void *field_data,
         ADDCH(c);
     }
 
+    /* If field is empty check if it needs to be quoted.
+     */
+    if (i == 0 && quote_empty) {
+        if (dialect->quoting == QUOTE_NONE) {
+            PyErr_Format(_csvstate_global->error_obj,
+                "single empty field record must be quoted");
+            return -1;
+        }
+        else
+            *quoted = 1;
+    }
+
     if (*quoted) {
         if (copy_phase)
             ADDCH(dialect->quotechar);
@@ -1114,7 +1126,7 @@ join_check_rec_size(WriterObj *self, Py_ssize_t rec_len)
 }
 
 static int
-join_append(WriterObj *self, PyObject *field, int quoted)
+join_append(WriterObj *self, PyObject *field, int *quoted, int quote_empty)
 {
     unsigned int field_kind = -1;
     void *field_data = NULL;
@@ -1129,7 +1141,7 @@ join_append(WriterObj *self, PyObject *field, int quoted)
         field_len = PyUnicode_GET_LENGTH(field);
     }
     rec_len = join_append_data(self, field_kind, field_data, field_len,
-                               &quoted, 0);
+                               quote_empty, quoted, 0);
     if (rec_len < 0)
         return 0;
 
@@ -1138,7 +1150,7 @@ join_append(WriterObj *self, PyObject *field, int quoted)
         return 0;
 
     self->rec_len = join_append_data(self, field_kind, field_data, field_len,
-                                     &quoted, 1);
+                                     quote_empty, quoted, 1);
     self->num_fields++;
 
     return 1;
@@ -1169,29 +1181,36 @@ join_append_lineterminator(WriterObj *self)
 }
 
 PyDoc_STRVAR(csv_writerow_doc,
-"writerow(iterable)\n"
+"writerow(sequence)\n"
 "\n"
-"Construct and write a CSV record from an iterable of fields.  Non-string\n"
+"Construct and write a CSV record from a sequence of fields.  Non-string\n"
 "elements will be converted to string.");
 
 static PyObject *
 csv_writerow(WriterObj *self, PyObject *seq)
 {
     DialectObj *dialect = self->dialect;
-    PyObject *iter, *field, *line, *result;
+    Py_ssize_t len, i;
+    PyObject *line, *result;
 
-    iter = PyObject_GetIter(seq);
-    if (iter == NULL)
-        return PyErr_Format(_csvstate_global->error_obj,
-                            "iterable expected, not %.200s",
-                            seq->ob_type->tp_name);
+    if (!PySequence_Check(seq))
+        return PyErr_Format(_csvstate_global->error_obj, "sequence expected");
+
+    len = PySequence_Length(seq);
+    if (len < 0)
+        return NULL;
 
     /* Join all fields in internal buffer.
      */
     join_reset(self);
-    while ((field = PyIter_Next(iter))) {
+    for (i = 0; i < len; i++) {
+        PyObject *field;
         int append_ok;
         int quoted;
+
+        field = PySequence_GetItem(seq, i);
+        if (field == NULL)
+            return NULL;
 
         switch (dialect->quoting) {
         case QUOTE_NONNUMERIC:
@@ -1206,11 +1225,11 @@ csv_writerow(WriterObj *self, PyObject *seq)
         }
 
         if (PyUnicode_Check(field)) {
-            append_ok = join_append(self, field, quoted);
+            append_ok = join_append(self, field, &quoted, len == 1);
             Py_DECREF(field);
         }
         else if (field == Py_None) {
-            append_ok = join_append(self, NULL, quoted);
+            append_ok = join_append(self, NULL, &quoted, len == 1);
             Py_DECREF(field);
         }
         else {
@@ -1218,37 +1237,19 @@ csv_writerow(WriterObj *self, PyObject *seq)
 
             str = PyObject_Str(field);
             Py_DECREF(field);
-            if (str == NULL) {
-                Py_DECREF(iter);
+            if (str == NULL)
                 return NULL;
-            }
-            append_ok = join_append(self, str, quoted);
+            append_ok = join_append(self, str, &quoted, len == 1);
             Py_DECREF(str);
         }
-        if (!append_ok) {
-            Py_DECREF(iter);
-            return NULL;
-        }
-    }
-    Py_DECREF(iter);
-    if (PyErr_Occurred())
-        return NULL;
-
-    if (self->num_fields > 0 && self->rec_size == 0) {
-        if (dialect->quoting == QUOTE_NONE) {
-            PyErr_Format(_csvstate_global->error_obj,
-                "single empty field record must be quoted");
-            return NULL;
-        }
-        self->num_fields--;
-        if (!join_append(self, NULL, 1))
+        if (!append_ok)
             return NULL;
     }
 
     /* Add line terminator.
      */
     if (!join_append_lineterminator(self))
-        return NULL;
+        return 0;
 
     line = PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND,
                                      (void *) self->rec, self->rec_len);
@@ -1260,9 +1261,9 @@ csv_writerow(WriterObj *self, PyObject *seq)
 }
 
 PyDoc_STRVAR(csv_writerows_doc,
-"writerows(iterable of iterables)\n"
+"writerows(sequence of sequences)\n"
 "\n"
-"Construct and write a series of iterables to a csv file.  Non-string\n"
+"Construct and write a series of sequences to a csv file.  Non-string\n"
 "elements will be converted to string.");
 
 static PyObject *
@@ -1588,7 +1589,7 @@ PyDoc_STRVAR(csv_get_dialect_doc,
 
 PyDoc_STRVAR(csv_register_dialect_doc,
 "Create a mapping from a string name to a dialect class.\n"
-"    dialect = csv.register_dialect(name[, dialect[, **fmtparams]])");
+"    dialect = csv.register_dialect(name, dialect)");
 
 PyDoc_STRVAR(csv_unregister_dialect_doc,
 "Delete the name/dialect mapping associated with a string name.\n"

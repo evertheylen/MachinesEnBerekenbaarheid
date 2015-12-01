@@ -149,6 +149,12 @@ This module provides an interface to the mechanisms used to implement the
 
    There are a number of other caveats:
 
+   If a module is syntactically correct but its initialization fails, the first
+   :keyword:`import` statement for it does not bind its name locally, but does
+   store a (partially initialized) module object in ``sys.modules``.  To reload the
+   module you must first :keyword:`import` it again (this will bind the name to the
+   partially initialized module object) before you can :func:`reload` it.
+
    When a module is reloaded, its dictionary (containing the module's global
    variables) is retained.  Redefinitions of names will override the old
    definitions, so this is generally not a problem.  If the new version of a module
@@ -197,9 +203,11 @@ file paths.
    value would be ``/foo/bar/__pycache__/baz.cpython-32.pyc`` for Python 3.2.
    The ``cpython-32`` string comes from the current magic tag (see
    :func:`get_tag`; if :attr:`sys.implementation.cache_tag` is not defined then
-   :exc:`NotImplementedError` will be raised). By passing in ``True`` or
-   ``False`` for *debug_override* you can override the system's value for
-   ``__debug__``, leading to optimized bytecode.
+   :exc:`NotImplementedError` will be raised).  The returned path will end in
+   ``.pyc`` when ``__debug__`` is ``True`` or ``.pyo`` for an optimized Python
+   (i.e. ``__debug__`` is ``False``).  By passing in ``True`` or ``False`` for
+   *debug_override* you can override the system's value for ``__debug__`` for
+   extension selection.
 
    *path* need not exist.
 
@@ -209,9 +217,6 @@ file paths.
 
    .. deprecated:: 3.4
       Use :func:`importlib.util.cache_from_source` instead.
-
-   .. versionchanged:: 3.5
-      The *debug_override* parameter no longer creates a ``.pyo`` file.
 
 
 .. function:: source_from_cache(path)

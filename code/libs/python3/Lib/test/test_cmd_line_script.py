@@ -13,9 +13,10 @@ import subprocess
 
 import textwrap
 from test import support
-from test.support.script_helper import (
+from test.script_helper import (
     make_pkg, make_script, make_zip_pkg, make_zip_script,
-    assert_python_ok, assert_python_failure, spawn_python, kill_python)
+    assert_python_ok, assert_python_failure, temp_dir,
+    spawn_python, kill_python)
 
 verbose = support.verbose
 
@@ -113,7 +114,7 @@ class CmdLineTest(unittest.TestCase):
                              expected_loader):
         if verbose > 1:
             print("Output from test script %r:" % script_name)
-            print(repr(data))
+            print(data)
         self.assertEqual(exit_code, 0)
         printed_loader = '__loader__==%a' % expected_loader
         printed_file = '__file__==%a' % expected_file
@@ -152,7 +153,7 @@ class CmdLineTest(unittest.TestCase):
         rc, out, err = assert_python_failure(*run_args)
         if verbose > 1:
             print('Output from test script %r:' % script_name)
-            print(repr(err))
+            print(err)
             print('Expected output: %r' % expected_msg)
         self.assertIn(expected_msg.encode('utf-8'), err)
 
@@ -222,14 +223,14 @@ class CmdLineTest(unittest.TestCase):
         self.check_repl_stderr_flush(True)
 
     def test_basic_script(self):
-        with support.temp_dir() as script_dir:
+        with temp_dir() as script_dir:
             script_name = _make_test_script(script_dir, 'script')
             self._check_script(script_name, script_name, script_name,
                                script_dir, None,
                                importlib.machinery.SourceFileLoader)
 
     def test_script_compiled(self):
-        with support.temp_dir() as script_dir:
+        with temp_dir() as script_dir:
             script_name = _make_test_script(script_dir, 'script')
             py_compile.compile(script_name, doraise=True)
             os.remove(script_name)
@@ -239,14 +240,14 @@ class CmdLineTest(unittest.TestCase):
                                importlib.machinery.SourcelessFileLoader)
 
     def test_directory(self):
-        with support.temp_dir() as script_dir:
+        with temp_dir() as script_dir:
             script_name = _make_test_script(script_dir, '__main__')
             self._check_script(script_dir, script_name, script_dir,
                                script_dir, '',
                                importlib.machinery.SourceFileLoader)
 
     def test_directory_compiled(self):
-        with support.temp_dir() as script_dir:
+        with temp_dir() as script_dir:
             script_name = _make_test_script(script_dir, '__main__')
             py_compile.compile(script_name, doraise=True)
             os.remove(script_name)
@@ -256,19 +257,19 @@ class CmdLineTest(unittest.TestCase):
                                importlib.machinery.SourcelessFileLoader)
 
     def test_directory_error(self):
-        with support.temp_dir() as script_dir:
+        with temp_dir() as script_dir:
             msg = "can't find '__main__' module in %r" % script_dir
             self._check_import_error(script_dir, msg)
 
     def test_zipfile(self):
-        with support.temp_dir() as script_dir:
+        with temp_dir() as script_dir:
             script_name = _make_test_script(script_dir, '__main__')
             zip_name, run_name = make_zip_script(script_dir, 'test_zip', script_name)
             self._check_script(zip_name, run_name, zip_name, zip_name, '',
                                zipimport.zipimporter)
 
     def test_zipfile_compiled(self):
-        with support.temp_dir() as script_dir:
+        with temp_dir() as script_dir:
             script_name = _make_test_script(script_dir, '__main__')
             compiled_name = py_compile.compile(script_name, doraise=True)
             zip_name, run_name = make_zip_script(script_dir, 'test_zip', compiled_name)
@@ -276,14 +277,14 @@ class CmdLineTest(unittest.TestCase):
                                zipimport.zipimporter)
 
     def test_zipfile_error(self):
-        with support.temp_dir() as script_dir:
+        with temp_dir() as script_dir:
             script_name = _make_test_script(script_dir, 'not_main')
             zip_name, run_name = make_zip_script(script_dir, 'test_zip', script_name)
             msg = "can't find '__main__' module in %r" % zip_name
             self._check_import_error(zip_name, msg)
 
     def test_module_in_package(self):
-        with support.temp_dir() as script_dir:
+        with temp_dir() as script_dir:
             pkg_dir = os.path.join(script_dir, 'test_pkg')
             make_pkg(pkg_dir)
             script_name = _make_test_script(pkg_dir, 'script')
@@ -293,14 +294,14 @@ class CmdLineTest(unittest.TestCase):
                                importlib.machinery.SourceFileLoader)
 
     def test_module_in_package_in_zipfile(self):
-        with support.temp_dir() as script_dir:
+        with temp_dir() as script_dir:
             zip_name, run_name = _make_test_zip_pkg(script_dir, 'test_zip', 'test_pkg', 'script')
             launch_name = _make_launch_script(script_dir, 'launch', 'test_pkg.script', zip_name)
             self._check_script(launch_name, run_name, run_name,
                                zip_name, 'test_pkg', zipimport.zipimporter)
 
     def test_module_in_subpackage_in_zipfile(self):
-        with support.temp_dir() as script_dir:
+        with temp_dir() as script_dir:
             zip_name, run_name = _make_test_zip_pkg(script_dir, 'test_zip', 'test_pkg', 'script', depth=2)
             launch_name = _make_launch_script(script_dir, 'launch', 'test_pkg.test_pkg.script', zip_name)
             self._check_script(launch_name, run_name, run_name,
@@ -308,7 +309,7 @@ class CmdLineTest(unittest.TestCase):
                                zipimport.zipimporter)
 
     def test_package(self):
-        with support.temp_dir() as script_dir:
+        with temp_dir() as script_dir:
             pkg_dir = os.path.join(script_dir, 'test_pkg')
             make_pkg(pkg_dir)
             script_name = _make_test_script(pkg_dir, '__main__')
@@ -318,7 +319,7 @@ class CmdLineTest(unittest.TestCase):
                                importlib.machinery.SourceFileLoader)
 
     def test_package_compiled(self):
-        with support.temp_dir() as script_dir:
+        with temp_dir() as script_dir:
             pkg_dir = os.path.join(script_dir, 'test_pkg')
             make_pkg(pkg_dir)
             script_name = _make_test_script(pkg_dir, '__main__')
@@ -331,7 +332,7 @@ class CmdLineTest(unittest.TestCase):
                                importlib.machinery.SourcelessFileLoader)
 
     def test_package_error(self):
-        with support.temp_dir() as script_dir:
+        with temp_dir() as script_dir:
             pkg_dir = os.path.join(script_dir, 'test_pkg')
             make_pkg(pkg_dir)
             msg = ("'test_pkg' is a package and cannot "
@@ -340,7 +341,7 @@ class CmdLineTest(unittest.TestCase):
             self._check_import_error(launch_name, msg)
 
     def test_package_recursion(self):
-        with support.temp_dir() as script_dir:
+        with temp_dir() as script_dir:
             pkg_dir = os.path.join(script_dir, 'test_pkg')
             make_pkg(pkg_dir)
             main_dir = os.path.join(pkg_dir, '__main__')
@@ -354,14 +355,14 @@ class CmdLineTest(unittest.TestCase):
     def test_issue8202(self):
         # Make sure package __init__ modules see "-m" in sys.argv0 while
         # searching for the module to execute
-        with support.temp_dir() as script_dir:
+        with temp_dir() as script_dir:
             with support.change_cwd(path=script_dir):
                 pkg_dir = os.path.join(script_dir, 'test_pkg')
                 make_pkg(pkg_dir, "import sys; print('init_argv0==%r' % sys.argv[0])")
                 script_name = _make_test_script(pkg_dir, 'script')
                 rc, out, err = assert_python_ok('-m', 'test_pkg.script', *example_args, __isolated=False)
                 if verbose > 1:
-                    print(repr(out))
+                    print(out)
                 expected = "init_argv0==%r" % '-m'
                 self.assertIn(expected.encode('utf-8'), out)
                 self._check_output(script_name, rc, out,
@@ -371,7 +372,7 @@ class CmdLineTest(unittest.TestCase):
     def test_issue8202_dash_c_file_ignored(self):
         # Make sure a "-c" file in the current directory
         # does not alter the value of sys.path[0]
-        with support.temp_dir() as script_dir:
+        with temp_dir() as script_dir:
             with support.change_cwd(path=script_dir):
                 with open("-c", "w") as f:
                     f.write("data")
@@ -379,14 +380,14 @@ class CmdLineTest(unittest.TestCase):
                         'import sys; print("sys.path[0]==%r" % sys.path[0])',
                         __isolated=False)
                     if verbose > 1:
-                        print(repr(out))
+                        print(out)
                     expected = "sys.path[0]==%r" % ''
                     self.assertIn(expected.encode('utf-8'), out)
 
     def test_issue8202_dash_m_file_ignored(self):
         # Make sure a "-m" file in the current directory
         # does not alter the value of sys.path[0]
-        with support.temp_dir() as script_dir:
+        with temp_dir() as script_dir:
             script_name = _make_test_script(script_dir, 'other')
             with support.change_cwd(path=script_dir):
                 with open("-m", "w") as f:
@@ -401,7 +402,7 @@ class CmdLineTest(unittest.TestCase):
         # If a module is invoked with the -m command line flag
         # and results in an error that the return code to the
         # shell is '1'
-        with support.temp_dir() as script_dir:
+        with temp_dir() as script_dir:
             with support.change_cwd(path=script_dir):
                 pkg_dir = os.path.join(script_dir, 'test_pkg')
                 make_pkg(pkg_dir)
@@ -409,7 +410,7 @@ class CmdLineTest(unittest.TestCase):
                                                 "if __name__ == '__main__': raise ValueError")
                 rc, out, err = assert_python_failure('-m', 'test_pkg.other', *example_args)
                 if verbose > 1:
-                    print(repr(out))
+                    print(out)
                 self.assertEqual(rc, 1)
 
     def test_pep_409_verbiage(self):
@@ -421,7 +422,7 @@ class CmdLineTest(unittest.TestCase):
             except:
                 raise NameError from None
             """)
-        with support.temp_dir() as script_dir:
+        with temp_dir() as script_dir:
             script_name = _make_test_script(script_dir, 'script', script)
             exitcode, stdout, stderr = assert_python_failure(script_name)
             text = stderr.decode('ascii').split('\n')
@@ -465,7 +466,7 @@ class CmdLineTest(unittest.TestCase):
             if error:
                 sys.exit(error)
             """)
-        with support.temp_dir() as script_dir:
+        with temp_dir() as script_dir:
             script_name = _make_test_script(script_dir, 'script', script)
             exitcode, stdout, stderr = assert_python_failure(script_name)
             text = stderr.decode('ascii')

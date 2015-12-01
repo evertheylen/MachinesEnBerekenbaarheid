@@ -43,15 +43,11 @@ class addclosehook(addbase):
         self.hookargs = hookargs
 
     def close(self):
-        try:
-            closehook = self.closehook
-            hookargs = self.hookargs
-            if closehook:
-                self.closehook = None
-                self.hookargs = None
-                closehook(*hookargs)
-        finally:
-            super(addclosehook, self).close()
+        if self.closehook:
+            self.closehook(*self.hookargs)
+            self.closehook = None
+            self.hookargs = None
+        super(addclosehook, self).close()
 
 
 class addinfo(addbase):

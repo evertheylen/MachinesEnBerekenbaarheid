@@ -1,10 +1,7 @@
 import gc
 import sys
 import unittest
-import warnings
 import weakref
-import inspect
-import types
 
 from test import support
 
@@ -51,65 +48,6 @@ class FinalizationTest(unittest.TestCase):
         support.gc_collect()
         self.assertTrue(finalized)
         self.assertEqual(gc.garbage, old_garbage)
-
-    def test_lambda_generator(self):
-        # Issue #23192: Test that a lambda returning a generator behaves
-        # like the equivalent function
-        f = lambda: (yield 1)
-        def g(): return (yield 1)
-
-        # test 'yield from'
-        f2 = lambda: (yield from g())
-        def g2(): return (yield from g())
-
-        f3 = lambda: (yield from f())
-        def g3(): return (yield from f())
-
-        for gen_fun in (f, g, f2, g2, f3, g3):
-            gen = gen_fun()
-            self.assertEqual(next(gen), 1)
-            with self.assertRaises(StopIteration) as cm:
-                gen.send(2)
-            self.assertEqual(cm.exception.value, 2)
-
-
-class GeneratorTest(unittest.TestCase):
-
-    def test_name(self):
-        def func():
-            yield 1
-
-        # check generator names
-        gen = func()
-        self.assertEqual(gen.__name__, "func")
-        self.assertEqual(gen.__qualname__,
-                         "GeneratorTest.test_name.<locals>.func")
-
-        # modify generator names
-        gen.__name__ = "name"
-        gen.__qualname__ = "qualname"
-        self.assertEqual(gen.__name__, "name")
-        self.assertEqual(gen.__qualname__, "qualname")
-
-        # generator names must be a string and cannot be deleted
-        self.assertRaises(TypeError, setattr, gen, '__name__', 123)
-        self.assertRaises(TypeError, setattr, gen, '__qualname__', 123)
-        self.assertRaises(TypeError, delattr, gen, '__name__')
-        self.assertRaises(TypeError, delattr, gen, '__qualname__')
-
-        # modify names of the function creating the generator
-        func.__qualname__ = "func_qualname"
-        func.__name__ = "func_name"
-        gen = func()
-        self.assertEqual(gen.__name__, "func_name")
-        self.assertEqual(gen.__qualname__, "func_qualname")
-
-        # unnamed generator
-        gen = (x for x in range(10))
-        self.assertEqual(gen.__name__,
-                         "<genexpr>")
-        self.assertEqual(gen.__qualname__,
-                         "GeneratorTest.test_name.<locals>.<genexpr>")
 
 
 class ExceptionTest(unittest.TestCase):
@@ -220,79 +158,6 @@ class ExceptionTest(unittest.TestCase):
         self.assertEqual(next(g), "done")
         self.assertEqual(sys.exc_info(), (None, None, None))
 
-    def test_stopiteration_warning(self):
-        # See also PEP 479.
-
-        def gen():
-            raise StopIteration
-            yield
-
-        with self.assertRaises(StopIteration), \
-             self.assertWarnsRegex(PendingDeprecationWarning, "StopIteration"):
-
-            next(gen())
-
-        with self.assertRaisesRegex(PendingDeprecationWarning,
-                                    "generator .* raised StopIteration"), \
-             warnings.catch_warnings():
-
-            warnings.simplefilter('error')
-            next(gen())
-
-
-    def test_tutorial_stopiteration(self):
-        # Raise StopIteration" stops the generator too:
-
-        def f():
-            yield 1
-            raise StopIteration
-            yield 2 # never reached
-
-        g = f()
-        self.assertEqual(next(g), 1)
-
-        with self.assertWarnsRegex(PendingDeprecationWarning, "StopIteration"):
-            with self.assertRaises(StopIteration):
-                next(g)
-
-        with self.assertRaises(StopIteration):
-            # This time StopIteration isn't raised from the generator's body,
-            # hence no warning.
-            next(g)
-
-
-class YieldFromTests(unittest.TestCase):
-    def test_generator_gi_yieldfrom(self):
-        def a():
-            self.assertEqual(inspect.getgeneratorstate(gen_b), inspect.GEN_RUNNING)
-            self.assertIsNone(gen_b.gi_yieldfrom)
-            yield
-            self.assertEqual(inspect.getgeneratorstate(gen_b), inspect.GEN_RUNNING)
-            self.assertIsNone(gen_b.gi_yieldfrom)
-
-        def b():
-            self.assertIsNone(gen_b.gi_yieldfrom)
-            yield from a()
-            self.assertIsNone(gen_b.gi_yieldfrom)
-            yield
-            self.assertIsNone(gen_b.gi_yieldfrom)
-
-        gen_b = b()
-        self.assertEqual(inspect.getgeneratorstate(gen_b), inspect.GEN_CREATED)
-        self.assertIsNone(gen_b.gi_yieldfrom)
-
-        gen_b.send(None)
-        self.assertEqual(inspect.getgeneratorstate(gen_b), inspect.GEN_SUSPENDED)
-        self.assertEqual(gen_b.gi_yieldfrom.gi_code.co_name, 'a')
-
-        gen_b.send(None)
-        self.assertEqual(inspect.getgeneratorstate(gen_b), inspect.GEN_SUSPENDED)
-        self.assertIsNone(gen_b.gi_yieldfrom)
-
-        [] = gen_b  # Exhaust generator
-        self.assertEqual(inspect.getgeneratorstate(gen_b), inspect.GEN_CLOSED)
-        self.assertIsNone(gen_b.gi_yieldfrom)
-
 
 tutorial_tests = """
 Let's try a simple generator:
@@ -339,7 +204,26 @@ Let's try a simple generator:
       File "<stdin>", line 1, in ?
     StopIteration
 
-However, "return" and StopIteration are not exactly equivalent:
+"raise StopIteration" stops the generator too:
+
+    >>> def f():
+    ...     yield 1
+    ...     raise StopIteration
+    ...     yield 2 # never reached
+    ...
+    >>> g = f()
+    >>> next(g)
+    1
+    >>> next(g)
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in ?
+    StopIteration
+    >>> next(g)
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in ?
+    StopIteration
+
+However, they are not exactly equivalent:
 
     >>> def g1():
     ...     try:
@@ -659,7 +543,7 @@ From the Iterators list, about the types of these things.
 >>> type(i)
 <class 'generator'>
 >>> [s for s in dir(i) if not s.startswith('_')]
-['close', 'gi_code', 'gi_frame', 'gi_running', 'gi_yieldfrom', 'send', 'throw']
+['close', 'gi_code', 'gi_frame', 'gi_running', 'send', 'throw']
 >>> from test.support import HAVE_DOCSTRINGS
 >>> print(i.__next__.__doc__ if HAVE_DOCSTRINGS else 'Implement next(self).')
 Implement next(self).

@@ -47,8 +47,7 @@ The following functions are provided:
 .. function:: heappop(heap)
 
    Pop and return the smallest item from the *heap*, maintaining the heap
-   invariant.  If the heap is empty, :exc:`IndexError` is raised.  To access the
-   smallest item without popping it, use ``heap[0]``.
+   invariant.  If the heap is empty, :exc:`IndexError` is raised.
 
 
 .. function:: heappushpop(heap, item)
@@ -82,7 +81,7 @@ The following functions are provided:
 The module also offers three general purpose functions based on heaps.
 
 
-.. function:: merge(*iterables, key=None, reverse=False)
+.. function:: merge(*iterables)
 
    Merge multiple sorted inputs into a single sorted output (for example, merge
    timestamped entries from multiple log files).  Returns an :term:`iterator`
@@ -91,18 +90,6 @@ The module also offers three general purpose functions based on heaps.
    Similar to ``sorted(itertools.chain(*iterables))`` but returns an iterable, does
    not pull the data into memory all at once, and assumes that each of the input
    streams is already sorted (smallest to largest).
-
-   Has two optional arguments which must be specified as keyword arguments.
-
-   *key* specifies a :term:`key function` of one argument that is used to
-   extract a comparison key from each input element.  The default value is
-   ``None`` (compare the elements directly).
-
-   *reverse* is a boolean value.  If set to ``True``, then the input elements
-   are merged as if each comparison were reversed.
-
-   .. versionchanged:: 3.5
-      Added the optional *key* and *reverse* parameters.
 
 
 .. function:: nlargest(n, iterable, key=None)
@@ -125,8 +112,7 @@ The module also offers three general purpose functions based on heaps.
 The latter two functions perform best for smaller values of *n*.  For larger
 values, it is more efficient to use the :func:`sorted` function.  Also, when
 ``n==1``, it is more efficient to use the built-in :func:`min` and :func:`max`
-functions.  If repeated usage of these functions is required, consider turning
-the iterable into an actual heap.
+functions.
 
 
 Basic Examples

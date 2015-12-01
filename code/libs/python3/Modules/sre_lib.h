@@ -30,7 +30,7 @@ SRE(at)(SRE_STATE* state, SRE_CHAR* ptr, SRE_CODE at)
                 SRE_IS_LINEBREAK((int) ptr[-1]));
 
     case SRE_AT_END:
-        return (((SRE_CHAR *)state->end - ptr == 1 &&
+        return (((void*) (ptr+1) == state->end &&
                  SRE_IS_LINEBREAK((int) ptr[0])) ||
                 ((void*) ptr == state->end));
 
@@ -101,7 +101,7 @@ SRE(at)(SRE_STATE* state, SRE_CHAR* ptr, SRE_CODE at)
 }
 
 LOCAL(int)
-SRE(charset)(SRE_STATE* state, SRE_CODE* set, SRE_CODE ch)
+SRE(charset)(SRE_CODE* set, SRE_CODE ch)
 {
     /* check if character is a member of the given set */
 
@@ -141,20 +141,6 @@ SRE(charset)(SRE_STATE* state, SRE_CODE* set, SRE_CODE ch)
                 return ok;
             set += 2;
             break;
-
-        case SRE_OP_RANGE_IGNORE:
-            /* <RANGE_IGNORE> <lower> <upper> */
-        {
-            SRE_CODE uch;
-            /* ch is already lower cased */
-            if (set[0] <= ch && ch <= set[1])
-                return ok;
-            uch = state->upper(ch);
-            if (set[0] <= uch && uch <= set[1])
-                return ok;
-            set += 2;
-            break;
-        }
 
         case SRE_OP_NEGATE:
             ok = !ok;
@@ -207,7 +193,7 @@ SRE(count)(SRE_STATE* state, SRE_CODE* pattern, Py_ssize_t maxcount)
     case SRE_OP_IN:
         /* repeated set */
         TRACE(("|%p|%p|COUNT IN\n", pattern, ptr));
-        while (ptr < end && SRE(charset)(state, pattern + 2, *ptr))
+        while (ptr < end && SRE(charset)(pattern + 2, *ptr))
             ptr++;
         break;
 
@@ -642,8 +628,7 @@ entrance:
             /* match set member (or non_member) */
             /* <IN> <skip> <set> */
             TRACE(("|%p|%p|IN\n", ctx->pattern, ctx->ptr));
-            if (ctx->ptr >= end ||
-                !SRE(charset)(state, ctx->pattern + 1, *ctx->ptr))
+            if (ctx->ptr >= end || !SRE(charset)(ctx->pattern + 1, *ctx->ptr))
                 RETURN_FAILURE;
             ctx->pattern += ctx->pattern[0];
             ctx->ptr++;
@@ -672,7 +657,7 @@ entrance:
         case SRE_OP_IN_IGNORE:
             TRACE(("|%p|%p|IN_IGNORE\n", ctx->pattern, ctx->ptr));
             if (ctx->ptr >= end
-                || !SRE(charset)(state, ctx->pattern+1,
+                || !SRE(charset)(ctx->pattern+1,
                                  (SRE_CODE)state->lower(*ctx->ptr)))
                 RETURN_FAILURE;
             ctx->pattern += ctx->pattern[0];
@@ -703,8 +688,7 @@ entrance:
                     continue;
                 if (ctx->pattern[1] == SRE_OP_IN &&
                     (ctx->ptr >= end ||
-                     !SRE(charset)(state, ctx->pattern + 3,
-                                   (SRE_CODE) *ctx->ptr)))
+                     !SRE(charset)(ctx->pattern + 3, (SRE_CODE) *ctx->ptr)))
                     continue;
                 state->ptr = ctx->ptr;
                 DO_JUMP(JUMP_BRANCH, jump_branch, ctx->pattern+1);
@@ -1109,9 +1093,9 @@ entrance:
             /* <ASSERT> <skip> <back> <pattern> */
             TRACE(("|%p|%p|ASSERT %d\n", ctx->pattern,
                    ctx->ptr, ctx->pattern[1]));
-            if (ctx->ptr - (SRE_CHAR *)state->beginning < (Py_ssize_t)ctx->pattern[1])
-                RETURN_FAILURE;
             state->ptr = ctx->ptr - ctx->pattern[1];
+            if (state->ptr < state->beginning)
+                RETURN_FAILURE;
             DO_JUMP0(JUMP_ASSERT, jump_assert, ctx->pattern+2);
             RETURN_ON_FAILURE(ret);
             ctx->pattern += ctx->pattern[0];
@@ -1122,8 +1106,8 @@ entrance:
             /* <ASSERT_NOT> <skip> <back> <pattern> */
             TRACE(("|%p|%p|ASSERT_NOT %d\n", ctx->pattern,
                    ctx->ptr, ctx->pattern[1]));
-            if (ctx->ptr - (SRE_CHAR *)state->beginning >= (Py_ssize_t)ctx->pattern[1]) {
-                state->ptr = ctx->ptr - ctx->pattern[1];
+            state->ptr = ctx->ptr - ctx->pattern[1];
+            if (state->ptr >= state->beginning) {
                 DO_JUMP0(JUMP_ASSERT_NOT, jump_assert_not, ctx->pattern+2);
                 if (ret) {
                     RETURN_ON_ERROR(ret);
@@ -1215,20 +1199,12 @@ SRE(search)(SRE_STATE* state, SRE_CODE* pattern)
     SRE_CODE* overlap = NULL;
     int flags = 0;
 
-    if (ptr > end)
-        return 0;
-
     if (pattern[0] == SRE_OP_INFO) {
         /* optimization info block */
         /* <INFO> <1=skip> <2=flags> <3=min> <4=max> <5=prefix info>  */
 
         flags = pattern[2];
 
-        if (pattern[3] && end - ptr < (Py_ssize_t)pattern[3]) {
-            TRACE(("reject (got %u chars, need %u)\n",
-                   (unsigned int)(end - ptr), pattern[3]));
-            return 0;
-        }
         if (pattern[3] > 1) {
             /* adjust end point (but make sure we leave at least one
                character in there, so literal search will work) */
@@ -1334,7 +1310,7 @@ SRE(search)(SRE_STATE* state, SRE_CODE* pattern)
         /* pattern starts with a character from a known set */
         end = (SRE_CHAR *)state->end;
         for (;;) {
-            while (ptr < end && !SRE(charset)(state, charset, *ptr))
+            while (ptr < end && !SRE(charset)(charset, *ptr))
                 ptr++;
             if (ptr >= end)
                 return 0;
@@ -1346,18 +1322,15 @@ SRE(search)(SRE_STATE* state, SRE_CODE* pattern)
                 break;
             ptr++;
         }
-    } else {
+    } else
         /* general case */
-        assert(ptr <= end);
-        while (1) {
+        while (ptr <= end) {
             TRACE(("|%p|%p|SEARCH\n", pattern, ptr));
-            state->start = state->ptr = ptr;
+            state->start = state->ptr = ptr++;
             status = SRE(match)(state, pattern, 0);
-            if (status != 0 || ptr >= end)
+            if (status != 0)
                 break;
-            ptr++;
         }
-    }
 
     return status;
 }

@@ -38,7 +38,7 @@ Executor Objects
               future = executor.submit(pow, 323, 1235)
               print(future.result())
 
-    .. method:: map(func, *iterables, timeout=None, chunksize=1)
+    .. method:: map(func, *iterables, timeout=None)
 
        Equivalent to :func:`map(func, *iterables) <map>` except *func* is executed
        asynchronously and several calls to *func* may be made concurrently.  The
@@ -48,16 +48,7 @@ Executor Objects
        *timeout* can be an int or a float.  If *timeout* is not specified or
        ``None``, there is no limit to the wait time.  If a call raises an
        exception, then that exception will be raised when its value is
-       retrieved from the iterator. When using :class:`ProcessPoolExecutor`, this
-       method chops *iterables* into a number of chunks which it submits to the
-       pool as separate tasks. The (approximate) size of these chunks can be
-       specified by setting *chunksize* to a positive integer. For very long
-       iterables, using a large value for *chunksize* can significantly improve
-       performance compared to the default size of 1. With :class:`ThreadPoolExecutor`,
-       *chunksize* has no effect.
-
-       .. versionchanged:: 3.5
-          Added the *chunksize* argument.
+       retrieved from the iterator.
 
     .. method:: shutdown(wait=True)
 
@@ -124,18 +115,10 @@ And::
    executor.submit(wait_on_future)
 
 
-.. class:: ThreadPoolExecutor(max_workers=None)
+.. class:: ThreadPoolExecutor(max_workers)
 
    An :class:`Executor` subclass that uses a pool of at most *max_workers*
    threads to execute calls asynchronously.
-
-   .. versionchanged:: 3.5
-      If *max_workers* is ``None`` or
-      not given, it will default to the number of processors on the machine,
-      multiplied by ``5``, assuming that :class:`ThreadPoolExecutor` is often
-      used to overlap I/O instead of CPU work and the number of workers
-      should be higher than the number of workers
-      for :class:`ProcessPoolExecutor`.
 
 
 .. _threadpoolexecutor-example:
@@ -155,8 +138,8 @@ ThreadPoolExecutor Example
 
    # Retrieve a single page and report the url and contents
    def load_url(url, timeout):
-       with urllib.request.urlopen(url, timeout=timeout) as conn:
-           return conn.read()
+       conn = urllib.request.urlopen(url, timeout=timeout)
+       return conn.readall()
 
    # We can use a with statement to ensure threads are cleaned up promptly
    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
@@ -192,8 +175,6 @@ to a :class:`ProcessPoolExecutor` will result in deadlock.
    An :class:`Executor` subclass that executes calls asynchronously using a pool
    of at most *max_workers* processes.  If *max_workers* is ``None`` or not
    given, it will default to the number of processors on the machine.
-   If *max_workers* is lower or equal to ``0``, then a :exc:`ValueError`
-   will be raised.
 
    .. versionchanged:: 3.3
       When one of the worker processes terminates abruptly, a

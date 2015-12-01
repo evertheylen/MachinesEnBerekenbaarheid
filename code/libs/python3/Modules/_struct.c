@@ -85,6 +85,8 @@ typedef struct { char c; _Bool x; } s_bool;
 #define BOOL_ALIGN 0
 #endif
 
+#define STRINGIFY(x)    #x
+
 #ifdef __powerc
 #pragma options align=reset
 #endif
@@ -544,8 +546,8 @@ np_short(char *p, PyObject *v, const formatdef *f)
         return -1;
     if (x < SHRT_MIN || x > SHRT_MAX){
         PyErr_SetString(StructError,
-                        "short format requires " Py_STRINGIFY(SHRT_MIN)
-                        " <= number <= " Py_STRINGIFY(SHRT_MAX));
+                        "short format requires " STRINGIFY(SHRT_MIN)
+                        " <= number <= " STRINGIFY(SHRT_MAX));
         return -1;
     }
     y = (short)x;
@@ -562,8 +564,7 @@ np_ushort(char *p, PyObject *v, const formatdef *f)
         return -1;
     if (x < 0 || x > USHRT_MAX){
         PyErr_SetString(StructError,
-                        "ushort format requires 0 <= number <= "
-                        Py_STRINGIFY(USHRT_MAX));
+                        "ushort format requires 0 <= number <= " STRINGIFY(USHRT_MAX));
         return -1;
     }
     y = (unsigned short)x;
@@ -1263,8 +1264,7 @@ prepare_s(PyStructObject *self)
     const char *s;
     const char *fmt;
     char c;
-    Py_ssize_t size, len, num, itemsize;
-    size_t ncodes;
+    Py_ssize_t size, len, ncodes, num, itemsize;
 
     fmt = PyBytes_AS_STRING(self->s_format);
 
@@ -1320,7 +1320,7 @@ prepare_s(PyStructObject *self)
     }
 
     /* check for overflow */
-    if ((ncodes + 1) > ((size_t)PY_SSIZE_T_MAX / sizeof(formatcode))) {
+    if ((ncodes + 1) > (PY_SSIZE_T_MAX / sizeof(formatcode))) {
         PyErr_NoMemory();
         return -1;
     }

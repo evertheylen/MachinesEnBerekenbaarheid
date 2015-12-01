@@ -34,12 +34,6 @@ try:
 except ImportError:
     BZ2_SUPPORTED = False
 
-try:
-    import lzma
-    LZMA_SUPPORTED = True
-except ImportError:
-    LZMA_SUPPORTED = False
-
 TESTFN2 = TESTFN + "2"
 
 try:
@@ -901,26 +895,6 @@ class TestShutil(unittest.TestCase):
         shutil.copytree(src_dir, dst_dir, symlinks=True)
         self.assertIn('test.txt', os.listdir(dst_dir))
 
-    @support.skip_unless_symlink
-    def test_copytree_symlink_dir(self):
-        src_dir = self.mkdtemp()
-        dst_dir = os.path.join(self.mkdtemp(), 'destination')
-        os.mkdir(os.path.join(src_dir, 'real_dir'))
-        with open(os.path.join(src_dir, 'real_dir', 'test.txt'), 'w'):
-            pass
-        os.symlink(os.path.join(src_dir, 'real_dir'),
-                   os.path.join(src_dir, 'link_to_dir'),
-                   target_is_directory=True)
-
-        shutil.copytree(src_dir, dst_dir, symlinks=False)
-        self.assertFalse(os.path.islink(os.path.join(dst_dir, 'link_to_dir')))
-        self.assertIn('test.txt', os.listdir(os.path.join(dst_dir, 'link_to_dir')))
-
-        dst_dir = os.path.join(self.mkdtemp(), 'destination2')
-        shutil.copytree(src_dir, dst_dir, symlinks=True)
-        self.assertTrue(os.path.islink(os.path.join(dst_dir, 'link_to_dir')))
-        self.assertIn('test.txt', os.listdir(os.path.join(dst_dir, 'link_to_dir')))
-
     def _copy_file(self, method):
         fname = 'test.txt'
         tmpdir = self.mkdtemp()
@@ -1215,8 +1189,6 @@ class TestShutil(unittest.TestCase):
         formats = ['tar', 'gztar', 'zip']
         if BZ2_SUPPORTED:
             formats.append('bztar')
-        if LZMA_SUPPORTED:
-            formats.append('xztar')
 
         for format in formats:
             tmpdir = self.mkdtemp()
@@ -1652,24 +1624,6 @@ class TestMove(unittest.TestCase):
     def test_move_as_rename_return_value(self):
         rv = shutil.move(self.src_file, os.path.join(self.dst_dir, 'bar'))
         self.assertEqual(rv, os.path.join(self.dst_dir, 'bar'))
-
-    @mock_rename
-    def test_move_file_special_function(self):
-        moved = []
-        def _copy(src, dst):
-            moved.append((src, dst))
-        shutil.move(self.src_file, self.dst_dir, copy_function=_copy)
-        self.assertEqual(len(moved), 1)
-
-    @mock_rename
-    def test_move_dir_special_function(self):
-        moved = []
-        def _copy(src, dst):
-            moved.append((src, dst))
-        support.create_empty_file(os.path.join(self.src_dir, 'child'))
-        support.create_empty_file(os.path.join(self.src_dir, 'child1'))
-        shutil.move(self.src_dir, self.dst_dir, copy_function=_copy)
-        self.assertEqual(len(moved), 3)
 
 
 class TestCopyFile(unittest.TestCase):

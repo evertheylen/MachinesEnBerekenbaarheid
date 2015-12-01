@@ -9,7 +9,10 @@ from test import support
 from time import sleep
 import unittest
 import unittest.mock
-from time import monotonic as time
+try:
+    from time import monotonic as time
+except ImportError:
+    from time import time as time
 try:
     import resource
 except ImportError:
@@ -22,7 +25,7 @@ else:
     def socketpair(family=socket.AF_INET, type=socket.SOCK_STREAM, proto=0):
         with socket.socket(family, type, proto) as l:
             l.bind((support.HOST, 0))
-            l.listen()
+            l.listen(3)
             c = socket.socket(family, type, proto)
             try:
                 c.connect(l.getsockname())
@@ -185,8 +188,8 @@ class BaseSelectorTestCase(unittest.TestCase):
         s.register(wr, selectors.EVENT_WRITE)
 
         s.close()
-        self.assertRaises(RuntimeError, s.get_key, rd)
-        self.assertRaises(RuntimeError, s.get_key, wr)
+        self.assertRaises(KeyError, s.get_key, rd)
+        self.assertRaises(KeyError, s.get_key, wr)
         self.assertRaises(KeyError, mapping.__getitem__, rd)
         self.assertRaises(KeyError, mapping.__getitem__, wr)
 
@@ -255,8 +258,8 @@ class BaseSelectorTestCase(unittest.TestCase):
             sel.register(rd, selectors.EVENT_READ)
             sel.register(wr, selectors.EVENT_WRITE)
 
-        self.assertRaises(RuntimeError, s.get_key, rd)
-        self.assertRaises(RuntimeError, s.get_key, wr)
+        self.assertRaises(KeyError, s.get_key, rd)
+        self.assertRaises(KeyError, s.get_key, wr)
 
     def test_fileno(self):
         s = self.SELECTOR()
@@ -357,35 +360,7 @@ class BaseSelectorTestCase(unittest.TestCase):
 
     @unittest.skipUnless(hasattr(signal, "alarm"),
                          "signal.alarm() required for this test")
-    def test_select_interrupt_exc(self):
-        s = self.SELECTOR()
-        self.addCleanup(s.close)
-
-        rd, wr = self.make_socketpair()
-
-        class InterruptSelect(Exception):
-            pass
-
-        def handler(*args):
-            raise InterruptSelect
-
-        orig_alrm_handler = signal.signal(signal.SIGALRM, handler)
-        self.addCleanup(signal.signal, signal.SIGALRM, orig_alrm_handler)
-        self.addCleanup(signal.alarm, 0)
-
-        signal.alarm(1)
-
-        s.register(rd, selectors.EVENT_READ)
-        t = time()
-        # select() is interrupted by a signal which raises an exception
-        with self.assertRaises(InterruptSelect):
-            s.select(30)
-        # select() was interrupted before the timeout of 30 seconds
-        self.assertLess(time() - t, 5.0)
-
-    @unittest.skipUnless(hasattr(signal, "alarm"),
-                         "signal.alarm() required for this test")
-    def test_select_interrupt_noraise(self):
+    def test_select_interrupt(self):
         s = self.SELECTOR()
         self.addCleanup(s.close)
 
@@ -399,11 +374,8 @@ class BaseSelectorTestCase(unittest.TestCase):
 
         s.register(rd, selectors.EVENT_READ)
         t = time()
-        # select() is interrupted by a signal, but the signal handler doesn't
-        # raise an exception, so select() should by retries with a recomputed
-        # timeout
-        self.assertFalse(s.select(1.5))
-        self.assertGreaterEqual(time() - t, 1.0)
+        self.assertFalse(s.select(2))
+        self.assertLess(time() - t, 2.5)
 
 
 class ScalableSelectorMixIn:
@@ -483,18 +455,10 @@ class KqueueSelectorTestCase(BaseSelectorTestCase, ScalableSelectorMixIn):
     SELECTOR = getattr(selectors, 'KqueueSelector', None)
 
 
-@unittest.skipUnless(hasattr(selectors, 'DevpollSelector'),
-                     "Test needs selectors.DevpollSelector")
-class DevpollSelectorTestCase(BaseSelectorTestCase, ScalableSelectorMixIn):
-
-    SELECTOR = getattr(selectors, 'DevpollSelector', None)
-
-
-
 def test_main():
     tests = [DefaultSelectorTestCase, SelectSelectorTestCase,
              PollSelectorTestCase, EpollSelectorTestCase,
-             KqueueSelectorTestCase, DevpollSelectorTestCase]
+             KqueueSelectorTestCase]
     support.run_unittest(*tests)
     support.reap_children()
 

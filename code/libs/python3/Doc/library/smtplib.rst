@@ -61,10 +61,6 @@ Protocol) and :rfc:`1869` (SMTP Service Extensions).
    .. versionchanged:: 3.3
       source_address argument was added.
 
-   .. versionadded:: 3.5
-      The SMTPUTF8 extension (:rfc:`6531`) is now supported.
-
-
 .. class:: SMTP_SSL(host='', port=0, local_hostname=None, keyfile=None, \
                     certfile=None [, timeout], context=None, \
                     source_address=None)
@@ -165,13 +161,6 @@ A nice selection of exceptions is defined as well:
    The server refused our ``HELO`` message.
 
 
-.. exception:: SMTPNotSupportedError
-
-    The command or option attempted is not supported by the server.
-
-    .. versionadded:: 3.5
-
-
 .. exception:: SMTPAuthenticationError
 
    SMTP authentication went wrong.  Most probably the server didn't accept the
@@ -200,12 +189,8 @@ An :class:`SMTP` instance has the following methods:
 
 .. method:: SMTP.set_debuglevel(level)
 
-   Set the debug output level.  A value of 1 or ``True`` for *level* results in
-   debug messages for connection and for all messages sent to and received from
-   the server.  A value of 2 for *level* results in these messages being
-   timestamped.
-
-   .. versionchanged:: 3.5 Added debuglevel 2.
+   Set the debug output level.  A true value for *level* results in debug messages
+   for connection and for all messages sent to and received from the server.
 
 
 .. method:: SMTP.docmd(cmd, args='')
@@ -255,7 +240,8 @@ An :class:`SMTP` instance has the following methods:
    the server is stored as the :attr:`ehlo_resp` attribute, :attr:`does_esmtp`
    is set to true or false depending on whether the server supports ESMTP, and
    :attr:`esmtp_features` will be a dictionary containing the names of the
-   SMTP service extensions this server supports, and their parameters (if any).
+   SMTP service extensions this server supports, and their
+   parameters (if any).
 
    Unless you wish to use :meth:`has_extn` before sending mail, it should not be
    necessary to call this method explicitly.  It will be implicitly called by
@@ -288,7 +274,7 @@ An :class:`SMTP` instance has the following methods:
       Many sites disable SMTP ``VRFY`` in order to foil spammers.
 
 
-.. method:: SMTP.login(user, password, *, initial_response_ok=True)
+.. method:: SMTP.login(user, password)
 
    Log in on an SMTP server that requires authentication. The arguments are the
    username and the password to authenticate with. If there has been no previous
@@ -302,67 +288,8 @@ An :class:`SMTP` instance has the following methods:
    :exc:`SMTPAuthenticationError`
       The server didn't accept the username/password combination.
 
-   :exc:`SMTPNotSupportedError`
-      The ``AUTH`` command is not supported by the server.
-
    :exc:`SMTPException`
       No suitable authentication method was found.
-
-   Each of the authentication methods supported by :mod:`smtplib` are tried in
-   turn if they are advertised as supported by the server.  See :meth:`auth`
-   for a list of supported authentication methods.  *initial_response_ok* is
-   passed through to :meth:`auth`.
-
-   Optional keyword argument *initial_response_ok* specifies whether, for
-   authentication methods that support it, an "initial response" as specified
-   in :rfc:`4954` can be sent along with the ``AUTH`` command, rather than
-   requiring a challenge/response.
-
-   .. versionchanged:: 3.5
-      :exc:`SMTPNotSupportedError` may be raised, and the
-      *initial_response_ok* parameter was added.
-
-
-.. method:: SMTP.auth(mechanism, authobject, *, initial_response_ok=True)
-
-   Issue an ``SMTP`` ``AUTH`` command for the specified authentication
-   *mechanism*, and handle the challenge response via *authobject*.
-
-   *mechanism* specifies which authentication mechanism is to
-   be used as argument to the ``AUTH`` command; the valid values are
-   those listed in the ``auth`` element of :attr:`esmtp_features`.
-
-   *authobject* must be a callable object taking an optional single argument:
-
-     data = authobject(challenge=None)
-
-   If optional keyword argument *initial_response_ok* is true,
-   ``authobject()`` will be called first with no argument.  It can return the
-   :rfc:`4954` "initial response" bytes which will be encoded and sent with
-   the ``AUTH`` command as below.  If the ``authobject()`` does not support an
-   initial response (e.g. because it requires a challenge), it should return
-   None when called with ``challenge=None``.  If *initial_response_ok* is
-   false, then ``authobject()`` will not be called first with None.
-
-   If the initial response check returns None, or if *initial_response_ok* is
-   false, ``authobject()`` will be called to process the server's challenge
-   response; the *challenge* argument it is passed will be a ``bytes``.  It
-   should return ``bytes`` *data* that will be base64 encoded and sent to the
-   server.
-
-   The ``SMTP`` class provides ``authobjects`` for the ``CRAM-MD5``, ``PLAIN``,
-   and ``LOGIN`` mechanisms; they are named ``SMTP.auth_cram_md5``,
-   ``SMTP.auth_plain``, and ``SMTP.auth_login`` respectively.  They all require
-   that the ``user`` and ``password`` properties of the ``SMTP`` instance are
-   set to appropriate values.
-
-   User code does not normally need to call ``auth`` directly, but can instead
-   call the :meth:`login` method, which will try each of the above mechanisms
-   in turn, in the order listed.  ``auth`` is exposed to facilitate the
-   implementation of authentication methods not (or not yet) supported
-   directly by :mod:`smtplib`.
-
-   .. versionadded:: 3.5
 
 
 .. method:: SMTP.starttls(keyfile=None, certfile=None, context=None)
@@ -383,7 +310,7 @@ An :class:`SMTP` instance has the following methods:
    :exc:`SMTPHeloError`
       The server didn't reply properly to the ``HELO`` greeting.
 
-   :exc:`SMTPNotSupportedError`
+   :exc:`SMTPException`
      The server does not support the STARTTLS extension.
 
    :exc:`RuntimeError`
@@ -396,11 +323,6 @@ An :class:`SMTP` instance has the following methods:
       The method now supports hostname check with
       :attr:`SSLContext.check_hostname` and *Server Name Indicator* (see
       :data:`~ssl.HAS_SNI`).
-
-   .. versionchanged:: 3.5
-      The error raised for lack of STARTTLS support is now the
-      :exc:`SMTPNotSupportedError` subclass instead of the base
-      :exc:`SMTPException`.
 
 
 .. method:: SMTP.sendmail(from_addr, to_addrs, msg, mail_options=[], rcpt_options=[])
@@ -438,9 +360,6 @@ An :class:`SMTP` instance has the following methods:
    recipient that was refused.  Each entry contains a tuple of the SMTP error code
    and the accompanying error message sent by the server.
 
-   If ``SMTPUTF8`` is included in *mail_options*, and the server supports it,
-   *from_addr* and *to_addr* may contain non-ASCII characters.
-
    This method may raise the following exceptions:
 
    :exc:`SMTPRecipientsRefused`
@@ -459,19 +378,11 @@ An :class:`SMTP` instance has the following methods:
       The server replied with an unexpected error code (other than a refusal of a
       recipient).
 
-   :exc:`SMTPNotSupportedError`
-      ``SMTPUTF8`` was given in the *mail_options* but is not supported by the
-      server.
-
    Unless otherwise noted, the connection will be open even after an exception is
    raised.
 
    .. versionchanged:: 3.2
       *msg* may be a byte string.
-
-   .. versionchanged:: 3.5
-      ``SMTPUTF8`` support added, and :exc:`SMTPNotSupportedError` may be
-      raised if ``SMTPUTF8`` is specified but the server does not support it.
 
 
 .. method:: SMTP.send_message(msg, from_addr=None, to_addrs=None, \
@@ -484,7 +395,7 @@ An :class:`SMTP` instance has the following methods:
 
    If *from_addr* is ``None`` or *to_addrs* is ``None``, ``send_message`` fills
    those arguments with addresses extracted from the headers of *msg* as
-   specified in :rfc:`5322`\: *from_addr* is set to the :mailheader:`Sender`
+   specified in :rfc:`2822`\: *from_addr* is set to the :mailheader:`Sender`
    field if it is present, and otherwise to the :mailheader:`From` field.
    *to_adresses* combines the values (if any) of the :mailheader:`To`,
    :mailheader:`Cc`, and :mailheader:`Bcc` fields from *msg*.  If exactly one
@@ -499,17 +410,9 @@ An :class:`SMTP` instance has the following methods:
    calls :meth:`sendmail` to transmit the resulting message.  Regardless of the
    values of *from_addr* and *to_addrs*, ``send_message`` does not transmit any
    :mailheader:`Bcc` or :mailheader:`Resent-Bcc` headers that may appear
-   in *msg*.  If any of the addresses in *from_addr* and *to_addrs* contain
-   non-ASCII characters and the server does not advertise ``SMTPUTF8`` support,
-   an :exc:`SMTPNotSupported` error is raised.  Otherwise the ``Message`` is
-   serialized with a clone of its :mod:`~email.policy` with the
-   :attr:`~email.policy.EmailPolicy.utf8` attribute set to ``True``, and
-   ``SMTPUTF8`` and ``BODY=8BITMIME`` are added to *mail_options*.
+   in *msg*.
 
    .. versionadded:: 3.2
-
-   .. versionadded:: 3.5
-      Support for internationalized addresses (``SMTPUTF8``).
 
 
 .. method:: SMTP.quit()

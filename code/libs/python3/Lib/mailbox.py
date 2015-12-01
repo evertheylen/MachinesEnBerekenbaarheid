@@ -722,14 +722,10 @@ class _singlefileMailbox(Mailbox):
 
     def close(self):
         """Flush and close the mailbox."""
-        try:
-            self.flush()
-        finally:
-            try:
-                if self._locked:
-                    self.unlock()
-            finally:
-                self._file.close()  # Sync has been done by self.flush() above.
+        self.flush()
+        if self._locked:
+            self.unlock()
+        self._file.close()  # Sync has been done by self.flush() above.
 
     def _lookup(self, key=None):
         """Return (start, stop) or raise KeyError."""
@@ -1234,8 +1230,8 @@ class MH(Mailbox):
 class Babyl(_singlefileMailbox):
     """An Rmail-style Babyl mailbox."""
 
-    _special_labels = frozenset({'unseen', 'deleted', 'filed', 'answered',
-                                 'forwarded', 'edited', 'resent'})
+    _special_labels = frozenset(('unseen', 'deleted', 'filed', 'answered',
+                                 'forwarded', 'edited', 'resent'))
 
     def __init__(self, path, factory=None, create=True):
         """Initialize a Babyl mailbox."""
@@ -1953,7 +1949,7 @@ class _ProxyFile:
         while True:
             line = self.readline()
             if not line:
-                return
+                raise StopIteration
             yield line
 
     def tell(self):
@@ -1970,11 +1966,9 @@ class _ProxyFile:
     def close(self):
         """Close the file."""
         if hasattr(self, '_file'):
-            try:
-                if hasattr(self._file, 'close'):
-                    self._file.close()
-            finally:
-                del self._file
+            if hasattr(self._file, 'close'):
+                self._file.close()
+            del self._file
 
     def _read(self, size, read_method):
         """Read size bytes using read_method."""

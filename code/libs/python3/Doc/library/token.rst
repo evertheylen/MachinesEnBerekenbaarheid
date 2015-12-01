@@ -93,7 +93,6 @@ The token constants are:
           DOUBLESLASH
           DOUBLESLASHEQUAL
           AT
-          ATEQUAL
           RARROW
           ELLIPSIS
           OP

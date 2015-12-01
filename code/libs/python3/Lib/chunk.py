@@ -85,10 +85,8 @@ class Chunk:
 
     def close(self):
         if not self.closed:
-            try:
-                self.skip()
-            finally:
-                self.closed = True
+            self.skip()
+            self.closed = True
 
     def isatty(self):
         if self.closed:
@@ -128,7 +126,7 @@ class Chunk:
         if self.closed:
             raise ValueError("I/O operation on closed file")
         if self.size_read >= self.chunksize:
-            return b''
+            return ''
         if size < 0:
             size = self.chunksize - self.size_read
         if size > self.chunksize - self.size_read:

@@ -362,7 +362,7 @@ importmap(const char *modname, const char *symbol,
     if (mod == NULL)
         return -1;
 
-    o = PyObject_GetAttrString(mod, symbol);
+    o = PyObject_GetAttrString(mod, (char*)symbol);
     if (o == NULL)
         goto errorexit;
     else if (!PyCapsule_IsValid(o, PyMultibyteCodec_CAPSULE_NAME)) {
@@ -401,7 +401,7 @@ errorexit:
         NULL,                                                           \
         NULL                                                            \
     };                                                                  \
-    PyMODINIT_FUNC                                                      \
+    PyObject*                                                           \
     PyInit__codecs_##loc(void)                                          \
     {                                                                   \
         PyObject *m = PyModule_Create(&__module);                       \

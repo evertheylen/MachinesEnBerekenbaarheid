@@ -280,9 +280,8 @@ and optionally an *errors* argument.
 The *errors* argument specifies the response when the input string can't be
 converted according to the encoding's rules.  Legal values for this argument are
 ``'strict'`` (raise a :exc:`UnicodeDecodeError` exception), ``'replace'`` (use
-``U+FFFD``, ``REPLACEMENT CHARACTER``), ``'ignore'`` (just leave the
-character out of the Unicode result), or ``'backslashreplace'`` (inserts a
-``\xNN`` escape sequence).
+``U+FFFD``, ``REPLACEMENT CHARACTER``), or ``'ignore'`` (just leave the
+character out of the Unicode result).
 The following examples show the differences::
 
     >>> b'\x80abc'.decode("utf-8", "strict")  #doctest: +NORMALIZE_WHITESPACE
@@ -292,8 +291,6 @@ The following examples show the differences::
       invalid start byte
     >>> b'\x80abc'.decode("utf-8", "replace")
     '\ufffdabc'
-    >>> b'\x80abc'.decode("utf-8", "backslashreplace")
-    '\\x80abc'
     >>> b'\x80abc'.decode("utf-8", "ignore")
     'abc'
 
@@ -328,9 +325,8 @@ The *errors* parameter is the same as the parameter of the
 :meth:`~bytes.decode` method but supports a few more possible handlers. As well as
 ``'strict'``, ``'ignore'``, and ``'replace'`` (which in this case
 inserts a question mark instead of the unencodable character), there is
-also ``'xmlcharrefreplace'`` (inserts an XML character reference),
-``backslashreplace`` (inserts a ``\uNNNN`` escape sequence) and
-``namereplace`` (inserts a ``\N{...}`` escape sequence).
+also ``'xmlcharrefreplace'`` (inserts an XML character reference) and
+``backslashreplace`` (inserts a ``\uNNNN`` escape sequence).
 
 The following example shows the different results::
 
@@ -350,8 +346,6 @@ The following example shows the different results::
     b'&#40960;abcd&#1972;'
     >>> u.encode('ascii', 'backslashreplace')
     b'\\ua000abcd\\u07b4'
-    >>> u.encode('ascii', 'namereplace')
-    b'\\N{YI SYLLABLE IT}abcd\\u07b4'
 
 The low-level routines for registering and accessing the available
 encodings are found in the :mod:`codecs` module.  Implementing new

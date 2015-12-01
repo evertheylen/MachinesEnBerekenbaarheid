@@ -174,7 +174,7 @@ class Element:
         self._children = []
 
     def __repr__(self):
-        return "<%s %r at %#x>" % (self.__class__.__name__, self.tag, id(self))
+        return "<Element %s at 0x%x>" % (repr(self.tag), id(self))
 
     def makeelement(self, tag, attrib):
         """Create a new element with the same type.
@@ -509,7 +509,7 @@ class QName:
     def __str__(self):
         return self.text
     def __repr__(self):
-        return '<%s %r>' % (self.__class__.__name__, self.text)
+        return '<QName %r>' % (self.text,)
     def __hash__(self):
         return hash(self.text)
     def __le__(self, other):
@@ -532,6 +532,10 @@ class QName:
         if isinstance(other, QName):
             return self.text == other.text
         return self.text == other
+    def __ne__(self, other):
+        if isinstance(other, QName):
+            return self.text != other.text
+        return self.text != other
 
 # --------------------------------------------------------------------
 

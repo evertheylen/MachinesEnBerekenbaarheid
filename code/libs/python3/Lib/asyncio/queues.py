@@ -1,15 +1,15 @@
 """Queues"""
 
-__all__ = ['Queue', 'PriorityQueue', 'LifoQueue', 'QueueFull', 'QueueEmpty']
+__all__ = ['Queue', 'PriorityQueue', 'LifoQueue', 'JoinableQueue',
+           'QueueFull', 'QueueEmpty']
 
 import collections
 import heapq
 
-from . import compat
 from . import events
 from . import futures
 from . import locks
-from .coroutines import coroutine
+from .tasks import coroutine
 
 
 class QueueEmpty(Exception):
@@ -47,14 +47,9 @@ class Queue:
 
         # Futures.
         self._getters = collections.deque()
-        # Futures
+        # Pairs of (item, Future).
         self._putters = collections.deque()
-        self._unfinished_tasks = 0
-        self._finished = locks.Event(loop=self._loop)
-        self._finished.set()
         self._init(maxsize)
-
-    # These three are overridable in subclasses.
 
     def _init(self, maxsize):
         self._queue = collections.deque()
@@ -64,13 +59,6 @@ class Queue:
 
     def _put(self, item):
         self._queue.append(item)
-
-    # End of the overridable methods.
-
-    def __put_internal(self, item):
-        self._put(item)
-        self._unfinished_tasks += 1
-        self._finished.clear()
 
     def __repr__(self):
         return '<{} at {:#x} {}>'.format(
@@ -87,8 +75,6 @@ class Queue:
             result += ' _getters[{}]'.format(len(self._getters))
         if self._putters:
             result += ' _putters[{}]'.format(len(self._putters))
-        if self._unfinished_tasks:
-            result += ' tasks={}'.format(self._unfinished_tasks)
         return result
 
     def _consume_done_getters(self):
@@ -98,7 +84,7 @@ class Queue:
 
     def _consume_done_putters(self):
         # Delete waiters at the head of the put() queue who've timed out.
-        while self._putters and self._putters[0].done():
+        while self._putters and self._putters[0][1].done():
             self._putters.popleft()
 
     def qsize(self):
@@ -140,7 +126,10 @@ class Queue:
                 'queue non-empty, why are getters waiting?')
 
             getter = self._getters.popleft()
-            self.__put_internal(item)
+
+            # Use _put and _get instead of passing item straight to getter, in
+            # case a subclass has logic that must run (e.g. JoinableQueue).
+            self._put(item)
 
             # getter cannot be cancelled, we just removed done getters
             getter.set_result(self._get())
@@ -148,12 +137,11 @@ class Queue:
         elif self._maxsize > 0 and self._maxsize <= self.qsize():
             waiter = futures.Future(loop=self._loop)
 
-            self._putters.append(waiter)
+            self._putters.append((item, waiter))
             yield from waiter
-            self._put(item)
 
         else:
-            self.__put_internal(item)
+            self._put(item)
 
     def put_nowait(self, item):
         """Put an item into the queue without blocking.
@@ -166,7 +154,10 @@ class Queue:
                 'queue non-empty, why are getters waiting?')
 
             getter = self._getters.popleft()
-            self.__put_internal(item)
+
+            # Use _put and _get instead of passing item straight to getter, in
+            # case a subclass has logic that must run (e.g. JoinableQueue).
+            self._put(item)
 
             # getter cannot be cancelled, we just removed done getters
             getter.set_result(self._get())
@@ -174,7 +165,7 @@ class Queue:
         elif self._maxsize > 0 and self._maxsize <= self.qsize():
             raise QueueFull
         else:
-            self.__put_internal(item)
+            self._put(item)
 
     @coroutine
     def get(self):
@@ -187,7 +178,8 @@ class Queue:
         self._consume_done_putters()
         if self._putters:
             assert self.full(), 'queue not full, why are putters waiting?'
-            putter = self._putters.popleft()
+            item, putter = self._putters.popleft()
+            self._put(item)
 
             # When a getter runs and frees up a slot so this putter can
             # run, we need to defer the put for a tick to ensure that
@@ -201,39 +193,9 @@ class Queue:
             return self._get()
         else:
             waiter = futures.Future(loop=self._loop)
+
             self._getters.append(waiter)
-            try:
-                return (yield from waiter)
-            except futures.CancelledError:
-                # if we get CancelledError, it means someone cancelled this
-                # get() coroutine.  But there is a chance that the waiter
-                # already is ready and contains an item that has just been
-                # removed from the queue.  In this case, we need to put the item
-                # back into the front of the queue.  This get() must either
-                # succeed without fault or, if it gets cancelled, it must be as
-                # if it never happened.
-                if waiter.done():
-                    self._put_it_back(waiter.result())
-                raise
-
-    def _put_it_back(self, item):
-        """
-        This is called when we have a waiter to get() an item and this waiter
-        gets cancelled.  In this case, we put the item back: wake up another
-        waiter or put it in the _queue.
-        """
-        self._consume_done_getters()
-        if self._getters:
-            assert not self._queue, (
-                'queue non-empty, why are getters waiting?')
-
-            getter = self._getters.popleft()
-            self.__put_internal(item)
-
-            # getter cannot be cancelled, we just removed done getters
-            getter.set_result(item)
-        else:
-            self._queue.appendleft(item)
+            return (yield from waiter)
 
     def get_nowait(self):
         """Remove and return an item from the queue.
@@ -243,7 +205,8 @@ class Queue:
         self._consume_done_putters()
         if self._putters:
             assert self.full(), 'queue not full, why are putters waiting?'
-            putter = self._putters.popleft()
+            item, putter = self._putters.popleft()
+            self._put(item)
             # Wake putter on next tick.
 
             # getter cannot be cancelled, we just removed done putters
@@ -255,38 +218,6 @@ class Queue:
             return self._get()
         else:
             raise QueueEmpty
-
-    def task_done(self):
-        """Indicate that a formerly enqueued task is complete.
-
-        Used by queue consumers. For each get() used to fetch a task,
-        a subsequent call to task_done() tells the queue that the processing
-        on the task is complete.
-
-        If a join() is currently blocking, it will resume when all items have
-        been processed (meaning that a task_done() call was received for every
-        item that had been put() into the queue).
-
-        Raises ValueError if called more times than there were items placed in
-        the queue.
-        """
-        if self._unfinished_tasks <= 0:
-            raise ValueError('task_done() called too many times')
-        self._unfinished_tasks -= 1
-        if self._unfinished_tasks == 0:
-            self._finished.set()
-
-    @coroutine
-    def join(self):
-        """Block until all items in the queue have been gotten and processed.
-
-        The count of unfinished tasks goes up whenever an item is added to the
-        queue. The count goes down whenever a consumer calls task_done() to
-        indicate that the item was retrieved and all work on it is complete.
-        When the count of unfinished tasks drops to zero, join() unblocks.
-        """
-        if self._unfinished_tasks > 0:
-            yield from self._finished.wait()
 
 
 class PriorityQueue(Queue):
@@ -318,7 +249,54 @@ class LifoQueue(Queue):
         return self._queue.pop()
 
 
-if not compat.PY35:
-    JoinableQueue = Queue
-    """Deprecated alias for Queue."""
-    __all__.append('JoinableQueue')
+class JoinableQueue(Queue):
+    """A subclass of Queue with task_done() and join() methods."""
+
+    def __init__(self, maxsize=0, *, loop=None):
+        super().__init__(maxsize=maxsize, loop=loop)
+        self._unfinished_tasks = 0
+        self._finished = locks.Event(loop=self._loop)
+        self._finished.set()
+
+    def _format(self):
+        result = Queue._format(self)
+        if self._unfinished_tasks:
+            result += ' tasks={}'.format(self._unfinished_tasks)
+        return result
+
+    def _put(self, item):
+        super()._put(item)
+        self._unfinished_tasks += 1
+        self._finished.clear()
+
+    def task_done(self):
+        """Indicate that a formerly enqueued task is complete.
+
+        Used by queue consumers. For each get() used to fetch a task,
+        a subsequent call to task_done() tells the queue that the processing
+        on the task is complete.
+
+        If a join() is currently blocking, it will resume when all items have
+        been processed (meaning that a task_done() call was received for every
+        item that had been put() into the queue).
+
+        Raises ValueError if called more times than there were items placed in
+        the queue.
+        """
+        if self._unfinished_tasks <= 0:
+            raise ValueError('task_done() called too many times')
+        self._unfinished_tasks -= 1
+        if self._unfinished_tasks == 0:
+            self._finished.set()
+
+    @coroutine
+    def join(self):
+        """Block until all items in the queue have been gotten and processed.
+
+        The count of unfinished tasks goes up whenever an item is added to the
+        queue. The count goes down whenever a consumer thread calls task_done()
+        to indicate that the item was retrieved and all work on it is complete.
+        When the count of unfinished tasks drops to zero, join() unblocks.
+        """
+        if self._unfinished_tasks > 0:
+            yield from self._finished.wait()

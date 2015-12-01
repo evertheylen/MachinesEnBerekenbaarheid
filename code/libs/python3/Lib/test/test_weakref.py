@@ -7,8 +7,7 @@ import operator
 import contextlib
 import copy
 
-from test import support
-from test.support import script_helper
+from test import support, script_helper
 
 # Used in ReferencesTestCase.test_ref_created_during_del() .
 ref_from_del = None
@@ -92,18 +91,6 @@ class ReferencesTestCase(TestBase):
         self.check_basic_callback(C)
         self.check_basic_callback(create_function)
         self.check_basic_callback(create_bound_method)
-
-    @support.cpython_only
-    def test_cfunction(self):
-        import _testcapi
-        create_cfunction = _testcapi.create_cfunction
-        f = create_cfunction()
-        wr = weakref.ref(f)
-        self.assertIs(wr(), f)
-        del f
-        self.assertIsNone(wr())
-        self.check_basic_ref(create_cfunction)
-        self.check_basic_callback(create_cfunction)
 
     def test_multiple_callbacks(self):
         o = C()
@@ -1586,14 +1573,6 @@ class MappingTestCase(TestBase):
             del d[o]
         self.assertEqual(len(d), 0)
         self.assertEqual(count, 2)
-
-    def test_make_weak_valued_dict_repr(self):
-        dict = weakref.WeakValueDictionary()
-        self.assertRegex(repr(dict), '<WeakValueDictionary at 0x.*>')
-
-    def test_make_weak_keyed_dict_repr(self):
-        dict = weakref.WeakKeyDictionary()
-        self.assertRegex(repr(dict), '<WeakKeyDictionary at 0x.*>')
 
 from test import mapping_tests
 

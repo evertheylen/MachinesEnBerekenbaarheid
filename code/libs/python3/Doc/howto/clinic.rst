@@ -758,14 +758,6 @@ All Argument Clinic converters accept the following arguments:
 In addition, some converters accept additional arguments.  Here is a list
 of these arguments, along with their meanings:
 
-  ``accept``
-    A set of Python types (and possibly pseudo-types);
-    this restricts the allowable Python argument to values of these types.
-    (This is not a general-purpose facility; as a rule it only supports
-    specific lists of types as shown in the legacy converter table.)
-
-    To accept ``None``, add ``NoneType`` to this set.
-
   ``bitwise``
     Only supported for unsigned integers.  The native integer value of this
     Python argument will be written to the parameter without any range checking,
@@ -780,27 +772,39 @@ of these arguments, along with their meanings:
     Only supported for strings.  Specifies the encoding to use when converting
     this string from a Python str (Unicode) value into a C ``char *`` value.
 
+  ``length``
+    Only supported for strings.  If true, requests that the length of the
+    string be passed in to the impl function, just after the string parameter,
+    in a parameter named ``<parameter_name>_length``.
+
+  ``nullable``
+    Only supported for strings.  If true, this parameter may also be set to
+    ``None``, in which case the C parameter will be set to ``NULL``.
 
   ``subclass_of``
     Only supported for the ``object`` converter.  Requires that the Python
     value be a subclass of a Python type, as expressed in C.
 
-  ``type``
-    Only supported for the ``object`` and ``self`` converters.  Specifies
+  ``types``
+    Only supported for the ``object`` (and ``self``) converter.  Specifies
     the C type that will be used to declare the variable.  Default value is
     ``"PyObject *"``.
 
+  ``types``
+    A string containing a list of Python types (and possibly pseudo-types);
+    this restricts the allowable Python argument to values of these types.
+    (This is not a general-purpose facility; as a rule it only supports
+    specific lists of types as shown in the legacy converter table.)
+
   ``zeroes``
     Only supported for strings.  If true, embedded NUL bytes (``'\\0'``) are
-    permitted inside the value.  The length of the string will be passed in
-    to the impl function, just after the string parameter, as a parameter named
-    ``<parameter_name>_length``.
+    permitted inside the value.
 
 Please note, not every possible combination of arguments will work.
-Usually these arguments are implemented by specific ``PyArg_ParseTuple``
+Often these arguments are implemented internally by specific ``PyArg_ParseTuple``
 *format units*, with specific behavior.  For example, currently you cannot
-call ``unsigned_short`` without also specifying ``bitwise=True``.
-Although it's perfectly reasonable to think this would work, these semantics don't
+call ``str`` and pass in ``zeroes=True`` without also specifying an ``encoding``;
+although it's perfectly reasonable to think this would work, these semantics don't
 map to any existing format unit.  So Argument Clinic doesn't support it.  (Or, at
 least, not yet.)
 
@@ -812,13 +816,13 @@ on the right is the text you'd replace it with.
 ``'B'``     ``unsigned_char(bitwise=True)``
 ``'b'``     ``unsigned_char``
 ``'c'``     ``char``
-``'C'``     ``int(accept={str})``
+``'C'``     ``int(types='str')``
 ``'d'``     ``double``
 ``'D'``     ``Py_complex``
+``'es#'``   ``str(encoding='name_of_encoding', length=True, zeroes=True)``
 ``'es'``    ``str(encoding='name_of_encoding')``
-``'es#'``   ``str(encoding='name_of_encoding', zeroes=True)``
-``'et'``    ``str(encoding='name_of_encoding', accept={bytes, bytearray, str})``
-``'et#'``   ``str(encoding='name_of_encoding', accept={bytes, bytearray, str}, zeroes=True)``
+``'et#'``   ``str(encoding='name_of_encoding', types='bytes bytearray str', length=True)``
+``'et'``    ``str(encoding='name_of_encoding', types='bytes bytearray str')``
 ``'f'``     ``float``
 ``'h'``     ``short``
 ``'H'``     ``unsigned_short(bitwise=True)``
@@ -826,30 +830,29 @@ on the right is the text you'd replace it with.
 ``'I'``     ``unsigned_int(bitwise=True)``
 ``'k'``     ``unsigned_long(bitwise=True)``
 ``'K'``     ``unsigned_PY_LONG_LONG(bitwise=True)``
-``'l'``     ``long``
 ``'L'``     ``PY_LONG_LONG``
 ``'n'``     ``Py_ssize_t``
-``'O'``     ``object``
 ``'O!'``    ``object(subclass_of='&PySomething_Type')``
 ``'O&'``    ``object(converter='name_of_c_function')``
+``'O'``     ``object``
 ``'p'``     ``bool``
+``'s#'``    ``str(length=True)``
 ``'S'``     ``PyBytesObject``
 ``'s'``     ``str``
-``'s#'``    ``str(zeroes=True)``
-``'s*'``    ``Py_buffer(accept={buffer, str})``
-``'U'``     ``unicode``
+``'s*'``    ``Py_buffer(types='str bytes bytearray buffer')``
+``'u#'``    ``Py_UNICODE(length=True)``
 ``'u'``     ``Py_UNICODE``
-``'u#'``    ``Py_UNICODE(zeroes=True)``
-``'w*'``    ``Py_buffer(accept={rwbuffer})``
+``'U'``     ``unicode``
+``'w*'``    ``Py_buffer(types='bytearray rwbuffer')``
+``'y#'``    ``str(types='bytes', length=True)``
 ``'Y'``     ``PyByteArrayObject``
-``'y'``     ``str(accept={bytes})``
-``'y#'``    ``str(accept={robuffer}, zeroes=True)``
+``'y'``     ``str(types='bytes')``
 ``'y*'``    ``Py_buffer``
-``'Z'``     ``Py_UNICODE(accept={str, NoneType})``
-``'Z#'``    ``Py_UNICODE(accept={str, NoneType}, zeroes=True)``
-``'z'``     ``str(accept={str, NoneType})``
-``'z#'``    ``str(accept={str, NoneType}, zeroes=True)``
-``'z*'``    ``Py_buffer(accept={buffer, str, NoneType})``
+``'Z#'``    ``Py_UNICODE(nullable=True, length=True)``
+``'z#'``    ``str(nullable=True, length=True)``
+``'Z'``     ``Py_UNICODE(nullable=True)``
+``'z'``     ``str(nullable=True)``
+``'z*'``    ``Py_buffer(types='str bytes bytearray buffer', nullable=True)``
 =========   =================================================================================
 
 As an example, here's our sample ``pickle.Pickler.dump`` using the proper
@@ -883,7 +886,7 @@ Argument Clinic generates code that does it for you (in the parsing function).
 Advanced converters
 -------------------
 
-Remember those format units you skipped for your first
+Remeber those format units you skipped for your first
 time because they were advanced?  Here's how to handle those too.
 
 The trick is, all those format units take arguments--either
@@ -1017,12 +1020,12 @@ any of the default arguments you can omit the parentheses.
 the ``"as"`` should come before the return converter.)
 
 There's one additional complication when using return converters: how do you
-indicate an error has occurred?  Normally, a function returns a valid (non-``NULL``)
+indicate an error has occured?  Normally, a function returns a valid (non-``NULL``)
 pointer for success, and ``NULL`` for failure.  But if you use an integer return converter,
 all integers are valid.  How can Argument Clinic detect an error?  Its solution: each return
 converter implicitly looks for a special value that indicates an error.  If you return
 that value, and an error has been set (``PyErr_Occurred()`` returns a true
-value), then the generated code will propagate the error.  Otherwise it will
+value), then the generated code will propogate the error.  Otherwise it will
 encode the value you return like normal.
 
 Currently Argument Clinic supports only a few return converters::
@@ -1495,7 +1498,7 @@ preset configurations, as follows:
     the ``buffer`` preset.
 
     Suppresses the ``impl_prototype``, write the ``docstring_definition``
-    and ``parser_definition`` to ``buffer``, write everything else to ``block``.
+    and ``parser_defintion`` to ``buffer``, write everything else to ``block``.
 
 The third new directive is ``destination``::
 
@@ -1570,7 +1573,7 @@ The fourth new directive is ``set``::
 ``line_prefix`` is a string that will be prepended to every line of Clinic's output;
 ``line_suffix`` is a string that will be appended to every line of Clinic's output.
 
-Both of these support two format strings:
+Both of these suport two format strings:
 
   ``{block comment start}``
     Turns into the string ``/*``, the start-comment text sequence for C files.

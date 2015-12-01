@@ -3,22 +3,23 @@
 __all__ = ['Task',
            'FIRST_COMPLETED', 'FIRST_EXCEPTION', 'ALL_COMPLETED',
            'wait', 'wait_for', 'as_completed', 'sleep', 'async',
-           'gather', 'shield', 'ensure_future',
+           'gather', 'shield',
            ]
 
 import concurrent.futures
 import functools
 import inspect
 import linecache
+import sys
 import traceback
-import warnings
 import weakref
 
-from . import compat
 from . import coroutines
 from . import events
 from . import futures
 from .coroutines import coroutine
+
+_PY34 = (sys.version_info >= (3, 4))
 
 
 class Task(futures.Future):
@@ -71,7 +72,7 @@ class Task(futures.Future):
         super().__init__(loop=loop)
         if self._source_traceback:
             del self._source_traceback[-1]
-        self._coro = coro
+        self._coro = iter(coro)  # Use the iterator just in case.
         self._fut_waiter = None
         self._must_cancel = False
         self._loop.call_soon(self._step)
@@ -80,7 +81,7 @@ class Task(futures.Future):
     # On Python 3.3 or older, objects with a destructor that are part of a
     # reference cycle are never destroyed. That's not the case any more on
     # Python 3.4 thanks to the PEP 442.
-    if compat.PY34:
+    if _PY34:
         def __del__(self):
             if self._state == futures._PENDING and self._log_destroy_pending:
                 context = {
@@ -128,11 +129,7 @@ class Task(futures.Future):
         returned for a suspended coroutine.
         """
         frames = []
-        try:
-            # 'async def' coroutines
-            f = self._coro.cr_frame
-        except AttributeError:
-            f = self._coro.gi_frame
+        f = self._coro.gi_frame
         if f is not None:
             while f is not None:
                 if limit is not None:
@@ -235,8 +232,10 @@ class Task(futures.Future):
         try:
             if exc is not None:
                 result = coro.throw(exc)
-            else:
+            elif value is not None:
                 result = coro.send(value)
+            else:
+                result = next(coro)
         except StopIteration as exc:
             self.set_result(exc.value)
         except futures.CancelledError as exc:
@@ -328,7 +327,7 @@ def wait(fs, *, loop=None, timeout=None, return_when=ALL_COMPLETED):
     if loop is None:
         loop = events.get_event_loop()
 
-    fs = {ensure_future(f, loop=loop) for f in set(fs)}
+    fs = {async(f, loop=loop) for f in set(fs)}
 
     return (yield from _wait(fs, timeout, return_when, loop))
 
@@ -362,7 +361,7 @@ def wait_for(fut, timeout, *, loop=None):
     timeout_handle = loop.call_later(timeout, _release_waiter, waiter)
     cb = functools.partial(_release_waiter, waiter)
 
-    fut = ensure_future(fut, loop=loop)
+    fut = async(fut, loop=loop)
     fut.add_done_callback(cb)
 
     try:
@@ -450,7 +449,7 @@ def as_completed(fs, *, loop=None, timeout=None):
     if isinstance(fs, futures.Future) or coroutines.iscoroutine(fs):
         raise TypeError("expect a list of futures, not %s" % type(fs).__name__)
     loop = loop if loop is not None else events.get_event_loop()
-    todo = {ensure_future(f, loop=loop) for f in set(fs)}
+    todo = {async(f, loop=loop) for f in set(fs)}
     from .queues import Queue  # Import here to avoid circular import problem.
     done = Queue(loop=loop)
     timeout_handle = None
@@ -498,20 +497,6 @@ def sleep(delay, result=None, *, loop=None):
 
 
 def async(coro_or_future, *, loop=None):
-    """Wrap a coroutine in a future.
-
-    If the argument is a Future, it is returned directly.
-
-    This function is deprecated in 3.5. Use asyncio.ensure_future() instead.
-    """
-
-    warnings.warn("asyncio.async() function is deprecated, use ensure_future()",
-                  DeprecationWarning)
-
-    return ensure_future(coro_or_future, loop=loop)
-
-
-def ensure_future(coro_or_future, *, loop=None):
     """Wrap a coroutine in a future.
 
     If the argument is a Future, it is returned directly.
@@ -579,7 +564,7 @@ def gather(*coros_or_futures, loop=None, return_exceptions=False):
     arg_to_fut = {}
     for arg in set(coros_or_futures):
         if not isinstance(arg, futures.Future):
-            fut = ensure_future(arg, loop=loop)
+            fut = async(arg, loop=loop)
             if loop is None:
                 loop = fut._loop
             # The caller cannot control this future, the "destroy pending task"
@@ -655,7 +640,7 @@ def shield(arg, *, loop=None):
         except CancelledError:
             res = None
     """
-    inner = ensure_future(arg, loop=loop)
+    inner = async(arg, loop=loop)
     if inner.done():
         # Shortcut.
         return inner

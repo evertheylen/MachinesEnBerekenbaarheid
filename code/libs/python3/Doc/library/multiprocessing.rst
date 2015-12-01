@@ -262,6 +262,14 @@ that only one process prints to standard output at a time::
 Without using the lock output from the different processes is liable to get all
 mixed up.
 
+.. note::
+
+   Some of this package's functionality requires a functioning shared semaphore
+   implementation on the host operating system. Without one, the
+   :mod:`multiprocessing.synchronize` module will be disabled, and attempts to
+   import it will result in an :exc:`ImportError`. See
+   :issue:`3770` for additional information.
+
 
 Sharing state between processes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -800,14 +808,6 @@ For an example of the usage of queues for interprocess communication see
       immediately without waiting to flush enqueued data to the
       underlying pipe, and you don't care about lost data.
 
-   .. note::
-
-      This class's functionality requires a functioning shared semaphore
-      implementation on the host operating system. Without one, the
-      functionality in this class will be disabled, and attempts to
-      instantiate a :class:`Queue` will result in an :exc:`ImportError`. See
-      :issue:`3770` for additional information.  The same holds true for any
-      of the specialized queue types listed below.
 
 .. class:: SimpleQueue()
 
@@ -1183,14 +1183,6 @@ object -- see :ref:`multiprocessing-managers`.
    This differs from the behaviour of :mod:`threading` where SIGINT will be
    ignored while the equivalent blocking calls are in progress.
 
-.. note::
-
-   Some of this package's functionality requires a functioning shared semaphore
-   implementation on the host operating system. Without one, the
-   :mod:`multiprocessing.synchronize` module will be disabled, and attempts to
-   import it will result in an :exc:`ImportError`. See
-   :issue:`3770` for additional information.
-
 
 Shared :mod:`ctypes` Objects
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1351,9 +1343,6 @@ processes.
 
    Note that accessing the ctypes object through the wrapper can be a lot slower
    than accessing the raw ctypes object.
-
-   .. versionchanged:: 3.5
-      Synchronized objects support the :term:`context manager` protocol.
 
 
 The table below compares the syntax for creating shared ctypes objects from
@@ -1842,9 +1831,9 @@ itself.  This means, for example, that one shared object can contain a second:
          >>> l = manager.list(range(10))
          >>> l._callmethod('__len__')
          10
-         >>> l._callmethod('__getitem__', (slice(2, 7),)) # equivalent to l[2:7]
+         >>> l._callmethod('__getslice__', (2, 7))   # equiv to `l[2:7]`
          [2, 3, 4, 5, 6]
-         >>> l._callmethod('__getitem__', (20,))          # equivalent to l[20]
+         >>> l._callmethod('__getitem__', (20,))     # equiv to `l[20]`
          Traceback (most recent call last):
          ...
          IndexError: list index out of range

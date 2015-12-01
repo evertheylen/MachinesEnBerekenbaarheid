@@ -39,7 +39,7 @@ Importing Modules
       behaviour isn't needed anymore.
 
 
-.. c:function:: PyObject* PyImport_ImportModuleEx(const char *name, PyObject *globals, PyObject *locals, PyObject *fromlist)
+.. c:function:: PyObject* PyImport_ImportModuleEx(char *name, PyObject *globals, PyObject *locals, PyObject *fromlist)
 
    .. index:: builtin: __import__
 
@@ -70,7 +70,7 @@ Importing Modules
    .. versionadded:: 3.3
 
 
-.. c:function:: PyObject* PyImport_ImportModuleLevel(const char *name, PyObject *globals, PyObject *locals, PyObject *fromlist, int level)
+.. c:function:: PyObject* PyImport_ImportModuleLevel(char *name, PyObject *globals, PyObject *locals, PyObject *fromlist, int level)
 
    Similar to :c:func:`PyImport_ImportModuleLevelObject`, but the name is an
    UTF-8 encoded string instead of a Unicode object.
@@ -183,9 +183,9 @@ Importing Modules
 
 .. c:function:: long PyImport_GetMagicNumber()
 
-   Return the magic number for Python bytecode files (a.k.a. :file:`.pyc` file).
-   The magic number should be present in the first four bytes of the bytecode
-   file, in little-endian byte order. Returns -1 on error.
+   Return the magic number for Python bytecode files (a.k.a. :file:`.pyc` and
+   :file:`.pyo` files).  The magic number should be present in the first four bytes
+   of the bytecode file, in little-endian byte order. Returns -1 on error.
 
    .. versionchanged:: 3.3
       Return value of -1 upon failure.

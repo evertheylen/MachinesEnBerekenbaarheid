@@ -194,7 +194,7 @@ class BasicWrapTestCase(unittest.TestCase):
 
         a = A()
         a._as_parameter_ = a
-        with self.assertRaises(RecursionError):
+        with self.assertRaises(RuntimeError):
             c_int.from_param(a)
 
 

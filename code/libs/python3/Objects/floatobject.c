@@ -220,7 +220,6 @@ PyFloat_AsDouble(PyObject *op)
     if (fo == NULL)
         return -1;
     if (!PyFloat_Check(fo)) {
-        Py_DECREF(fo);
         PyErr_SetString(PyExc_TypeError,
                         "nb_float should return float object");
         return -1;
@@ -986,9 +985,8 @@ float_round(PyObject *v, PyObject *args)
     x = PyFloat_AsDouble(v);
     if (!PyArg_ParseTuple(args, "|O", &o_ndigits))
         return NULL;
-    if (o_ndigits == NULL || o_ndigits == Py_None) {
-        /* single-argument round or with None ndigits:
-         * round to nearest integer */
+    if (o_ndigits == NULL) {
+        /* single-argument round: round to nearest integer */
         rounded = round(x);
         if (fabs(x-rounded) == 0.5)
             /* halfway case: round to even */
@@ -2034,7 +2032,7 @@ _PyFloat_Pack4(double x, unsigned char *p, int le)
     }
     else {
         float y = (float)x;
-        const unsigned char *s = (unsigned char*)&y;
+        const char *s = (char*)&y;
         int i, incr = 1;
 
         if (Py_IS_INFINITY(y) && !Py_IS_INFINITY(x))
@@ -2170,7 +2168,7 @@ _PyFloat_Pack8(double x, unsigned char *p, int le)
         return -1;
     }
     else {
-        const unsigned char *s = (unsigned char*)&x;
+        const char *s = (char*)&x;
         int i, incr = 1;
 
         if ((double_format == ieee_little_endian_format && !le)

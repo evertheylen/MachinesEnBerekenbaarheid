@@ -14,7 +14,7 @@ redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 /* !!! !!! !!! This file is edited by the makesetup script !!! !!! !!! */
 
 /* This file contains the table of built-in modules.
-   See create_builtin() in import.c. */
+   See init_builtin() in import.c. */
 
 #include "Python.h"
 
@@ -24,7 +24,7 @@ extern "C" {
 
 
 extern PyObject* PyInit__thread(void);
-extern PyObject* PyInit__signal(void);
+extern PyObject* PyInit_signal(void);
 extern PyObject* PyInit_posix(void);
 extern PyObject* PyInit_errno(void);
 extern PyObject* PyInit_pwd(void);
@@ -37,7 +37,6 @@ extern PyObject* PyInit__collections(void);
 extern PyObject* PyInit_itertools(void);
 extern PyObject* PyInit_atexit(void);
 extern PyObject* PyInit__stat(void);
-extern PyObject* PyInit_time(void);
 extern PyObject* PyInit__locale(void);
 extern PyObject* PyInit__io(void);
 extern PyObject* PyInit_zipimport(void);
@@ -58,7 +57,7 @@ extern PyObject* PyInit__string(void);
 struct _inittab _PyImport_Inittab[] = {
 
 	{"_thread", PyInit__thread},
-	{"_signal", PyInit__signal},
+	{"signal", PyInit_signal},
 	{"posix", PyInit_posix},
 	{"errno", PyInit_errno},
 	{"pwd", PyInit_pwd},
@@ -71,7 +70,6 @@ struct _inittab _PyImport_Inittab[] = {
 	{"itertools", PyInit_itertools},
 	{"atexit", PyInit_atexit},
 	{"_stat", PyInit__stat},
-	{"time", PyInit_time},
 	{"_locale", PyInit__locale},
 	{"_io", PyInit__io},
 	{"zipimport", PyInit_zipimport},

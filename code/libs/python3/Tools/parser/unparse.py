@@ -138,14 +138,6 @@ class Unparser:
         self.fill("nonlocal ")
         interleave(lambda: self.write(", "), self.write, t.names)
 
-    def _Await(self, t):
-        self.write("(")
-        self.write("await")
-        if t.value:
-            self.write(" ")
-            self.dispatch(t.value)
-        self.write(")")
-
     def _Yield(self, t):
         self.write("(")
         self.write("yield")
@@ -219,6 +211,16 @@ class Unparser:
             if comma: self.write(", ")
             else: comma = True
             self.dispatch(e)
+        if t.starargs:
+            if comma: self.write(", ")
+            else: comma = True
+            self.write("*")
+            self.dispatch(t.starargs)
+        if t.kwargs:
+            if comma: self.write(", ")
+            else: comma = True
+            self.write("**")
+            self.dispatch(t.kwargs)
         self.write(")")
 
         self.enter()
@@ -226,18 +228,11 @@ class Unparser:
         self.leave()
 
     def _FunctionDef(self, t):
-        self.__FunctionDef_helper(t, "def")
-
-    def _AsyncFunctionDef(self, t):
-        self.__FunctionDef_helper(t, "async def")
-
-    def __FunctionDef_helper(self, t, fill_suffix):
         self.write("\n")
         for deco in t.decorator_list:
             self.fill("@")
             self.dispatch(deco)
-        def_str = fill_suffix+" "+t.name + "("
-        self.fill(def_str)
+        self.fill("def "+t.name + "(")
         self.dispatch(t.args)
         self.write(")")
         if t.returns:
@@ -248,13 +243,7 @@ class Unparser:
         self.leave()
 
     def _For(self, t):
-        self.__For_helper("for ", t)
-
-    def _AsyncFor(self, t):
-        self.__For_helper("async for ", t)
-
-    def __For_helper(self, fill, t):
-        self.fill(fill)
+        self.fill("for ")
         self.dispatch(t.target)
         self.write(" in ")
         self.dispatch(t.iter)
@@ -303,13 +292,6 @@ class Unparser:
 
     def _With(self, t):
         self.fill("with ")
-        interleave(lambda: self.write(", "), self.dispatch, t.items)
-        self.enter()
-        self.dispatch(t.body)
-        self.leave()
-
-    def _AsyncWith(self, t):
-        self.fill("async with ")
         interleave(lambda: self.write(", "), self.dispatch, t.items)
         self.enter()
         self.dispatch(t.body)
@@ -419,7 +401,7 @@ class Unparser:
         self.dispatch(t.operand)
         self.write(")")
 
-    binop = { "Add":"+", "Sub":"-", "Mult":"*", "MatMult":"@", "Div":"/", "Mod":"%",
+    binop = { "Add":"+", "Sub":"-", "Mult":"*", "Div":"/", "Mod":"%",
                     "LShift":"<<", "RShift":">>", "BitOr":"|", "BitXor":"^", "BitAnd":"&",
                     "FloorDiv":"//", "Pow": "**"}
     def _BinOp(self, t):
@@ -468,6 +450,16 @@ class Unparser:
             if comma: self.write(", ")
             else: comma = True
             self.dispatch(e)
+        if t.starargs:
+            if comma: self.write(", ")
+            else: comma = True
+            self.write("*")
+            self.dispatch(t.starargs)
+        if t.kwargs:
+            if comma: self.write(", ")
+            else: comma = True
+            self.write("**")
+            self.dispatch(t.kwargs)
         self.write(")")
 
     def _Subscript(self, t):
@@ -551,11 +543,8 @@ class Unparser:
                 self.dispatch(t.kwarg.annotation)
 
     def _keyword(self, t):
-        if t.arg is None:
-            self.write("**")
-        else:
-            self.write(t.arg)
-            self.write("=")
+        self.write(t.arg)
+        self.write("=")
         self.dispatch(t.value)
 
     def _Lambda(self, t):

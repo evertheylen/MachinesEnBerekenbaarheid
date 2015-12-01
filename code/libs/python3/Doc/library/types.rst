@@ -90,14 +90,6 @@ Standard names are defined for the following types:
    generator function.
 
 
-.. data:: CoroutineType
-
-   The type of :term:`coroutine` objects, produced by calling a
-   function defined with an :keyword:`async def` statement.
-
-   .. versionadded:: 3.5
-
-
 .. data:: CodeType
 
    .. index:: builtin: compile
@@ -122,10 +114,6 @@ Standard names are defined for the following types:
 
    The type of :term:`modules <module>`. Constructor takes the name of the
    module to be created and optionally its :term:`docstring`.
-
-   .. note::
-      Use :func:`importlib.util.module_from_spec` to create a new module if you
-      wish to set the various import-controlled attributes.
 
    .. attribute:: __doc__
 
@@ -279,25 +267,3 @@ Additional Utility Classes and Functions
    attributes on the class with the same name (see Enum for an example).
 
    .. versionadded:: 3.4
-
-
-Coroutine Utility Functions
----------------------------
-
-.. function:: coroutine(gen_func)
-
-   This function transforms a :term:`generator` function into a
-   :term:`coroutine function` which returns a generator-based coroutine.
-   The generator-based coroutine is still a :term:`generator iterator`,
-   but is also considered to be a :term:`coroutine` object and is
-   :term:`awaitable`.  However, it may not necessarily implement
-   the :meth:`__await__` method.
-
-   If *gen_func* is a generator function, it will be modified in-place.
-
-   If *gen_func* is not a generator function, it will be wrapped. If it
-   returns an instance of :class:`collections.abc.Generator`, the instance
-   will be wrapped in an *awaitable* proxy object.  All other types
-   of objects will be returned as is.
-
-   .. versionadded:: 3.5

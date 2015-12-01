@@ -340,7 +340,10 @@ class SocketIO(object):
                 n = self.sock.send(s[:BUFSIZE])
             except (AttributeError, TypeError):
                 raise OSError("socket no longer exists")
-            s = s[n:]
+            except OSError:
+                raise
+            else:
+                s = s[n:]
 
     buff = b''
     bufneed = 4

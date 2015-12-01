@@ -677,12 +677,10 @@ def test_pdb_next_command_for_generator():
     ...     import pdb; pdb.Pdb(nosigint=True).set_trace()
     ...     it = test_gen()
     ...     try:
-    ...         if next(it) != 0:
-    ...             raise AssertionError
+    ...         assert next(it) == 0
     ...         next(it)
     ...     except StopIteration as ex:
-    ...         if ex.value != 1:
-    ...             raise AssertionError
+    ...         assert ex.value == 1
     ...     print("finished")
 
     >>> with PdbTestInput(['step',
@@ -701,7 +699,7 @@ def test_pdb_next_command_for_generator():
     -> try:
     (Pdb) step
     > <doctest test.test_pdb.test_pdb_next_command_for_generator[1]>(5)test_function()
-    -> if next(it) != 0:
+    -> assert next(it) == 0
     (Pdb) step
     --Call--
     > <doctest test.test_pdb.test_pdb_next_command_for_generator[0]>(1)test_gen()
@@ -718,7 +716,7 @@ def test_pdb_next_command_for_generator():
     -> return 1
     (Pdb) step
     StopIteration: 1
-    > <doctest test.test_pdb.test_pdb_next_command_for_generator[1]>(7)test_function()
+    > <doctest test.test_pdb.test_pdb_next_command_for_generator[1]>(6)test_function()
     -> next(it)
     (Pdb) continue
     finished
@@ -737,12 +735,10 @@ def test_pdb_return_command_for_generator():
     ...     import pdb; pdb.Pdb(nosigint=True).set_trace()
     ...     it = test_gen()
     ...     try:
-    ...         if next(it) != 0:
-    ...             raise AssertionError
+    ...         assert next(it) == 0
     ...         next(it)
     ...     except StopIteration as ex:
-    ...         if ex.value != 1:
-    ...             raise AssertionError
+    ...         assert ex.value == 1
     ...     print("finished")
 
     >>> with PdbTestInput(['step',
@@ -760,21 +756,21 @@ def test_pdb_return_command_for_generator():
     -> try:
     (Pdb) step
     > <doctest test.test_pdb.test_pdb_return_command_for_generator[1]>(5)test_function()
-    -> if next(it) != 0:
+    -> assert next(it) == 0
     (Pdb) step
     --Call--
     > <doctest test.test_pdb.test_pdb_return_command_for_generator[0]>(1)test_gen()
     -> def test_gen():
     (Pdb) return
     StopIteration: 1
-    > <doctest test.test_pdb.test_pdb_return_command_for_generator[1]>(7)test_function()
+    > <doctest test.test_pdb.test_pdb_return_command_for_generator[1]>(6)test_function()
     -> next(it)
     (Pdb) step
-    > <doctest test.test_pdb.test_pdb_return_command_for_generator[1]>(8)test_function()
+    > <doctest test.test_pdb.test_pdb_return_command_for_generator[1]>(7)test_function()
     -> except StopIteration as ex:
     (Pdb) step
-    > <doctest test.test_pdb.test_pdb_return_command_for_generator[1]>(9)test_function()
-    -> if ex.value != 1:
+    > <doctest test.test_pdb.test_pdb_return_command_for_generator[1]>(8)test_function()
+    -> assert ex.value == 1
     (Pdb) continue
     finished
     """

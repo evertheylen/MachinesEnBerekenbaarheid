@@ -366,10 +366,8 @@ def main():
             mf.load_file(mod)
 
     # Alias "importlib._bootstrap" to "_frozen_importlib" so that the
-    # import machinery can bootstrap.  Do the same for
-    # importlib._bootstrap_external.
+    # import machinery can bootstrap.
     mf.modules["_frozen_importlib"] = mf.modules["importlib._bootstrap"]
-    mf.modules["_frozen_importlib_external"] = mf.modules["importlib._bootstrap_external"]
 
     # Add the main script as either __main__, or the actual module name.
     if python_entry_is_main:
@@ -441,17 +439,25 @@ def main():
                  frozendllmain_c, os.path.basename(extensions_c)] + files
         maindefn = checkextensions_win32.CExtension( '__main__', xtras )
         frozen_extensions.append( maindefn )
-        with open(makefile, 'w') as outfp:
+        outfp = open(makefile, 'w')
+        try:
             winmakemakefile.makemakefile(outfp,
                                          locals(),
                                          frozen_extensions,
                                          os.path.basename(target))
+        finally:
+            outfp.close()
         return
 
     # generate config.c and Makefile
     builtins.sort()
-    with open(config_c_in) as infp, bkfile.open(config_c, 'w') as outfp:
+    infp = open(config_c_in)
+    outfp = bkfile.open(config_c, 'w')
+    try:
         makeconfig.makeconfig(infp, outfp, builtins)
+    finally:
+        outfp.close()
+    infp.close()
 
     cflags = ['$(OPT)']
     cppflags = defines + includes
@@ -469,8 +475,11 @@ def main():
             files + supp_sources +  addfiles + libs + \
             ['$(MODLIBS)', '$(LIBS)', '$(SYSLIBS)']
 
-    with bkfile.open(makefile, 'w') as outfp:
+    outfp = bkfile.open(makefile, 'w')
+    try:
         makemakefile.makemakefile(outfp, somevars, files, base_target)
+    finally:
+        outfp.close()
 
     # Done!
 

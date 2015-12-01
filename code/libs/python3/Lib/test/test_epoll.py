@@ -44,7 +44,7 @@ class TestEPoll(unittest.TestCase):
     def setUp(self):
         self.serverSocket = socket.socket()
         self.serverSocket.bind(('127.0.0.1', 0))
-        self.serverSocket.listen()
+        self.serverSocket.listen(1)
         self.connections = [self.serverSocket]
 
     def tearDown(self):
@@ -252,5 +252,8 @@ class TestEPoll(unittest.TestCase):
         self.assertEqual(os.get_inheritable(epoll.fileno()), False)
 
 
+def test_main():
+    support.run_unittest(TestEPoll)
+
 if __name__ == "__main__":
-    unittest.main()
+    test_main()

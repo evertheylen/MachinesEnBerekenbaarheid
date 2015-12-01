@@ -630,7 +630,7 @@ item to the buffer only needs to wake up one consumer thread.
             cv.wait()
 
       Therefore, the same rules apply as with :meth:`wait`: The lock must be
-      held when called and is re-acquired on return.  The predicate is evaluated
+      held when called and is re-aquired on return.  The predicate is evaluated
       with the lock held.
 
       .. versionadded:: 3.2
@@ -874,7 +874,7 @@ This class provides a simple synchronization primitive for use by a fixed number
 of threads that need to wait for each other.  Each of the threads tries to pass
 the barrier by calling the :meth:`~Barrier.wait` method and will block until
 all of the threads have made the call.  At this points, the threads are released
-simultaneously.
+simultanously.
 
 The barrier can be reused any number of times for the same number of threads.
 

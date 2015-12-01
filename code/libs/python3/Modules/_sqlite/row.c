@@ -46,7 +46,7 @@ pysqlite_row_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
     if (!PyArg_ParseTuple(args, "OO", &cursor, &data))
         return NULL;
 
-    if (!PyObject_TypeCheck((PyObject*)cursor, &pysqlite_CursorType)) {
+    if (!PyObject_IsInstance((PyObject*)cursor, (PyObject*)&pysqlite_CursorType)) {
         PyErr_SetString(PyExc_TypeError, "instance of cursor required for first argument");
         return NULL;
     }
@@ -142,7 +142,8 @@ PyObject* pysqlite_row_subscript(pysqlite_Row* self, PyObject* idx)
         return NULL;
     }
     else if (PySlice_Check(idx)) {
-        return PyObject_GetItem(self->data, idx);
+        PyErr_SetString(PyExc_ValueError, "slices not implemented, yet");
+        return NULL;
     }
     else {
         PyErr_SetString(PyExc_IndexError, "Index must be int or string");
@@ -158,7 +159,7 @@ Py_ssize_t pysqlite_row_length(pysqlite_Row* self, PyObject* args, PyObject* kwa
 PyObject* pysqlite_row_keys(pysqlite_Row* self, PyObject* args, PyObject* kwargs)
 {
     PyObject* list;
-    Py_ssize_t nitems, i;
+    int nitems, i;
 
     list = PyList_New(0);
     if (!list) {

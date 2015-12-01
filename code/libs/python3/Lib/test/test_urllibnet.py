@@ -91,8 +91,7 @@ class urlopenNetworkTests(unittest.TestCase):
         # test getcode() with the fancy opener to get 404 error codes
         URL = "http://www.example.com/XXXinvalidXXX"
         with support.transient_internet(URL):
-            with self.assertWarns(DeprecationWarning):
-                open_url = urllib.request.FancyURLopener().open(URL)
+            open_url = urllib.request.FancyURLopener().open(URL)
             try:
                 code = open_url.getcode()
             finally:

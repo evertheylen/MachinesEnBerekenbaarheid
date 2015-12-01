@@ -172,9 +172,6 @@ another rational number, or from a string.
    sign as *b* if *b* is nonzero; otherwise it takes the sign of *a*.  ``gcd(0,
    0)`` returns ``0``.
 
-   .. deprecated:: 3.5
-      Use :func:`math.gcd` instead.
-
 
 .. seealso::
 

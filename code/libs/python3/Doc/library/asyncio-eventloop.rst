@@ -22,8 +22,6 @@ It provides multiple facilities, amongst which:
 
    Base class of event loops.
 
-   This class is :ref:`not thread safe <asyncio-multithreading>`.
-
 Run an event loop
 -----------------
 
@@ -36,7 +34,7 @@ Run an event loop
    Run until the :class:`Future` is done.
 
    If the argument is a :ref:`coroutine object <coroutine>`, it is wrapped by
-   :func:`ensure_future`.
+   :func:`async`.
 
    Return the Future's result, or raise its exception.
 
@@ -97,8 +95,7 @@ keywords to your callback, use :func:`functools.partial`. For example,
    Any positional arguments after the callback will be passed to the
    callback when it is called.
 
-   An instance of :class:`asyncio.Handle` is returned, which can be
-   used to cancel the callback.
+   An instance of :class:`asyncio.Handle` is returned.
 
    :ref:`Use functools.partial to pass keywords to the callback
    <asyncio-pass-keywords>`.
@@ -106,9 +103,6 @@ keywords to your callback, use :func:`functools.partial`. For example,
 .. method:: BaseEventLoop.call_soon_threadsafe(callback, \*args)
 
    Like :meth:`call_soon`, but thread safe.
-
-   See the :ref:`concurrency and multithreading <asyncio-multithreading>`
-   section of the documentation.
 
 
 .. _asyncio-delayed-calls:
@@ -131,8 +125,7 @@ a different clock than :func:`time.time`.
    Arrange for the *callback* to be called after the given *delay*
    seconds (either an int or float).
 
-   An instance of :class:`asyncio.Handle` is returned, which can be
-   used to cancel the callback.
+   An instance of :class:`asyncio.Handle` is returned.
 
    *callback* will be called exactly once per call to :meth:`call_later`.
    If two callbacks are scheduled for exactly the same time, it is
@@ -153,9 +146,6 @@ a different clock than :func:`time.time`.
 
    This method's behavior is the same as :meth:`call_later`.
 
-   An instance of :class:`asyncio.Handle` is returned, which can be
-   used to cancel the callback.
-
    :ref:`Use functools.partial to pass keywords to the callback
    <asyncio-pass-keywords>`.
 
@@ -169,8 +159,8 @@ a different clock than :func:`time.time`.
    The :func:`asyncio.sleep` function.
 
 
-Tasks
------
+Coroutines
+----------
 
 .. method:: BaseEventLoop.create_task(coro)
 
@@ -186,31 +176,11 @@ Tasks
 
    .. versionadded:: 3.4.2
 
-.. method:: BaseEventLoop.set_task_factory(factory)
-
-   Set a task factory that will be used by
-   :meth:`BaseEventLoop.create_task`.
-
-   If *factory* is ``None`` the default task factory will be set.
-
-   If *factory* is a *callable*, it should have a signature matching
-   ``(loop, coro)``, where *loop* will be a reference to the active
-   event loop, *coro* will be a coroutine object.  The callable
-   must return an :class:`asyncio.Future` compatible object.
-
-   .. versionadded:: 3.4.4
-
-.. method:: BaseEventLoop.get_task_factory()
-
-   Return a task factory, or ``None`` if the default one is in use.
-
-   .. versionadded:: 3.4.4
-
 
 Creating connections
 --------------------
 
-.. coroutinemethod:: BaseEventLoop.create_connection(protocol_factory, host=None, port=None, \*, ssl=None, family=0, proto=0, flags=0, sock=None, local_addr=None, server_hostname=None)
+.. method:: BaseEventLoop.create_connection(protocol_factory, host=None, port=None, \*, ssl=None, family=0, proto=0, flags=0, sock=None, local_addr=None, server_hostname=None)
 
    Create a streaming transport connection to a given Internet *host* and
    *port*: socket family :py:data:`~socket.AF_INET` or
@@ -283,7 +253,7 @@ Creating connections
       (:class:`StreamReader`, :class:`StreamWriter`) instead of a protocol.
 
 
-.. coroutinemethod:: BaseEventLoop.create_datagram_endpoint(protocol_factory, local_addr=None, remote_addr=None, \*, family=0, proto=0, flags=0)
+.. method:: BaseEventLoop.create_datagram_endpoint(protocol_factory, local_addr=None, remote_addr=None, \*, family=0, proto=0, flags=0)
 
    Create datagram connection: socket family :py:data:`~socket.AF_INET` or
    :py:data:`~socket.AF_INET6` depending on *host* (or *family* if specified),
@@ -301,7 +271,7 @@ Creating connections
    :ref:`UDP echo server protocol <asyncio-udp-echo-server-protocol>` examples.
 
 
-.. coroutinemethod:: BaseEventLoop.create_unix_connection(protocol_factory, path, \*, ssl=None, sock=None, server_hostname=None)
+.. method:: BaseEventLoop.create_unix_connection(protocol_factory, path, \*, ssl=None, sock=None, server_hostname=None)
 
    Create UNIX connection: socket family :py:data:`~socket.AF_UNIX`, socket
    type :py:data:`~socket.SOCK_STREAM`. The :py:data:`~socket.AF_UNIX` socket
@@ -320,7 +290,7 @@ Creating connections
 Creating listening connections
 ------------------------------
 
-.. coroutinemethod:: BaseEventLoop.create_server(protocol_factory, host=None, port=None, \*, family=socket.AF_UNSPEC, flags=socket.AI_PASSIVE, sock=None, backlog=100, ssl=None, reuse_address=None)
+.. method:: BaseEventLoop.create_server(protocol_factory, host=None, port=None, \*, family=socket.AF_UNSPEC, flags=socket.AI_PASSIVE, sock=None, backlog=100, ssl=None, reuse_address=None)
 
    Create a TCP server (socket type :data:`~socket.SOCK_STREAM`) bound to
    *host* and *port*.
@@ -366,12 +336,10 @@ Creating listening connections
       :class:`StreamWriter`) pair and calls back a function with this pair.
 
 
-.. coroutinemethod:: BaseEventLoop.create_unix_server(protocol_factory, path=None, \*, sock=None, backlog=100, ssl=None)
+.. method:: BaseEventLoop.create_unix_server(protocol_factory, path=None, \*, sock=None, backlog=100, ssl=None)
 
    Similar to :meth:`BaseEventLoop.create_server`, but specific to the
    socket family :py:data:`~socket.AF_UNIX`.
-
-   This method is a :ref:`coroutine <coroutine>`.
 
    Availability: UNIX.
 
@@ -416,7 +384,7 @@ the file descriptor of a socket.
 Low-level socket operations
 ---------------------------
 
-.. coroutinemethod:: BaseEventLoop.sock_recv(sock, nbytes)
+.. method:: BaseEventLoop.sock_recv(sock, nbytes)
 
    Receive data from the socket.  The return value is a bytes object
    representing the data received.  The maximum amount of data to be received
@@ -431,7 +399,7 @@ Low-level socket operations
 
       The :meth:`socket.socket.recv` method.
 
-.. coroutinemethod:: BaseEventLoop.sock_sendall(sock, data)
+.. method:: BaseEventLoop.sock_sendall(sock, data)
 
    Send data to the socket.  The socket must be connected to a remote socket.
    This method continues to send data from *data* until either all data has
@@ -448,7 +416,7 @@ Low-level socket operations
 
       The :meth:`socket.socket.sendall` method.
 
-.. coroutinemethod:: BaseEventLoop.sock_connect(sock, address)
+.. method:: BaseEventLoop.sock_connect(sock, address)
 
    Connect to a remote socket at *address*.
 
@@ -470,7 +438,7 @@ Low-level socket operations
       method.
 
 
-.. coroutinemethod:: BaseEventLoop.sock_accept(sock)
+.. method:: BaseEventLoop.sock_accept(sock)
 
    Accept a connection. The socket must be bound to an address and listening
    for connections. The return value is a pair ``(conn, address)`` where *conn*
@@ -491,12 +459,12 @@ Low-level socket operations
 Resolve host name
 -----------------
 
-.. coroutinemethod:: BaseEventLoop.getaddrinfo(host, port, \*, family=0, type=0, proto=0, flags=0)
+.. method:: BaseEventLoop.getaddrinfo(host, port, \*, family=0, type=0, proto=0, flags=0)
 
    This method is a :ref:`coroutine <coroutine>`, similar to
    :meth:`socket.getaddrinfo` function but non-blocking.
 
-.. coroutinemethod:: BaseEventLoop.getnameinfo(sockaddr, flags=0)
+.. method:: BaseEventLoop.getnameinfo(sockaddr, flags=0)
 
    This method is a :ref:`coroutine <coroutine>`, similar to
    :meth:`socket.getnameinfo` function but non-blocking.
@@ -508,7 +476,7 @@ Connect pipes
 On Windows with :class:`SelectorEventLoop`, these methods are not supported.
 Use :class:`ProactorEventLoop` to support pipes on Windows.
 
-.. coroutinemethod:: BaseEventLoop.connect_read_pipe(protocol_factory, pipe)
+.. method:: BaseEventLoop.connect_read_pipe(protocol_factory, pipe)
 
    Register read pipe in eventloop.
 
@@ -522,7 +490,7 @@ Use :class:`ProactorEventLoop` to support pipes on Windows.
 
    This method is a :ref:`coroutine <coroutine>`.
 
-.. coroutinemethod:: BaseEventLoop.connect_write_pipe(protocol_factory, pipe)
+.. method:: BaseEventLoop.connect_write_pipe(protocol_factory, pipe)
 
    Register write pipe in eventloop.
 
@@ -575,7 +543,7 @@ Call a function in an :class:`~concurrent.futures.Executor` (pool of threads or
 pool of processes). By default, an event loop uses a thread pool executor
 (:class:`~concurrent.futures.ThreadPoolExecutor`).
 
-.. coroutinemethod:: BaseEventLoop.run_in_executor(executor, callback, \*args)
+.. method:: BaseEventLoop.run_in_executor(executor, callback, \*args)
 
    Arrange for a callback to be called in the specified executor.
 
@@ -686,7 +654,7 @@ Server
       The server is closed asynchonously, use the :meth:`wait_closed` coroutine
       to wait until the server is closed.
 
-   .. coroutinemethod:: wait_closed()
+   .. method:: wait_closed()
 
       Wait until the :meth:`close` method completes.
 
@@ -709,8 +677,7 @@ Handle
 
    .. method:: cancel()
 
-      Cancel the call.  If the callback is already canceled or executed,
-      this method has no effect.
+      Cancel the call.
 
 
 Event loop examples

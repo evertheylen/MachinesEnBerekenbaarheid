@@ -51,10 +51,8 @@ static struct {
 static int nhandles = 0;
 
 
-dl_funcptr
-_PyImport_FindSharedFuncptr(const char *prefix,
-                            const char *shortname,
-                            const char *pathname, FILE *fp)
+dl_funcptr _PyImport_GetDynLoadFunc(const char *shortname,
+                                    const char *pathname, FILE *fp)
 {
     dl_funcptr p;
     void *handle;
@@ -69,24 +67,26 @@ _PyImport_FindSharedFuncptr(const char *prefix,
     }
 
     PyOS_snprintf(funcname, sizeof(funcname),
-                  LEAD_UNDERSCORE "%.20s_%.200s", prefix, shortname);
+                  LEAD_UNDERSCORE "PyInit_%.200s", shortname);
 
     if (fp != NULL) {
         int i;
-        struct _Py_stat_struct status;
-        if (_Py_fstat(fileno(fp), &status) == -1)
+        struct stat statb;
+        if (fstat(fileno(fp), &statb) == -1) {
+            PyErr_SetFromErrno(PyExc_IOError);
             return NULL;
+        }
         for (i = 0; i < nhandles; i++) {
-            if (status.st_dev == handles[i].dev &&
-                status.st_ino == handles[i].ino) {
+            if (statb.st_dev == handles[i].dev &&
+                statb.st_ino == handles[i].ino) {
                 p = (dl_funcptr) dlsym(handles[i].handle,
                                        funcname);
                 return p;
             }
         }
         if (nhandles < 128) {
-            handles[nhandles].dev = status.st_dev;
-            handles[nhandles].ino = status.st_ino;
+            handles[nhandles].dev = statb.st_dev;
+            handles[nhandles].ino = statb.st_ino;
         }
     }
 

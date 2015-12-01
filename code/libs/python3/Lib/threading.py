@@ -3,7 +3,10 @@
 import sys as _sys
 import _thread
 
-from time import monotonic as _time
+try:
+    from time import monotonic as _time
+except ImportError:
+    from time import time as _time
 from traceback import format_exc as _format_exc
 from _weakrefset import WeakSet
 from itertools import islice as _islice, count as _count
@@ -103,14 +106,8 @@ class _RLock:
             owner = _active[owner].name
         except KeyError:
             pass
-        return "<%s %s.%s object owner=%r count=%d at %s>" % (
-            "locked" if self._block.locked() else "unlocked",
-            self.__class__.__module__,
-            self.__class__.__qualname__,
-            owner,
-            self._count,
-            hex(id(self))
-        )
+        return "<%s owner=%r count=%d>" % (
+                self.__class__.__name__, owner, self._count)
 
     def acquire(self, blocking=True, timeout=-1):
         """Acquire a lock, blocking or non-blocking.

@@ -27,7 +27,7 @@ between conformable Python objects and XML on the wire.
    constructed data.  If you need to parse untrusted or unauthenticated data see
    :ref:`xml-vulnerabilities`.
 
-.. versionchanged:: 3.5
+.. versionchanged:: 3.4.3
 
    For https URIs, :mod:`xmlrpc.client` now performs all the necessary
    certificate and hostname checks by default
@@ -129,7 +129,7 @@ between conformable Python objects and XML on the wire.
    :class:`Server` is retained as an alias for :class:`ServerProxy` for backwards
    compatibility.  New code should use :class:`ServerProxy`.
 
-   .. versionchanged:: 3.5
+   .. versionchanged:: 3.4.3
       Added the *context* argument.
 
 
@@ -200,11 +200,6 @@ grouped under the reserved :attr:`system` attribute:
    no such string is available, an empty string is returned. The documentation
    string may contain HTML markup.
 
-.. versionchanged:: 3.5
-
-   Instances of :class:`ServerProxy` support the :term:`context manager` protocol
-   for closing the underlying transport.
-
 
 A working example follows. The server code::
 
@@ -222,9 +217,9 @@ The client code for the preceding server::
 
    import xmlrpc.client
 
-   with xmlrpc.client.ServerProxy("http://localhost:8000/") as proxy:
-       print("3 is even: %s" % str(proxy.is_even(3)))
-       print("100 is even: %s" % str(proxy.is_even(100)))
+   proxy = xmlrpc.client.ServerProxy("http://localhost:8000/")
+   print("3 is even: %s" % str(proxy.is_even(3)))
+   print("100 is even: %s" % str(proxy.is_even(100)))
 
 .. _datetime-objects:
 
@@ -532,14 +527,14 @@ Example of Client Usage
    from xmlrpc.client import ServerProxy, Error
 
    # server = ServerProxy("http://localhost:8000") # local server
-   with ServerProxy("http://betty.userland.com") as proxy:
+   server = ServerProxy("http://betty.userland.com")
 
-       print(proxy)
+   print(server)
 
-       try:
-           print(proxy.examples.getStateName(41))
-       except Error as v:
-           print("ERROR", v)
+   try:
+       print(server.examples.getStateName(41))
+   except Error as v:
+       print("ERROR", v)
 
 To access an XML-RPC server through a proxy, you need to define  a custom
 transport.  The following example shows how:

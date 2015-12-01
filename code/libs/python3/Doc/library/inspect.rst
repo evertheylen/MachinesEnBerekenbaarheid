@@ -28,7 +28,7 @@ Types and members
 -----------------
 
 The :func:`getmembers` function retrieves the members of an object such as a
-class or module. The functions whose names begin with "is" are mainly
+class or module. The sixteen functions whose names begin with "is" are mainly
 provided as convenient choices for the second argument to :func:`getmembers`.
 They also help you determine when you can expect to find the following special
 attributes:
@@ -43,11 +43,6 @@ attributes:
 +-----------+-----------------+---------------------------+
 | class     | __doc__         | documentation string      |
 +-----------+-----------------+---------------------------+
-|           | __name__        | name with which this      |
-|           |                 | class was defined         |
-+-----------+-----------------+---------------------------+
-|           | __qualname__    | qualified name            |
-+-----------+-----------------+---------------------------+
 |           | __module__      | name of module in which   |
 |           |                 | this class was defined    |
 +-----------+-----------------+---------------------------+
@@ -55,8 +50,6 @@ attributes:
 +-----------+-----------------+---------------------------+
 |           | __name__        | name with which this      |
 |           |                 | method was defined        |
-+-----------+-----------------+---------------------------+
-|           | __qualname__    | qualified name            |
 +-----------+-----------------+---------------------------+
 |           | __func__        | function object           |
 |           |                 | containing implementation |
@@ -70,8 +63,6 @@ attributes:
 +-----------+-----------------+---------------------------+
 |           | __name__        | name with which this      |
 |           |                 | function was defined      |
-+-----------+-----------------+---------------------------+
-|           | __qualname__    | qualified name            |
 +-----------+-----------------+---------------------------+
 |           | __code__        | code object containing    |
 |           |                 | compiled function         |
@@ -168,50 +159,15 @@ attributes:
 |           |                 | arguments and local       |
 |           |                 | variables                 |
 +-----------+-----------------+---------------------------+
-| generator | __name__        | name                      |
-+-----------+-----------------+---------------------------+
-|           | __qualname__    | qualified name            |
-+-----------+-----------------+---------------------------+
-|           | gi_frame        | frame                     |
-+-----------+-----------------+---------------------------+
-|           | gi_running      | is the generator running? |
-+-----------+-----------------+---------------------------+
-|           | gi_code         | code                      |
-+-----------+-----------------+---------------------------+
-| coroutine | __name__        | name                      |
-+-----------+-----------------+---------------------------+
-|           | __qualname__    | qualified name            |
-+-----------+-----------------+---------------------------+
-|           | cr_await        | object being awaited on,  |
-|           |                 | or ``None``               |
-+-----------+-----------------+---------------------------+
-|           | cr_frame        | frame                     |
-+-----------+-----------------+---------------------------+
-|           | cr_running      | is the coroutine running? |
-+-----------+-----------------+---------------------------+
-|           | cr_code         | code                      |
-+-----------+-----------------+---------------------------+
-|           | gi_yieldfrom    | object being iterated by  |
-|           |                 | ``yield from``, or        |
-|           |                 | ``None``                  |
-+-----------+-----------------+---------------------------+
 | builtin   | __doc__         | documentation string      |
 +-----------+-----------------+---------------------------+
 |           | __name__        | original name of this     |
 |           |                 | function or method        |
 +-----------+-----------------+---------------------------+
-|           | __qualname__    | qualified name            |
-+-----------+-----------------+---------------------------+
 |           | __self__        | instance to which a       |
 |           |                 | method is bound, or       |
 |           |                 | ``None``                  |
 +-----------+-----------------+---------------------------+
-
-.. versionchanged:: 3.5
-
-   Add ``__qualname__`` attribute to generators. The ``__name__`` attribute of
-   generators is now set from the function name, instead of the code name, and
-   it can now be modified.
 
 
 .. function:: getmembers(object[, predicate])
@@ -292,41 +248,6 @@ attributes:
 .. function:: isgenerator(object)
 
    Return true if the object is a generator.
-
-
-.. function:: iscoroutinefunction(object)
-
-   Return true if the object is a :term:`coroutine function`
-   (a function defined with an :keyword:`async def` syntax).
-
-   .. versionadded:: 3.5
-
-
-.. function:: iscoroutine(object)
-
-   Return true if the object is a :term:`coroutine` created by an
-   :keyword:`async def` function.
-
-   .. versionadded:: 3.5
-
-
-.. function:: isawaitable(object)
-
-   Return true if the object can be used in :keyword:`await` expression.
-
-   Can also be used to distinguish generator-based coroutines from regular
-   generators::
-
-      def gen():
-          yield
-      @types.coroutine
-      def gen_coro():
-          yield
-
-      assert not isawaitable(gen())
-      assert isawaitable(gen_coro())
-
-   .. versionadded:: 3.5
 
 
 .. function:: istraceback(object)
@@ -419,12 +340,6 @@ Retrieving source code
 .. function:: getdoc(object)
 
    Get the documentation string for an object, cleaned up with :func:`cleandoc`.
-   If the documentation string for an object is not provided and the object is
-   a class, a method, a property or a descriptor, retrieve the documentation
-   string from the inheritance hierarchy.
-
-   .. versionchanged:: 3.5
-      Documentation strings are now inherited if not overridden.
 
 
 .. function:: getcomments(object)
@@ -497,7 +412,7 @@ The Signature object represents the call signature of a callable object and its
 return annotation.  To retrieve a Signature object, use the :func:`signature`
 function.
 
-.. function:: signature(callable, \*, follow_wrapped=True)
+.. function:: signature(callable)
 
    Return a :class:`Signature` object for the given ``callable``::
 
@@ -521,11 +436,6 @@ function.
 
    Raises :exc:`ValueError` if no signature can be provided, and
    :exc:`TypeError` if that type of object is not supported.
-
-   .. versionadded:: 3.5
-      ``follow_wrapped`` parameter. Pass ``False`` to get a signature of
-      ``callable`` specifically (``callable.__wrapped__`` will not be used to
-      unwrap decorated callables.)
 
    .. note::
 
@@ -551,9 +461,6 @@ function.
 
    Signature objects are *immutable*.  Use :meth:`Signature.replace` to make a
    modified copy.
-
-   .. versionchanged:: 3.5
-      Signature objects are picklable and hashable.
 
    .. attribute:: Signature.empty
 
@@ -599,29 +506,11 @@ function.
          >>> str(new_sig)
          "(a, b) -> 'new return anno'"
 
-   .. classmethod:: Signature.from_callable(obj, \*, follow_wrapped=True)
-
-       Return a :class:`Signature` (or its subclass) object for a given callable
-       ``obj``.  Pass ``follow_wrapped=False`` to get a signature of ``obj``
-       without unwrapping its ``__wrapped__`` chain.
-
-       This method simplifies subclassing of :class:`Signature`::
-
-         class MySignature(Signature):
-             pass
-         sig = MySignature.from_callable(min)
-         assert isinstance(sig, MySignature)
-
-       .. versionadded:: 3.5
-
 
 .. class:: Parameter(name, kind, \*, default=Parameter.empty, annotation=Parameter.empty)
 
    Parameter objects are *immutable*.  Instead of modifying a Parameter object,
    you can use :meth:`Parameter.replace` to create a modified copy.
-
-   .. versionchanged:: 3.5
-      Parameter objects are picklable and hashable.
 
    .. attribute:: Parameter.empty
 
@@ -739,8 +628,27 @@ function.
 
          Arguments for which :meth:`Signature.bind` or
          :meth:`Signature.bind_partial` relied on a default value are skipped.
-         However, if needed, use :meth:`BoundArguments.apply_defaults` to add
-         them.
+         However, if needed, it is easy to include them.
+
+      ::
+
+        >>> def foo(a, b=10):
+        ...     pass
+
+        >>> sig = signature(foo)
+        >>> ba = sig.bind(5)
+
+        >>> ba.args, ba.kwargs
+        ((5,), {})
+
+        >>> for param in sig.parameters.values():
+        ...     if (param.name not in ba.arguments
+        ...             and param.default is not param.empty):
+        ...         ba.arguments[param.name] = param.default
+
+        >>> ba.args, ba.kwargs
+        ((5, 10), {})
+
 
    .. attribute:: BoundArguments.args
 
@@ -751,30 +659,6 @@ function.
 
       A dict of keyword arguments values.  Dynamically computed from the
       :attr:`arguments` attribute.
-
-   .. attribute:: BoundArguments.signature
-
-      A reference to the parent :class:`Signature` object.
-
-   .. method:: BoundArguments.apply_defaults()
-
-      Set default values for missing arguments.
-
-      For variable-positional arguments (``*args``) the default is an
-      empty tuple.
-
-      For variable-keyword arguments (``**kwargs``) the default is an
-      empty dict.
-
-      ::
-
-        >>> def foo(a, b='ham', *args): pass
-        >>> ba = inspect.signature(foo).bind('spam')
-        >>> ba.apply_defaults()
-        >>> ba.arguments
-        OrderedDict([('a', 'spam'), ('b', 'ham'), ('args', ())])
-
-      .. versionadded:: 3.5
 
    The :attr:`args` and :attr:`kwargs` properties can be used to invoke
    functions::
@@ -820,10 +704,8 @@ Classes and functions
    *n* elements listed in *args*.
 
    .. deprecated:: 3.0
-      Use :func:`signature` and
-      :ref:`Signature Object <inspect-signature-object>`, which provide a
-      better introspecting API for callables.  This function will be removed
-      in Python 3.6.
+      Use :func:`getfullargspec` instead, which provides information about
+      keyword-only arguments and annotations.
 
 
 .. function:: getfullargspec(func)
@@ -844,15 +726,14 @@ Classes and functions
 
    The first four items in the tuple correspond to :func:`getargspec`.
 
+   .. note::
+      Consider using the new :ref:`Signature Object <inspect-signature-object>`
+      interface, which provides a better way of introspecting functions.
+
    .. versionchanged:: 3.4
       This function is now based on :func:`signature`, but still ignores
       ``__wrapped__`` attributes and includes the already bound first
       parameter in the signature output for bound methods.
-
-   .. deprecated:: 3.5
-      Use :func:`signature` and
-      :ref:`Signature Object <inspect-signature-object>`, which provide a
-      better introspecting API for callables.
 
 
 .. function:: getargvalues(frame)
@@ -862,11 +743,6 @@ Classes and functions
    returned. *args* is a list of the argument names.  *varargs* and *keywords*
    are the names of the ``*`` and ``**`` arguments or ``None``.  *locals* is the
    locals dictionary of the given frame.
-
-   .. deprecated:: 3.5
-      Use :func:`signature` and
-      :ref:`Signature Object <inspect-signature-object>`, which provide a
-      better introspecting API for callables.
 
 
 .. function:: formatargspec(args[, varargs, varkw, defaults, kwonlyargs, kwonlydefaults, annotations[, formatarg, formatvarargs, formatvarkw, formatvalue, formatreturns, formatannotations]])
@@ -890,22 +766,12 @@ Classes and functions
    >>> formatargspec(*getfullargspec(f))
    '(a: int, b: float)'
 
-   .. deprecated:: 3.5
-      Use :func:`signature` and
-      :ref:`Signature Object <inspect-signature-object>`, which provide a
-      better introspecting API for callables.
-
 
 .. function:: formatargvalues(args[, varargs, varkw, locals, formatarg, formatvarargs, formatvarkw, formatvalue])
 
    Format a pretty argument spec from the four values returned by
    :func:`getargvalues`.  The format\* arguments are the corresponding optional
    formatting functions that are called to turn names and values into strings.
-
-   .. deprecated:: 3.5
-      Use :func:`signature` and
-      :ref:`Signature Object <inspect-signature-object>`, which provide a
-      better introspecting API for callables.
 
 
 .. function:: getmro(cls)
@@ -941,8 +807,8 @@ Classes and functions
 
    .. versionadded:: 3.2
 
-   .. deprecated:: 3.5
-      Use :meth:`Signature.bind` and :meth:`Signature.bind_partial` instead.
+   .. note::
+      Consider using the new :meth:`Signature.bind` instead.
 
 
 .. function:: getclosurevars(func)
@@ -983,16 +849,10 @@ Classes and functions
 The interpreter stack
 ---------------------
 
-When the following functions return "frame records," each record is a
-:term:`named tuple`
-``FrameInfo(frame, filename, lineno, function, code_context, index)``.
-The tuple contains the frame object, the filename, the line number of the
-current line,
+When the following functions return "frame records," each record is a tuple of
+six items: the frame object, the filename, the line number of the current line,
 the function name, a list of lines of context from the source code, and the
 index of the current line within that list.
-
-.. versionchanged:: 3.5
-   Return a named tuple instead of a tuple.
 
 .. note::
 
@@ -1132,8 +992,8 @@ code execution::
            pass
 
 
-Current State of Generators and Coroutines
-------------------------------------------
+Current State of a Generator
+----------------------------
 
 When implementing coroutine schedulers and for other advanced uses of
 generators, it is useful to determine whether a generator is currently
@@ -1152,21 +1012,6 @@ generator to be determined easily.
     * GEN_CLOSED: Execution has completed.
 
    .. versionadded:: 3.2
-
-.. function:: getcoroutinestate(coroutine)
-
-   Get current state of a coroutine object.  The function is intended to be
-   used with coroutine objects created by :keyword:`async def` functions, but
-   will accept any coroutine-like object that has ``cr_running`` and
-   ``cr_frame`` attributes.
-
-   Possible states are:
-    * CORO_CREATED: Waiting to start execution.
-    * CORO_RUNNING: Currently being executed by the interpreter.
-    * CORO_SUSPENDED: Currently suspended at an await expression.
-    * CORO_CLOSED: Execution has completed.
-
-   .. versionadded:: 3.5
 
 The current internal state of the generator can also be queried. This is
 mostly useful for testing purposes, to ensure that internal state is being
@@ -1191,13 +1036,6 @@ updated as expected:
       return an empty dictionary.
 
    .. versionadded:: 3.3
-
-.. function:: getcoroutinelocals(coroutine)
-
-   This function is analogous to :func:`~inspect.getgeneratorlocals`, but
-   works for coroutine objects created by :keyword:`async def` functions.
-
-   .. versionadded:: 3.5
 
 
 .. _inspect-module-cli:

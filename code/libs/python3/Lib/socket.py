@@ -49,7 +49,7 @@ the setsockopt() and getsockopt() methods.
 import _socket
 from _socket import *
 
-import os, sys, io, selectors
+import os, sys, io
 from enum import IntEnum
 
 try:
@@ -69,20 +69,15 @@ __all__.extend(os._get_exports_list(_socket))
 # Note that _socket only knows about the integer values. The public interface
 # in this module understands the enums and translates them back from integers
 # where needed (e.g. .family property of a socket object).
+AddressFamily = IntEnum('AddressFamily',
+                        {name: value for name, value in globals().items()
+                         if name.isupper() and name.startswith('AF_')})
+globals().update(AddressFamily.__members__)
 
-IntEnum._convert(
-        'AddressFamily',
-        __name__,
-        lambda C: C.isupper() and C.startswith('AF_'))
-
-IntEnum._convert(
-        'SocketKind',
-        __name__,
-        lambda C: C.isupper() and C.startswith('SOCK_'))
-
-_LOCALHOST    = '127.0.0.1'
-_LOCALHOST_V6 = '::1'
-
+SocketKind = IntEnum('SocketKind',
+                     {name: value for name, value in globals().items()
+                      if name.isupper() and name.startswith('SOCK_')})
+globals().update(SocketKind.__members__)
 
 def _intenum_converter(value, enum_klass):
     """Convert a numeric family value to an IntEnum member.
@@ -117,9 +112,6 @@ if sys.platform.lower().startswith("win"):
     __all__.append("errorTab")
 
 
-class _GiveupOnSendfile(Exception): pass
-
-
 class socket(_socket.socket):
 
     """A subclass of _socket.socket adding the makefile() method."""
@@ -149,7 +141,7 @@ class socket(_socket.socket):
         closed = getattr(self, '_closed', False)
         s = "<%s.%s%s fd=%i, family=%s, type=%s, proto=%i" \
             % (self.__class__.__module__,
-               self.__class__.__qualname__,
+               self.__class__.__name__,
                " [closed]" if closed else "",
                self.fileno(),
                self.family,
@@ -243,149 +235,6 @@ class socket(_socket.socket):
         text.mode = mode
         return text
 
-    if hasattr(os, 'sendfile'):
-
-        def _sendfile_use_sendfile(self, file, offset=0, count=None):
-            self._check_sendfile_params(file, offset, count)
-            sockno = self.fileno()
-            try:
-                fileno = file.fileno()
-            except (AttributeError, io.UnsupportedOperation) as err:
-                raise _GiveupOnSendfile(err)  # not a regular file
-            try:
-                fsize = os.fstat(fileno).st_size
-            except OSError:
-                raise _GiveupOnSendfile(err)  # not a regular file
-            if not fsize:
-                return 0  # empty file
-            blocksize = fsize if not count else count
-
-            timeout = self.gettimeout()
-            if timeout == 0:
-                raise ValueError("non-blocking sockets are not supported")
-            # poll/select have the advantage of not requiring any
-            # extra file descriptor, contrarily to epoll/kqueue
-            # (also, they require a single syscall).
-            if hasattr(selectors, 'PollSelector'):
-                selector = selectors.PollSelector()
-            else:
-                selector = selectors.SelectSelector()
-            selector.register(sockno, selectors.EVENT_WRITE)
-
-            total_sent = 0
-            # localize variable access to minimize overhead
-            selector_select = selector.select
-            os_sendfile = os.sendfile
-            try:
-                while True:
-                    if timeout and not selector_select(timeout):
-                        raise _socket.timeout('timed out')
-                    if count:
-                        blocksize = count - total_sent
-                        if blocksize <= 0:
-                            break
-                    try:
-                        sent = os_sendfile(sockno, fileno, offset, blocksize)
-                    except BlockingIOError:
-                        if not timeout:
-                            # Block until the socket is ready to send some
-                            # data; avoids hogging CPU resources.
-                            selector_select()
-                        continue
-                    except OSError as err:
-                        if total_sent == 0:
-                            # We can get here for different reasons, the main
-                            # one being 'file' is not a regular mmap(2)-like
-                            # file, in which case we'll fall back on using
-                            # plain send().
-                            raise _GiveupOnSendfile(err)
-                        raise err from None
-                    else:
-                        if sent == 0:
-                            break  # EOF
-                        offset += sent
-                        total_sent += sent
-                return total_sent
-            finally:
-                if total_sent > 0 and hasattr(file, 'seek'):
-                    file.seek(offset)
-    else:
-        def _sendfile_use_sendfile(self, file, offset=0, count=None):
-            raise _GiveupOnSendfile(
-                "os.sendfile() not available on this platform")
-
-    def _sendfile_use_send(self, file, offset=0, count=None):
-        self._check_sendfile_params(file, offset, count)
-        if self.gettimeout() == 0:
-            raise ValueError("non-blocking sockets are not supported")
-        if offset:
-            file.seek(offset)
-        blocksize = min(count, 8192) if count else 8192
-        total_sent = 0
-        # localize variable access to minimize overhead
-        file_read = file.read
-        sock_send = self.send
-        try:
-            while True:
-                if count:
-                    blocksize = min(count - total_sent, blocksize)
-                    if blocksize <= 0:
-                        break
-                data = memoryview(file_read(blocksize))
-                if not data:
-                    break  # EOF
-                while True:
-                    try:
-                        sent = sock_send(data)
-                    except BlockingIOError:
-                        continue
-                    else:
-                        total_sent += sent
-                        if sent < len(data):
-                            data = data[sent:]
-                        else:
-                            break
-            return total_sent
-        finally:
-            if total_sent > 0 and hasattr(file, 'seek'):
-                file.seek(offset + total_sent)
-
-    def _check_sendfile_params(self, file, offset, count):
-        if 'b' not in getattr(file, 'mode', 'b'):
-            raise ValueError("file should be opened in binary mode")
-        if not self.type & SOCK_STREAM:
-            raise ValueError("only SOCK_STREAM type sockets are supported")
-        if count is not None:
-            if not isinstance(count, int):
-                raise TypeError(
-                    "count must be a positive integer (got {!r})".format(count))
-            if count <= 0:
-                raise ValueError(
-                    "count must be a positive integer (got {!r})".format(count))
-
-    def sendfile(self, file, offset=0, count=None):
-        """sendfile(file[, offset[, count]]) -> sent
-
-        Send a file until EOF is reached by using high-performance
-        os.sendfile() and return the total number of bytes which
-        were sent.
-        *file* must be a regular file object opened in binary mode.
-        If os.sendfile() is not available (e.g. Windows) or file is
-        not a regular file socket.send() will be used instead.
-        *offset* tells from where to start reading the file.
-        If specified, *count* is the total number of bytes to transmit
-        as opposed to sending the file until EOF is reached.
-        File position is updated on return or also in case of error in
-        which case file.tell() can be used to figure out the number of
-        bytes which were sent.
-        The socket must be of SOCK_STREAM type.
-        Non-blocking sockets are not supported.
-        """
-        try:
-            return self._sendfile_use_sendfile(file, offset, count)
-        except _GiveupOnSendfile:
-            return self._sendfile_use_send(file, offset, count)
-
     def _decref_socketios(self):
         if self._io_refs > 0:
             self._io_refs -= 1
@@ -476,52 +325,6 @@ if hasattr(_socket, "socketpair"):
         b = socket(family, type, proto, b.detach())
         return a, b
 
-else:
-
-    # Origin: https://gist.github.com/4325783, by Geert Jansen.  Public domain.
-    def socketpair(family=AF_INET, type=SOCK_STREAM, proto=0):
-        if family == AF_INET:
-            host = _LOCALHOST
-        elif family == AF_INET6:
-            host = _LOCALHOST_V6
-        else:
-            raise ValueError("Only AF_INET and AF_INET6 socket address families "
-                             "are supported")
-        if type != SOCK_STREAM:
-            raise ValueError("Only SOCK_STREAM socket type is supported")
-        if proto != 0:
-            raise ValueError("Only protocol zero is supported")
-
-        # We create a connected TCP socket. Note the trick with
-        # setblocking(False) that prevents us from having to create a thread.
-        lsock = socket(family, type, proto)
-        try:
-            lsock.bind((host, 0))
-            lsock.listen()
-            # On IPv6, ignore flow_info and scope_id
-            addr, port = lsock.getsockname()[:2]
-            csock = socket(family, type, proto)
-            try:
-                csock.setblocking(False)
-                try:
-                    csock.connect((addr, port))
-                except (BlockingIOError, InterruptedError):
-                    pass
-                csock.setblocking(True)
-                ssock, _ = lsock.accept()
-            except:
-                csock.close()
-                raise
-        finally:
-            lsock.close()
-        return (ssock, csock)
-
-socketpair.__doc__ = """socketpair([family[, type[, proto]]]) -> (socket object, socket object)
-Create a pair of socket objects from the sockets returned by the platform
-socketpair() function.
-The arguments are the same as for socket() except the default family is AF_UNIX
-if defined on the platform; otherwise, the default is AF_INET.
-"""
 
 _blocking_errnos = { EAGAIN, EWOULDBLOCK }
 
@@ -572,6 +375,8 @@ class SocketIO(io.RawIOBase):
             except timeout:
                 self._timeout_occurred = True
                 raise
+            except InterruptedError:
+                continue
             except error as e:
                 if e.args[0] in _blocking_errnos:
                     return None

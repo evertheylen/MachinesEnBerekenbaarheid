@@ -2,6 +2,7 @@
 
 import sys
 import unittest
+from test import support
 
 
 class A:
@@ -170,6 +171,10 @@ class TestSuper(unittest.TestCase):
             return g
         c = f().__closure__[0]
         self.assertRaises(TypeError, X.meth, c)
+
+
+def test_main():
+    support.run_unittest(TestSuper)
 
 
 if __name__ == "__main__":

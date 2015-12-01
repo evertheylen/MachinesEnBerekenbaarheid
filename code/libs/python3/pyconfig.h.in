@@ -101,9 +101,6 @@
 /* Define if `unsetenv` does not return an int. */
 #undef HAVE_BROKEN_UNSETENV
 
-/* Has builtin atomics */
-#undef HAVE_BUILTIN_ATOMIC
-
 /* Define this if you have the type _Bool. */
 #undef HAVE_C99_BOOL
 
@@ -182,9 +179,6 @@
 
 /* Define to 1 if you have the <direct.h> header file. */
 #undef HAVE_DIRECT_H
-
-/* Define to 1 if the dirent structure has a d_type field */
-#undef HAVE_DIRENT_D_TYPE
 
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
@@ -319,9 +313,6 @@
 /* Define to 1 if you have the `gamma' function. */
 #undef HAVE_GAMMA
 
-/* Define if we can use gcc inline assembler to get and set mc68881 fpcr */
-#undef HAVE_GCC_ASM_FOR_MC68881
-
 /* Define if we can use x64 gcc inline assembler */
 #undef HAVE_GCC_ASM_FOR_X64
 
@@ -394,9 +385,6 @@
 
 /* Define to 1 if you have the `getpwent' function. */
 #undef HAVE_GETPWENT
-
-/* Define to 1 if the Linux getrandom() syscall is available */
-#undef HAVE_GETRANDOM_SYSCALL
 
 /* Define to 1 if you have the `getresgid' function. */
 #undef HAVE_GETRESGID
@@ -530,9 +518,6 @@
 
 /* Define to 1 if you have the <linux/can.h> header file. */
 #undef HAVE_LINUX_CAN_H
-
-/* Define if compiling using Linux 3.6 or later. */
-#undef HAVE_LINUX_CAN_RAW_FD_FRAMES
 
 /* Define to 1 if you have the <linux/can/raw.h> header file. */
 #undef HAVE_LINUX_CAN_RAW_H
@@ -707,9 +692,6 @@
 
 /* Define to 1 if you have the `renameat' function. */
 #undef HAVE_RENAMEAT
-
-/* Define if readline supports append_history */
-#undef HAVE_RL_APPEND_HISTORY
 
 /* Define if you have readline 2.1 */
 #undef HAVE_RL_CALLBACK
@@ -888,9 +870,6 @@
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
-
-/* Has stdatomic.h, atomic_int and _Atomic void* types work */
-#undef HAVE_STD_ATOMIC
 
 /* Define to 1 if you have the `strdup' function. */
 #undef HAVE_STRDUP

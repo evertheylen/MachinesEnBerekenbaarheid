@@ -51,7 +51,7 @@ TESTPACK2 = "ziptestpackage2"
 TEMP_ZIP = os.path.abspath("junk95142.zip")
 
 pyc_file = importlib.util.cache_from_source(TESTMOD + '.py')
-pyc_ext = '.pyc'
+pyc_ext = ('.pyc' if __debug__ else '.pyo')
 
 
 class ImportHooksBaseTestCase(unittest.TestCase):
@@ -450,9 +450,7 @@ class BadFileZipImportTestCase(unittest.TestCase):
         fd = os.open(TESTMOD, os.O_CREAT, 000)
         try:
             os.close(fd)
-
-            with self.assertRaises(zipimport.ZipImportError) as cm:
-                zipimport.zipimporter(TESTMOD)
+            self.assertZipFailure(TESTMOD)
         finally:
             # If we leave "the read-only bit" set on Windows, nothing can
             # delete TESTMOD, and later tests suffer bogus failures.

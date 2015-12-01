@@ -7,6 +7,7 @@ from _collections_abc import *
 import _collections_abc
 __all__ += _collections_abc.__all__
 
+from _collections import deque, defaultdict
 from operator import itemgetter as _itemgetter, eq as _eq
 from keyword import iskeyword as _iskeyword
 import sys as _sys
@@ -15,39 +16,9 @@ from _weakref import proxy as _proxy
 from itertools import repeat as _repeat, chain as _chain, starmap as _starmap
 from reprlib import recursive_repr as _recursive_repr
 
-try:
-    from _collections import deque
-except ImportError:
-    pass
-else:
-    MutableSequence.register(deque)
-
-try:
-    from _collections import defaultdict
-except ImportError:
-    pass
-
-
 ################################################################################
 ### OrderedDict
 ################################################################################
-
-class _OrderedDictKeysView(KeysView):
-
-    def __reversed__(self):
-        yield from reversed(self._mapping)
-
-class _OrderedDictItemsView(ItemsView):
-
-    def __reversed__(self):
-        for key in reversed(self._mapping):
-            yield (key, self._mapping[key])
-
-class _OrderedDictValuesView(ValuesView):
-
-    def __reversed__(self):
-        for key in reversed(self._mapping):
-            yield self._mapping[key]
 
 class _Link(object):
     __slots__ = 'prev', 'next', 'key', '__weakref__'
@@ -112,8 +83,6 @@ class OrderedDict(dict):
         link_next = link.next
         link_prev.next = link_next
         link_next.prev = link_prev
-        link.prev = None
-        link.next = None
 
     def __iter__(self):
         'od.__iter__() <==> iter(od)'
@@ -197,19 +166,9 @@ class OrderedDict(dict):
         return size
 
     update = __update = MutableMapping.update
-
-    def keys(self):
-        "D.keys() -> a set-like object providing a view on D's keys"
-        return _OrderedDictKeysView(self)
-
-    def items(self):
-        "D.items() -> a set-like object providing a view on D's items"
-        return _OrderedDictItemsView(self)
-
-    def values(self):
-        "D.values() -> an object providing a view on D's values"
-        return _OrderedDictValuesView(self)
-
+    keys = MutableMapping.keys
+    values = MutableMapping.values
+    items = MutableMapping.items
     __ne__ = MutableMapping.__ne__
 
     __marker = object()
@@ -272,13 +231,6 @@ class OrderedDict(dict):
         if isinstance(other, OrderedDict):
             return dict.__eq__(self, other) and all(map(_eq, self, other))
         return dict.__eq__(self, other)
-
-
-try:
-    from _collections import OrderedDict
-except ImportError:
-    # Leave the pure Python version in place.
-    pass
 
 
 ################################################################################
@@ -753,22 +705,14 @@ class Counter(dict):
 
     def __pos__(self):
         'Adds an empty counter, effectively stripping negative and zero counts'
-        result = Counter()
-        for elem, count in self.items():
-            if count > 0:
-                result[elem] = count
-        return result
+        return self + Counter()
 
     def __neg__(self):
         '''Subtracts from an empty counter.  Strips positive and zero counts,
         and flips the sign on negative counts.
 
         '''
-        result = Counter()
-        for elem, count in self.items():
-            if count < 0:
-                result[elem] = 0 - count
-        return result
+        return Counter() - self
 
     def _keep_positive(self):
         '''Internal method to strip elements with a negative or zero count'''
@@ -1014,6 +958,7 @@ class UserList(MutableSequence):
     def __lt__(self, other): return self.data <  self.__cast(other)
     def __le__(self, other): return self.data <= self.__cast(other)
     def __eq__(self, other): return self.data == self.__cast(other)
+    def __ne__(self, other): return self.data != self.__cast(other)
     def __gt__(self, other): return self.data >  self.__cast(other)
     def __ge__(self, other): return self.data >= self.__cast(other)
     def __cast(self, other):
@@ -1085,13 +1030,15 @@ class UserString(Sequence):
     def __float__(self): return float(self.data)
     def __complex__(self): return complex(self.data)
     def __hash__(self): return hash(self.data)
-    def __getnewargs__(self):
-        return (self.data[:],)
 
     def __eq__(self, string):
         if isinstance(string, UserString):
             return self.data == string.data
         return self.data == string
+    def __ne__(self, string):
+        if isinstance(string, UserString):
+            return self.data != string.data
+        return self.data != string
     def __lt__(self, string):
         if isinstance(string, UserString):
             return self.data < string.data
@@ -1131,13 +1078,9 @@ class UserString(Sequence):
     __rmul__ = __mul__
     def __mod__(self, args):
         return self.__class__(self.data % args)
-    def __rmod__(self, format):
-        return self.__class__(format % args)
 
     # the following methods are defined in alphabetical order:
     def capitalize(self): return self.__class__(self.data.capitalize())
-    def casefold(self):
-        return self.__class__(self.data.casefold())
     def center(self, width, *args):
         return self.__class__(self.data.center(width, *args))
     def count(self, sub, start=0, end=_sys.maxsize):
@@ -1160,8 +1103,6 @@ class UserString(Sequence):
         return self.data.find(sub, start, end)
     def format(self, *args, **kwds):
         return self.data.format(*args, **kwds)
-    def format_map(self, mapping):
-        return self.data.format_map(mapping)
     def index(self, sub, start=0, end=_sys.maxsize):
         return self.data.index(sub, start, end)
     def isalpha(self): return self.data.isalpha()
@@ -1171,7 +1112,6 @@ class UserString(Sequence):
     def isidentifier(self): return self.data.isidentifier()
     def islower(self): return self.data.islower()
     def isnumeric(self): return self.data.isnumeric()
-    def isprintable(self): return self.data.isprintable()
     def isspace(self): return self.data.isspace()
     def istitle(self): return self.data.istitle()
     def isupper(self): return self.data.isupper()
@@ -1180,7 +1120,6 @@ class UserString(Sequence):
         return self.__class__(self.data.ljust(width, *args))
     def lower(self): return self.__class__(self.data.lower())
     def lstrip(self, chars=None): return self.__class__(self.data.lstrip(chars))
-    maketrans = str.maketrans
     def partition(self, sep):
         return self.data.partition(sep)
     def replace(self, old, new, maxsplit=-1):

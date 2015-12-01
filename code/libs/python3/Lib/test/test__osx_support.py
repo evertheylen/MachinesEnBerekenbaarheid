@@ -273,5 +273,9 @@ class Test_OSXSupport(unittest.TestCase):
         result = _osx_support.get_platform_osx(config_vars, ' ', ' ', ' ')
         self.assertEqual(('macosx', '10.6', 'fat'), result)
 
+def test_main():
+    if sys.platform == 'darwin':
+        test.support.run_unittest(Test_OSXSupport)
+
 if __name__ == "__main__":
-    unittest.main()
+    test_main()

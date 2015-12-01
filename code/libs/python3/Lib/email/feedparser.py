@@ -26,7 +26,6 @@ import re
 from email import errors
 from email import message
 from email._policybase import compat32
-from collections import deque
 
 NLCRE = re.compile('\r\n|\r|\n')
 NLCRE_bol = re.compile('(\r\n|\r|\n)')
@@ -53,8 +52,8 @@ class BufferedSubFile(object):
     def __init__(self):
         # Chunks of the last partial line pushed into this object.
         self._partial = []
-        # A deque of full, pushed lines
-        self._lines = deque()
+        # The list of full, pushed lines, in reverse order
+        self._lines = []
         # The stack of false-EOF checking predicates.
         self._eofstack = []
         # A flag indicating whether the file has been closed or not.
@@ -79,21 +78,21 @@ class BufferedSubFile(object):
             return NeedMoreData
         # Pop the line off the stack and see if it matches the current
         # false-EOF predicate.
-        line = self._lines.popleft()
+        line = self._lines.pop()
         # RFC 2046, section 5.1.2 requires us to recognize outer level
         # boundaries at any level of inner nesting.  Do this, but be sure it's
         # in the order of most to least nested.
-        for ateof in reversed(self._eofstack):
+        for ateof in self._eofstack[::-1]:
             if ateof(line):
                 # We're at the false EOF.  But push the last line back first.
-                self._lines.appendleft(line)
+                self._lines.append(line)
                 return ''
         return line
 
     def unreadline(self, line):
         # Let the consumer push a line back into the buffer.
         assert line is not NeedMoreData
-        self._lines.appendleft(line)
+        self._lines.append(line)
 
     def push(self, data):
         """Push some new data into this object."""
@@ -120,7 +119,8 @@ class BufferedSubFile(object):
         self.pushlines(parts)
 
     def pushlines(self, lines):
-        self._lines.extend(lines)
+        # Reverse and insert at the front of the lines.
+        self._lines[:0] = lines[::-1]
 
     def __iter__(self):
         return self

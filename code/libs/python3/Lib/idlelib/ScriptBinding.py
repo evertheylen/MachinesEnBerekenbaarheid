@@ -18,10 +18,13 @@ XXX GvR Redesign this interface (yet again) as follows:
 """
 
 import os
+import re
+import string
 import tabnanny
 import tokenize
 import tkinter.messagebox as tkMessageBox
-from idlelib import PyShell
+from idlelib.EditorWindow import EditorWindow
+from idlelib import PyShell, IOBinding
 
 from idlelib.configHandler import idleConf
 from idlelib import macosxSupport
@@ -35,7 +38,6 @@ indent_message = """Error: Inconsistent indentation detected!
 To fix case 2, change all tabs to spaces by using Edit->Select All followed \
 by Format->Untabify Region and specify the number of columns used by each tab.
 """
-
 
 class ScriptBinding:
 
@@ -143,8 +145,7 @@ class ScriptBinding:
             return 'break'
         interp = self.shell.interp
         if PyShell.use_subprocess:
-            interp.restart_subprocess(with_cwd=False, filename=
-                        self.editwin._filename_to_unicode(filename))
+            interp.restart_subprocess(with_cwd=False)
         dirname = os.path.dirname(filename)
         # XXX Too often this discards arguments the user just set...
         interp.runcommand("""if 1:

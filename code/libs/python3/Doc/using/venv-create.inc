@@ -21,11 +21,11 @@ subdirectory (on Windows, this is ``Lib\site-packages``).
 On Windows, you may have to invoke the ``pyvenv`` script as follows, if you
 don't have the relevant PATH and PATHEXT settings::
 
-    c:\Temp>c:\Python35\python c:\Python35\Tools\Scripts\pyvenv.py myenv
+    c:\Temp>c:\Python34\python c:\Python34\Tools\Scripts\pyvenv.py myenv
 
 or equivalently::
 
-    c:\Temp>c:\Python35\python -m venv myenv
+    c:\Temp>c:\Python34\python -m venv myenv
 
 The command, if run with ``-h``, will show the available options::
 

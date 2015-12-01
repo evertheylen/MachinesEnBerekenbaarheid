@@ -15,7 +15,6 @@ static int numfree = 0;
 #endif
 
 _Py_IDENTIFIER(__name__);
-_Py_IDENTIFIER(__qualname__);
 
 PyObject *
 PyMethod_Function(PyObject *im)
@@ -244,33 +243,51 @@ method_repr(PyMethodObject *a)
 {
     PyObject *self = a->im_self;
     PyObject *func = a->im_func;
-    PyObject *funcname = NULL, *result = NULL;
-    const char *defname = "?";
+    PyObject *klass;
+    PyObject *funcname = NULL ,*klassname = NULL, *result = NULL;
+    char *defname = "?";
 
-    funcname = _PyObject_GetAttrId(func, &PyId___qualname__);
+    if (self == NULL) {
+        PyErr_BadInternalCall();
+        return NULL;
+    }
+    klass = (PyObject*)Py_TYPE(self);
+
+    funcname = _PyObject_GetAttrId(func, &PyId___name__);
     if (funcname == NULL) {
         if (!PyErr_ExceptionMatches(PyExc_AttributeError))
             return NULL;
         PyErr_Clear();
-
-        funcname = _PyObject_GetAttrId(func, &PyId___name__);
-        if (funcname == NULL) {
-            if (!PyErr_ExceptionMatches(PyExc_AttributeError))
-                return NULL;
-            PyErr_Clear();
-        }
     }
-
-    if (funcname != NULL && !PyUnicode_Check(funcname)) {
+    else if (!PyUnicode_Check(funcname)) {
         Py_DECREF(funcname);
         funcname = NULL;
     }
 
+    if (klass == NULL)
+        klassname = NULL;
+    else {
+        klassname = _PyObject_GetAttrId(klass, &PyId___name__);
+        if (klassname == NULL) {
+            if (!PyErr_ExceptionMatches(PyExc_AttributeError)) {
+                Py_XDECREF(funcname);
+                return NULL;
+            }
+            PyErr_Clear();
+        }
+        else if (!PyUnicode_Check(klassname)) {
+            Py_DECREF(klassname);
+            klassname = NULL;
+        }
+    }
+
     /* XXX Shouldn't use repr()/%R here! */
-    result = PyUnicode_FromFormat("<bound method %V of %R>",
+    result = PyUnicode_FromFormat("<bound method %V.%V of %R>",
+                                  klassname, defname,
                                   funcname, defname, self);
 
     Py_XDECREF(funcname);
+    Py_XDECREF(klassname);
     return result;
 }
 

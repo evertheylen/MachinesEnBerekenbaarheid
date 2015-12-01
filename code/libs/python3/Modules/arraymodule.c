@@ -15,11 +15,6 @@
 #endif /* HAVE_SYS_TYPES_H */
 #endif /* !STDC_HEADERS */
 
-/*[clinic input]
-module array
-[clinic start generated code]*/
-/*[clinic end generated code: output=da39a3ee5e6b4b0d input=7d1b8d7f5958fd83]*/
-
 struct arrayobject; /* Forward */
 
 /* All possible arraydescr values are defined in the vector "descriptors"
@@ -46,63 +41,6 @@ typedef struct arrayobject {
 } arrayobject;
 
 static PyTypeObject Arraytype;
-
-typedef struct {
-    PyObject_HEAD
-    Py_ssize_t index;
-    arrayobject *ao;
-    PyObject* (*getitem)(struct arrayobject *, Py_ssize_t);
-} arrayiterobject;
-
-static PyTypeObject PyArrayIter_Type;
-
-#define PyArrayIter_Check(op) PyObject_TypeCheck(op, &PyArrayIter_Type)
-
-enum machine_format_code {
-    UNKNOWN_FORMAT = -1,
-    /* UNKNOWN_FORMAT is used to indicate that the machine format for an
-     * array type code cannot be interpreted. When this occurs, a list of
-     * Python objects is used to represent the content of the array
-     * instead of using the memory content of the array directly. In that
-     * case, the array_reconstructor mechanism is bypassed completely, and
-     * the standard array constructor is used instead.
-     *
-     * This is will most likely occur when the machine doesn't use IEEE
-     * floating-point numbers.
-     */
-
-    UNSIGNED_INT8 = 0,
-    SIGNED_INT8 = 1,
-    UNSIGNED_INT16_LE = 2,
-    UNSIGNED_INT16_BE = 3,
-    SIGNED_INT16_LE = 4,
-    SIGNED_INT16_BE = 5,
-    UNSIGNED_INT32_LE = 6,
-    UNSIGNED_INT32_BE = 7,
-    SIGNED_INT32_LE = 8,
-    SIGNED_INT32_BE = 9,
-    UNSIGNED_INT64_LE = 10,
-    UNSIGNED_INT64_BE = 11,
-    SIGNED_INT64_LE = 12,
-    SIGNED_INT64_BE = 13,
-    IEEE_754_FLOAT_LE = 14,
-    IEEE_754_FLOAT_BE = 15,
-    IEEE_754_DOUBLE_LE = 16,
-    IEEE_754_DOUBLE_BE = 17,
-    UTF16_LE = 18,
-    UTF16_BE = 19,
-    UTF32_LE = 20,
-    UTF32_BE = 21
-};
-#define MACHINE_FORMAT_CODE_MIN 0
-#define MACHINE_FORMAT_CODE_MAX 21
-
-
-/*
- * Must come after arrayobject, arrayiterobject,
- * and enum machine_code_type definitions.
- */
-#include "clinic/arraymodule.c.h"
 
 #define array_Check(op) PyObject_TypeCheck(op, &Arraytype)
 #define array_CheckExact(op) (Py_TYPE(op) == &Arraytype)
@@ -533,10 +471,6 @@ static struct arraydescr descriptors[] = {
 /****************************************************************************
 Implementations of array object methods.
 ****************************************************************************/
-/*[clinic input]
-class array.array "arrayobject *" "&Arraytype"
-[clinic start generated code]*/
-/*[clinic end generated code: output=da39a3ee5e6b4b0d input=ad43d37e942a8854]*/
 
 static PyObject *
 newarrayobject(PyTypeObject *type, Py_ssize_t size, struct arraydescr *descr)
@@ -750,35 +684,16 @@ array_slice(arrayobject *a, Py_ssize_t ilow, Py_ssize_t ihigh)
     return (PyObject *)np;
 }
 
-
-/*[clinic input]
-array.array.__copy__
-
-Return a copy of the array.
-[clinic start generated code]*/
-
 static PyObject *
-array_array___copy___impl(arrayobject *self)
-/*[clinic end generated code: output=dec7c3f925d9619e input=ad1ee5b086965f09]*/
+array_copy(arrayobject *a, PyObject *unused)
 {
-    return array_slice(self, 0, Py_SIZE(self));
+    return array_slice(a, 0, Py_SIZE(a));
 }
 
-/*[clinic input]
-array.array.__deepcopy__
-
-    unused: object
-    /
-
-Return a copy of the array.
-[clinic start generated code]*/
-
-static PyObject *
-array_array___deepcopy__(arrayobject *self, PyObject *unused)
-/*[clinic end generated code: output=1ec748d8e14a9faa input=2405ecb4933748c4]*/
-{
-    return array_array___copy___impl(self);
-}
+PyDoc_STRVAR(copy_doc,
+"copy(array)\n\
+\n\
+ Return a copy of the array.");
 
 static PyObject *
 array_concat(arrayobject *a, PyObject *bb)
@@ -1046,18 +961,8 @@ ins(arrayobject *self, Py_ssize_t where, PyObject *v)
     return Py_None;
 }
 
-/*[clinic input]
-array.array.count
-
-    v: object
-    /
-
-Return number of occurrences of v in the array.
-[clinic start generated code]*/
-
 static PyObject *
-array_array_count(arrayobject *self, PyObject *v)
-/*[clinic end generated code: output=3dd3624bf7135a3a input=d9bce9d65e39d1f5]*/
+array_count(arrayobject *self, PyObject *v)
 {
     Py_ssize_t count = 0;
     Py_ssize_t i;
@@ -1079,19 +984,13 @@ array_array_count(arrayobject *self, PyObject *v)
     return PyLong_FromSsize_t(count);
 }
 
-
-/*[clinic input]
-array.array.index
-
-    v: object
-    /
-
-Return index of first occurrence of v in the array.
-[clinic start generated code]*/
+PyDoc_STRVAR(count_doc,
+"count(x)\n\
+\n\
+Return number of occurrences of x in the array.");
 
 static PyObject *
-array_array_index(arrayobject *self, PyObject *v)
-/*[clinic end generated code: output=d48498d325602167 input=cf619898c6649d08]*/
+array_index(arrayobject *self, PyObject *v)
 {
     Py_ssize_t i;
 
@@ -1114,6 +1013,11 @@ array_array_index(arrayobject *self, PyObject *v)
     return NULL;
 }
 
+PyDoc_STRVAR(index_doc,
+"index(x)\n\
+\n\
+Return index of first occurrence of x in the array.");
+
 static int
 array_contains(arrayobject *self, PyObject *v)
 {
@@ -1130,18 +1034,8 @@ array_contains(arrayobject *self, PyObject *v)
     return cmp;
 }
 
-/*[clinic input]
-array.array.remove
-
-    v: object
-    /
-
-Remove the first occurrence of v in the array.
-[clinic start generated code]*/
-
 static PyObject *
-array_array_remove(arrayobject *self, PyObject *v)
-/*[clinic end generated code: output=bef06be9fdf9dceb input=0b1e5aed25590027]*/
+array_remove(arrayobject *self, PyObject *v)
 {
     int i;
 
@@ -1168,23 +1062,18 @@ array_array_remove(arrayobject *self, PyObject *v)
     return NULL;
 }
 
-/*[clinic input]
-array.array.pop
-
-    i: Py_ssize_t = -1
-    /
-
-Return the i-th element and delete it from the array.
-
-i defaults to -1.
-[clinic start generated code]*/
+PyDoc_STRVAR(remove_doc,
+"remove(x)\n\
+\n\
+Remove the first occurrence of x in the array.");
 
 static PyObject *
-array_array_pop_impl(arrayobject *self, Py_ssize_t i)
-/*[clinic end generated code: output=bc1f0c54fe5308e4 input=8e5feb4c1a11cd44]*/
+array_pop(arrayobject *self, PyObject *args)
 {
+    Py_ssize_t i = -1;
     PyObject *v;
-
+    if (!PyArg_ParseTuple(args, "|n:pop", &i))
+        return NULL;
     if (Py_SIZE(self) == 0) {
         /* Special-case most common failure cause */
         PyErr_SetString(PyExc_IndexError, "pop from empty array");
@@ -1206,18 +1095,13 @@ array_array_pop_impl(arrayobject *self, Py_ssize_t i)
     return v;
 }
 
-/*[clinic input]
-array.array.extend
-
-    bb: object
-    /
-
-Append items to the end of the array.
-[clinic start generated code]*/
+PyDoc_STRVAR(pop_doc,
+"pop([i])\n\
+\n\
+Return the i-th element and delete it from the array. i defaults to -1.");
 
 static PyObject *
-array_array_extend(arrayobject *self, PyObject *bb)
-/*[clinic end generated code: output=bbddbc8e8bef871d input=43be86aba5c31e44]*/
+array_extend(arrayobject *self, PyObject *bb)
 {
     if (array_do_extend(self, bb) == -1)
         return NULL;
@@ -1225,35 +1109,29 @@ array_array_extend(arrayobject *self, PyObject *bb)
     return Py_None;
 }
 
-/*[clinic input]
-array.array.insert
-
-    i: Py_ssize_t
-    v: object
-    /
-
-Insert a new item v into the array before position i.
-[clinic start generated code]*/
+PyDoc_STRVAR(extend_doc,
+"extend(array or iterable)\n\
+\n\
+ Append items to the end of the array.");
 
 static PyObject *
-array_array_insert_impl(arrayobject *self, Py_ssize_t i, PyObject *v)
-/*[clinic end generated code: output=5a3648e278348564 input=5577d1b4383e9313]*/
+array_insert(arrayobject *self, PyObject *args)
 {
+    Py_ssize_t i;
+    PyObject *v;
+    if (!PyArg_ParseTuple(args, "nO:insert", &i, &v))
+        return NULL;
     return ins(self, i, v);
 }
 
-/*[clinic input]
-array.array.buffer_info
+PyDoc_STRVAR(insert_doc,
+"insert(i,x)\n\
+\n\
+Insert a new item x into the array before position i.");
 
-Return a tuple (address, length) giving the current memory address and the length in items of the buffer used to hold array's contents.
-
-The length should be multiplied by the itemsize attribute to calculate
-the buffer length in bytes.
-[clinic start generated code]*/
 
 static PyObject *
-array_array_buffer_info_impl(arrayobject *self)
-/*[clinic end generated code: output=9b2a4ec3ae7e98e7 input=a58bae5c6e1ac6a6]*/
+array_buffer_info(arrayobject *self, PyObject *unused)
 {
     PyObject *retval = NULL, *v;
 
@@ -1278,34 +1156,29 @@ array_array_buffer_info_impl(arrayobject *self)
     return retval;
 }
 
-/*[clinic input]
-array.array.append
+PyDoc_STRVAR(buffer_info_doc,
+"buffer_info() -> (address, length)\n\
+\n\
+Return a tuple (address, length) giving the current memory address and\n\
+the length in items of the buffer used to hold array's contents\n\
+The length should be multiplied by the itemsize attribute to calculate\n\
+the buffer length in bytes.");
 
-    v: object
-    /
-
-Append new value v to the end of the array.
-[clinic start generated code]*/
 
 static PyObject *
-array_array_append(arrayobject *self, PyObject *v)
-/*[clinic end generated code: output=745a0669bf8db0e2 input=0b98d9d78e78f0fa]*/
+array_append(arrayobject *self, PyObject *v)
 {
     return ins(self, Py_SIZE(self), v);
 }
 
-/*[clinic input]
-array.array.byteswap
+PyDoc_STRVAR(append_doc,
+"append(x)\n\
+\n\
+Append new value x to the end of the array.");
 
-Byteswap all items of the array.
-
-If the items in the array are not 1, 2, 4, or 8 bytes in size, RuntimeError is
-raised.
-[clinic start generated code]*/
 
 static PyObject *
-array_array_byteswap_impl(arrayobject *self)
-/*[clinic end generated code: output=5f8236cbdf0d90b5 input=6a85591b950a0186]*/
+array_byteswap(arrayobject *self, PyObject *unused)
 {
     char *p;
     Py_ssize_t i;
@@ -1355,15 +1228,14 @@ array_array_byteswap_impl(arrayobject *self)
     return Py_None;
 }
 
-/*[clinic input]
-array.array.reverse
-
-Reverse the order of the items in the array.
-[clinic start generated code]*/
+PyDoc_STRVAR(byteswap_doc,
+"byteswap()\n\
+\n\
+Byteswap all items of the array.  If the items in the array are not 1, 2,\n\
+4, or 8 bytes in size, RuntimeError is raised.");
 
 static PyObject *
-array_array_reverse_impl(arrayobject *self)
-/*[clinic end generated code: output=c04868b36f6f4089 input=cd904f01b27d966a]*/
+array_reverse(arrayobject *self, PyObject *unused)
 {
     Py_ssize_t itemsize = self->ob_descr->itemsize;
     char *p, *q;
@@ -1389,25 +1261,26 @@ array_array_reverse_impl(arrayobject *self)
     return Py_None;
 }
 
-/*[clinic input]
-array.array.fromfile
+PyDoc_STRVAR(reverse_doc,
+"reverse()\n\
+\n\
+Reverse the order of the items in the array.");
 
-    f: object
-    n: Py_ssize_t
-    /
 
-Read n objects from the file object f and append them to the end of the array.
-[clinic start generated code]*/
+/* Forward */
+static PyObject *array_frombytes(arrayobject *self, PyObject *args);
 
 static PyObject *
-array_array_fromfile_impl(arrayobject *self, PyObject *f, Py_ssize_t n)
-/*[clinic end generated code: output=ec9f600e10f53510 input=e188afe8e58adf40]*/
+array_fromfile(arrayobject *self, PyObject *args)
 {
-    PyObject *b, *res;
+    PyObject *f, *b, *res;
     Py_ssize_t itemsize = self->ob_descr->itemsize;
-    Py_ssize_t nbytes;
+    Py_ssize_t n, nbytes;
     _Py_IDENTIFIER(read);
     int not_enough_bytes;
+
+    if (!PyArg_ParseTuple(args, "On:fromfile", &f, &n))
+        return NULL;
 
     if (n < 0) {
         PyErr_SetString(PyExc_ValueError, "negative count");
@@ -1432,8 +1305,13 @@ array_array_fromfile_impl(arrayobject *self, PyObject *f, Py_ssize_t n)
 
     not_enough_bytes = (PyBytes_GET_SIZE(b) != nbytes);
 
-    res = array_array_frombytes(self, b);
+    args = Py_BuildValue("(O)", b);
     Py_DECREF(b);
+    if (args == NULL)
+        return NULL;
+
+    res = array_frombytes(self, args);
+    Py_DECREF(args);
     if (res == NULL)
         return NULL;
 
@@ -1447,18 +1325,15 @@ array_array_fromfile_impl(arrayobject *self, PyObject *f, Py_ssize_t n)
     return res;
 }
 
-/*[clinic input]
-array.array.tofile
+PyDoc_STRVAR(fromfile_doc,
+"fromfile(f, n)\n\
+\n\
+Read n objects from the file object f and append them to the end of the\n\
+array.");
 
-    f: object
-    /
-
-Write all items (as machine values) to the file object f.
-[clinic start generated code]*/
 
 static PyObject *
-array_array_tofile(arrayobject *self, PyObject *f)
-/*[clinic end generated code: output=3a2cfa8128df0777 input=b0669a484aab0831]*/
+array_tofile(arrayobject *self, PyObject *f)
 {
     Py_ssize_t nbytes = Py_SIZE(self) * self->ob_descr->itemsize;
     /* Write 64K blocks at a time */
@@ -1493,18 +1368,14 @@ array_array_tofile(arrayobject *self, PyObject *f)
     return Py_None;
 }
 
-/*[clinic input]
-array.array.fromlist
+PyDoc_STRVAR(tofile_doc,
+"tofile(f)\n\
+\n\
+Write all items (as machine values) to the file object f.");
 
-    list: object
-    /
-
-Append items to array from list.
-[clinic start generated code]*/
 
 static PyObject *
-array_array_fromlist(arrayobject *self, PyObject *list)
-/*[clinic end generated code: output=26411c2d228a3e3f input=be2605a96c49680f]*/
+array_fromlist(arrayobject *self, PyObject *list)
 {
     Py_ssize_t n;
 
@@ -1531,15 +1402,13 @@ array_array_fromlist(arrayobject *self, PyObject *list)
     return Py_None;
 }
 
-/*[clinic input]
-array.array.tolist
-
-Convert array to an ordinary list with the same items.
-[clinic start generated code]*/
+PyDoc_STRVAR(fromlist_doc,
+"fromlist(list)\n\
+\n\
+Append items to array from list.");
 
 static PyObject *
-array_array_tolist_impl(arrayobject *self)
-/*[clinic end generated code: output=00b60cc9eab8ef89 input=a8d7784a94f86b53]*/
+array_tolist(arrayobject *self, PyObject *unused)
 {
     PyObject *list = PyList_New(Py_SIZE(self));
     Py_ssize_t i;
@@ -1559,6 +1428,11 @@ error:
     Py_DECREF(list);
     return NULL;
 }
+
+PyDoc_STRVAR(tolist_doc,
+"tolist() -> list\n\
+\n\
+Convert array to an ordinary list with the same items.");
 
 static PyObject *
 frombytes(arrayobject *self, Py_buffer *buffer)
@@ -1597,52 +1471,47 @@ frombytes(arrayobject *self, Py_buffer *buffer)
     return Py_None;
 }
 
-/*[clinic input]
-array.array.fromstring
-
-    buffer: Py_buffer(accept={str, buffer})
-    /
-
-Appends items from the string, interpreting it as an array of machine values, as if it had been read from a file using the fromfile() method).
-
-This method is deprecated. Use frombytes instead.
-[clinic start generated code]*/
-
 static PyObject *
-array_array_fromstring_impl(arrayobject *self, Py_buffer *buffer)
-/*[clinic end generated code: output=31c4baa779df84ce input=a3341a512e11d773]*/
+array_fromstring(arrayobject *self, PyObject *args)
 {
+    Py_buffer buffer;
     if (PyErr_WarnEx(PyExc_DeprecationWarning,
             "fromstring() is deprecated. Use frombytes() instead.", 2) != 0)
         return NULL;
-    return frombytes(self, buffer);
+    if (!PyArg_ParseTuple(args, "s*:fromstring", &buffer))
+        return NULL;
+    else
+        return frombytes(self, &buffer);
 }
 
-/*[clinic input]
-array.array.frombytes
+PyDoc_STRVAR(fromstring_doc,
+"fromstring(string)\n\
+\n\
+Appends items from the string, interpreting it as an array of machine\n\
+values, as if it had been read from a file using the fromfile() method).\n\
+\n\
+This method is deprecated. Use frombytes instead.");
 
-    buffer: Py_buffer
-    /
-
-Appends items from the string, interpreting it as an array of machine values, as if it had been read from a file using the fromfile() method).
-[clinic start generated code]*/
 
 static PyObject *
-array_array_frombytes_impl(arrayobject *self, Py_buffer *buffer)
-/*[clinic end generated code: output=d9842c8f7510a516 input=2bbf2b53ebfcc988]*/
+array_frombytes(arrayobject *self, PyObject *args)
 {
-    return frombytes(self, buffer);
+    Py_buffer buffer;
+    if (!PyArg_ParseTuple(args, "y*:frombytes", &buffer))
+        return NULL;
+    else
+        return frombytes(self, &buffer);
 }
 
-/*[clinic input]
-array.array.tobytes
+PyDoc_STRVAR(frombytes_doc,
+"frombytes(bytestring)\n\
+\n\
+Appends items from the string, interpreting it as an array of machine\n\
+values, as if it had been read from a file using the fromfile() method).");
 
-Convert the array to an array of machine values and return the bytes representation.
-[clinic start generated code]*/
 
 static PyObject *
-array_array_tobytes_impl(arrayobject *self)
-/*[clinic end generated code: output=87318e4edcdc2bb6 input=90ee495f96de34f5]*/
+array_tobytes(arrayobject *self, PyObject *unused)
 {
     if (Py_SIZE(self) <= PY_SSIZE_T_MAX / self->ob_descr->itemsize) {
         return PyBytes_FromStringAndSize(self->ob_item,
@@ -1652,44 +1521,40 @@ array_array_tobytes_impl(arrayobject *self)
     }
 }
 
-/*[clinic input]
-array.array.tostring
+PyDoc_STRVAR(tobytes_doc,
+"tobytes() -> bytes\n\
+\n\
+Convert the array to an array of machine values and return the bytes\n\
+representation.");
 
-Convert the array to an array of machine values and return the bytes representation.
-
-This method is deprecated. Use tobytes instead.
-[clinic start generated code]*/
 
 static PyObject *
-array_array_tostring_impl(arrayobject *self)
-/*[clinic end generated code: output=7d6bd92745a2c8f3 input=b6c0ddee7b30457e]*/
+array_tostring(arrayobject *self, PyObject *unused)
 {
     if (PyErr_WarnEx(PyExc_DeprecationWarning,
             "tostring() is deprecated. Use tobytes() instead.", 2) != 0)
         return NULL;
-    return array_array_tobytes_impl(self);
+    return array_tobytes(self, unused);
 }
 
-/*[clinic input]
-array.array.fromunicode
+PyDoc_STRVAR(tostring_doc,
+"tostring() -> bytes\n\
+\n\
+Convert the array to an array of machine values and return the bytes\n\
+representation.\n\
+\n\
+This method is deprecated. Use tobytes instead.");
 
-    ustr: Py_UNICODE(zeroes=True)
-    /
-
-Extends this array with data from the unicode string ustr.
-
-The array must be a unicode type array; otherwise a ValueError is raised.
-Use array.frombytes(ustr.encode(...)) to append Unicode data to an array of
-some other type.
-[clinic start generated code]*/
 
 static PyObject *
-array_array_fromunicode_impl(arrayobject *self, Py_UNICODE *ustr,
-                             Py_ssize_clean_t ustr_length)
-/*[clinic end generated code: output=ebb72fc16975e06d input=150f00566ffbca6e]*/
+array_fromunicode(arrayobject *self, PyObject *args)
 {
+    Py_UNICODE *ustr;
+    Py_ssize_t n;
     char typecode;
 
+    if (!PyArg_ParseTuple(args, "u#:fromunicode", &ustr, &n))
+        return NULL;
     typecode = self->ob_descr->typecode;
     if (typecode != 'u') {
         PyErr_SetString(PyExc_ValueError,
@@ -1697,30 +1562,29 @@ array_array_fromunicode_impl(arrayobject *self, Py_UNICODE *ustr,
             "unicode type arrays");
         return NULL;
     }
-    if (ustr_length > 0) {
+    if (n > 0) {
         Py_ssize_t old_size = Py_SIZE(self);
-        if (array_resize(self, old_size + ustr_length) == -1)
+        if (array_resize(self, old_size + n) == -1)
             return NULL;
         memcpy(self->ob_item + old_size * sizeof(Py_UNICODE),
-               ustr, ustr_length * sizeof(Py_UNICODE));
+               ustr, n * sizeof(Py_UNICODE));
     }
 
-    Py_RETURN_NONE;
+    Py_INCREF(Py_None);
+    return Py_None;
 }
 
-/*[clinic input]
-array.array.tounicode
+PyDoc_STRVAR(fromunicode_doc,
+"fromunicode(ustr)\n\
+\n\
+Extends this array with data from the unicode string ustr.\n\
+The array must be a unicode type array; otherwise a ValueError\n\
+is raised.  Use array.frombytes(ustr.encode(...)) to\n\
+append Unicode data to an array of some other type.");
 
-Extends this array with data from the unicode string ustr.
-
-Convert the array to a unicode string.  The array must be a unicode type array;
-otherwise a ValueError is raised.  Use array.tobytes().decode() to obtain a
-unicode string from an array of some other type.
-[clinic start generated code]*/
 
 static PyObject *
-array_array_tounicode_impl(arrayobject *self)
-/*[clinic end generated code: output=08e442378336e1ef input=127242eebe70b66d]*/
+array_tounicode(arrayobject *self, PyObject *unused)
 {
     char typecode;
     typecode = self->ob_descr->typecode;
@@ -1732,23 +1596,69 @@ array_array_tounicode_impl(arrayobject *self)
     return PyUnicode_FromUnicode((Py_UNICODE *) self->ob_item, Py_SIZE(self));
 }
 
-/*[clinic input]
-array.array.__sizeof__
+PyDoc_STRVAR(tounicode_doc,
+"tounicode() -> unicode\n\
+\n\
+Convert the array to a unicode string.  The array must be\n\
+a unicode type array; otherwise a ValueError is raised.  Use\n\
+array.tobytes().decode() to obtain a unicode string from\n\
+an array of some other type.");
 
-Size of the array in memory, in bytes.
-[clinic start generated code]*/
 
 static PyObject *
-array_array___sizeof___impl(arrayobject *self)
-/*[clinic end generated code: output=d8e1c61ebbe3eaed input=805586565bf2b3c6]*/
+array_sizeof(arrayobject *self, PyObject *unused)
 {
     Py_ssize_t res;
     res = sizeof(arrayobject) + self->allocated * self->ob_descr->itemsize;
     return PyLong_FromSsize_t(res);
 }
 
+PyDoc_STRVAR(sizeof_doc,
+"__sizeof__() -> int\n\
+\n\
+Size of the array in memory, in bytes.");
+
 
 /*********************** Pickling support ************************/
+
+enum machine_format_code {
+    UNKNOWN_FORMAT = -1,
+    /* UNKNOWN_FORMAT is used to indicate that the machine format for an
+     * array type code cannot be interpreted. When this occurs, a list of
+     * Python objects is used to represent the content of the array
+     * instead of using the memory content of the array directly. In that
+     * case, the array_reconstructor mechanism is bypassed completely, and
+     * the standard array constructor is used instead.
+     *
+     * This is will most likely occur when the machine doesn't use IEEE
+     * floating-point numbers.
+     */
+
+    UNSIGNED_INT8 = 0,
+    SIGNED_INT8 = 1,
+    UNSIGNED_INT16_LE = 2,
+    UNSIGNED_INT16_BE = 3,
+    SIGNED_INT16_LE = 4,
+    SIGNED_INT16_BE = 5,
+    UNSIGNED_INT32_LE = 6,
+    UNSIGNED_INT32_BE = 7,
+    SIGNED_INT32_LE = 8,
+    SIGNED_INT32_BE = 9,
+    UNSIGNED_INT64_LE = 10,
+    UNSIGNED_INT64_BE = 11,
+    SIGNED_INT64_LE = 12,
+    SIGNED_INT64_BE = 13,
+    IEEE_754_FLOAT_LE = 14,
+    IEEE_754_FLOAT_BE = 15,
+    IEEE_754_DOUBLE_LE = 16,
+    IEEE_754_DOUBLE_BE = 17,
+    UTF16_LE = 18,
+    UTF16_BE = 19,
+    UTF32_LE = 20,
+    UTF32_BE = 21
+};
+#define MACHINE_FORMAT_CODE_MIN 0
+#define MACHINE_FORMAT_CODE_MAX 21
 
 static const struct mformatdescr {
     size_t size;
@@ -1925,28 +1835,20 @@ make_array(PyTypeObject *arraytype, char typecode, PyObject *items)
  * This functions is a special constructor used when unpickling an array. It
  * provides a portable way to rebuild an array from its memory representation.
  */
-/*[clinic input]
-array._array_reconstructor
-
-    arraytype: object(type="PyTypeObject *")
-    typecode: int(accept={str})
-    mformat_code: int(type="enum machine_format_code")
-    items: object
-    /
-
-Internal. Used for pickling support.
-[clinic start generated code]*/
-
 static PyObject *
-array__array_reconstructor_impl(PyModuleDef *module, PyTypeObject *arraytype,
-                                int typecode,
-                                enum machine_format_code mformat_code,
-                                PyObject *items)
-/*[clinic end generated code: output=6ecbf0e8e4d92ab9 input=2464dc8f4c7736b5]*/
+array_reconstructor(PyObject *self, PyObject *args)
 {
+    PyTypeObject *arraytype;
+    PyObject *items;
     PyObject *converted_items;
     PyObject *result;
+    int typecode;
+    enum machine_format_code mformat_code;
     struct arraydescr *descr;
+
+    if (!PyArg_ParseTuple(args, "OCiO:array._array_reconstructor",
+                    &arraytype, &typecode, &mformat_code, &items))
+        return NULL;
 
     if (!PyType_Check(arraytype)) {
         PyErr_Format(PyExc_TypeError,
@@ -2098,7 +2000,7 @@ array__array_reconstructor_impl(PyModuleDef *module, PyTypeObject *arraytype,
          */
         for (descr = descriptors; descr->typecode != '\0'; descr++) {
             if (descr->is_integer_type &&
-                (size_t)descr->itemsize == mf_descr.size &&
+                descr->itemsize == mf_descr.size &&
                 descr->is_signed == mf_descr.is_signed)
                 typecode = descr->typecode;
         }
@@ -2136,23 +2038,13 @@ array__array_reconstructor_impl(PyModuleDef *module, PyTypeObject *arraytype,
     return result;
 }
 
-/*[clinic input]
-array.array.__reduce_ex__
-
-    value: object
-    /
-
-Return state information for pickling.
-[clinic start generated code]*/
-
 static PyObject *
-array_array___reduce_ex__(arrayobject *self, PyObject *value)
-/*[clinic end generated code: output=051e0a6175d0eddb input=c36c3f85de7df6cd]*/
+array_reduce_ex(arrayobject *array, PyObject *value)
 {
     PyObject *dict;
     PyObject *result;
     PyObject *array_str;
-    int typecode = self->ob_descr->typecode;
+    int typecode = array->ob_descr->typecode;
     int mformat_code;
     static PyObject *array_reconstructor = NULL;
     long protocol;
@@ -2180,7 +2072,7 @@ array_array___reduce_ex__(arrayobject *self, PyObject *value)
     if (protocol == -1 && PyErr_Occurred())
         return NULL;
 
-    dict = _PyObject_GetAttrId((PyObject *)self, &PyId___dict__);
+    dict = _PyObject_GetAttrId((PyObject *)array, &PyId___dict__);
     if (dict == NULL) {
         if (!PyErr_ExceptionMatches(PyExc_AttributeError))
             return NULL;
@@ -2203,29 +2095,31 @@ array_array___reduce_ex__(arrayobject *self, PyObject *value)
          * coercing unicode objects to bytes in array_reconstructor.
          */
         PyObject *list;
-        list = array_array_tolist_impl(self);
+        list = array_tolist(array, NULL);
         if (list == NULL) {
             Py_DECREF(dict);
             return NULL;
         }
         result = Py_BuildValue(
-            "O(CO)O", Py_TYPE(self), typecode, list, dict);
+            "O(CO)O", Py_TYPE(array), typecode, list, dict);
         Py_DECREF(list);
         Py_DECREF(dict);
         return result;
     }
 
-    array_str = array_array_tobytes_impl(self);
+    array_str = array_tobytes(array, NULL);
     if (array_str == NULL) {
         Py_DECREF(dict);
         return NULL;
     }
     result = Py_BuildValue(
-        "O(OCiN)O", array_reconstructor, Py_TYPE(self), typecode,
+        "O(OCiN)O", array_reconstructor, Py_TYPE(array), typecode,
         mformat_code, array_str, dict);
     Py_DECREF(dict);
     return result;
 }
+
+PyDoc_STRVAR(reduce_doc, "Return state information for pickling.");
 
 static PyObject *
 array_get_typecode(arrayobject *a, void *closure)
@@ -2249,31 +2143,55 @@ static PyGetSetDef array_getsets [] = {
 };
 
 static PyMethodDef array_methods[] = {
-    ARRAY_ARRAY_APPEND_METHODDEF
-    ARRAY_ARRAY_BUFFER_INFO_METHODDEF
-    ARRAY_ARRAY_BYTESWAP_METHODDEF
-    ARRAY_ARRAY___COPY___METHODDEF
-    ARRAY_ARRAY_COUNT_METHODDEF
-    ARRAY_ARRAY___DEEPCOPY___METHODDEF
-    ARRAY_ARRAY_EXTEND_METHODDEF
-    ARRAY_ARRAY_FROMFILE_METHODDEF
-    ARRAY_ARRAY_FROMLIST_METHODDEF
-    ARRAY_ARRAY_FROMSTRING_METHODDEF
-    ARRAY_ARRAY_FROMBYTES_METHODDEF
-    ARRAY_ARRAY_FROMUNICODE_METHODDEF
-    ARRAY_ARRAY_INDEX_METHODDEF
-    ARRAY_ARRAY_INSERT_METHODDEF
-    ARRAY_ARRAY_POP_METHODDEF
-    ARRAY_ARRAY___REDUCE_EX___METHODDEF
-    ARRAY_ARRAY_REMOVE_METHODDEF
-    ARRAY_ARRAY_REVERSE_METHODDEF
-    ARRAY_ARRAY_TOFILE_METHODDEF
-    ARRAY_ARRAY_TOLIST_METHODDEF
-    ARRAY_ARRAY_TOSTRING_METHODDEF
-    ARRAY_ARRAY_TOBYTES_METHODDEF
-    ARRAY_ARRAY_TOUNICODE_METHODDEF
-    ARRAY_ARRAY___SIZEOF___METHODDEF
-    {NULL, NULL}  /* sentinel */
+    {"append",          (PyCFunction)array_append,      METH_O,
+     append_doc},
+    {"buffer_info",     (PyCFunction)array_buffer_info, METH_NOARGS,
+     buffer_info_doc},
+    {"byteswap",        (PyCFunction)array_byteswap,    METH_NOARGS,
+     byteswap_doc},
+    {"__copy__",        (PyCFunction)array_copy,        METH_NOARGS,
+     copy_doc},
+    {"count",           (PyCFunction)array_count,       METH_O,
+     count_doc},
+    {"__deepcopy__",    (PyCFunction)array_copy,        METH_O,
+     copy_doc},
+    {"extend",          (PyCFunction)array_extend,      METH_O,
+     extend_doc},
+    {"fromfile",        (PyCFunction)array_fromfile,    METH_VARARGS,
+     fromfile_doc},
+    {"fromlist",        (PyCFunction)array_fromlist,    METH_O,
+     fromlist_doc},
+    {"fromstring",      (PyCFunction)array_fromstring,  METH_VARARGS,
+     fromstring_doc},
+    {"frombytes",       (PyCFunction)array_frombytes,   METH_VARARGS,
+     frombytes_doc},
+    {"fromunicode",     (PyCFunction)array_fromunicode, METH_VARARGS,
+     fromunicode_doc},
+    {"index",           (PyCFunction)array_index,       METH_O,
+     index_doc},
+    {"insert",          (PyCFunction)array_insert,      METH_VARARGS,
+     insert_doc},
+    {"pop",             (PyCFunction)array_pop,         METH_VARARGS,
+     pop_doc},
+    {"__reduce_ex__",   (PyCFunction)array_reduce_ex,   METH_O,
+     reduce_doc},
+    {"remove",          (PyCFunction)array_remove,      METH_O,
+     remove_doc},
+    {"reverse",         (PyCFunction)array_reverse,     METH_NOARGS,
+     reverse_doc},
+    {"tofile",          (PyCFunction)array_tofile,      METH_O,
+     tofile_doc},
+    {"tolist",          (PyCFunction)array_tolist,      METH_NOARGS,
+     tolist_doc},
+    {"tostring",        (PyCFunction)array_tostring,    METH_NOARGS,
+     tostring_doc},
+    {"tobytes",         (PyCFunction)array_tobytes,     METH_NOARGS,
+     tobytes_doc},
+    {"tounicode",       (PyCFunction)array_tounicode,   METH_NOARGS,
+     tounicode_doc},
+    {"__sizeof__",      (PyCFunction)array_sizeof,      METH_NOARGS,
+     sizeof_doc},
+    {NULL,              NULL}           /* sentinel */
 };
 
 static PyObject *
@@ -2289,9 +2207,9 @@ array_repr(arrayobject *a)
         return PyUnicode_FromFormat("array('%c')", (int)typecode);
     }
     if (typecode == 'u') {
-        v = array_array_tounicode_impl(a);
+        v = array_tounicode(a, NULL);
     } else {
-        v = array_array_tolist_impl(a);
+        v = array_tolist(a, NULL);
     }
     if (v == NULL)
         return NULL;
@@ -2528,11 +2446,7 @@ static const void *emptybuf = "";
 static int
 array_buffer_getbuf(arrayobject *self, Py_buffer *view, int flags)
 {
-    if (view == NULL) {
-        PyErr_SetString(PyExc_BufferError,
-            "array_buffer_getbuf: view==NULL argument is obsolete");
-        return -1;
-    }
+    if (view==NULL) goto finish;
 
     view->buf = (void *)self->ob_item;
     view->obj = (PyObject*)self;
@@ -2562,6 +2476,7 @@ array_buffer_getbuf(arrayobject *self, Py_buffer *view, int flags)
 #endif
     }
 
+ finish:
     self->ob_exports++;
     return 0;
 }
@@ -2671,9 +2586,15 @@ array_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
             }
             else if (initial != NULL && (PyByteArray_Check(initial) ||
                                PyBytes_Check(initial))) {
-                PyObject *v;
-                v = array_array_frombytes((arrayobject *)a,
-                                          initial);
+                PyObject *t_initial, *v;
+                t_initial = PyTuple_Pack(1, initial);
+                if (t_initial == NULL) {
+                    Py_DECREF(a);
+                    return NULL;
+                }
+                v = array_frombytes((arrayobject *)a,
+                                         t_initial);
+                Py_DECREF(t_initial);
                 if (v == NULL) {
                     Py_DECREF(a);
                     return NULL;
@@ -2845,10 +2766,16 @@ static PyTypeObject Arraytype = {
 
 /*********************** Array Iterator **************************/
 
-/*[clinic input]
-class array.arrayiterator "arrayiterobject *" "&PyArrayIter_Type"
-[clinic start generated code]*/
-/*[clinic end generated code: output=da39a3ee5e6b4b0d input=5aefd2d74d8c8e30]*/
+typedef struct {
+    PyObject_HEAD
+    Py_ssize_t                          index;
+    arrayobject                 *ao;
+    PyObject                    * (*getitem)(struct arrayobject *, Py_ssize_t);
+} arrayiterobject;
+
+static PyTypeObject PyArrayIter_Type;
+
+#define PyArrayIter_Check(op) PyObject_TypeCheck(op, &PyArrayIter_Type)
 
 static PyObject *
 array_iter(arrayobject *ao)
@@ -2896,47 +2823,33 @@ arrayiter_traverse(arrayiterobject *it, visitproc visit, void *arg)
     return 0;
 }
 
-/*[clinic input]
-array.arrayiterator.__reduce__
-
-Return state information for pickling.
-[clinic start generated code]*/
-
 static PyObject *
-array_arrayiterator___reduce___impl(arrayiterobject *self)
-/*[clinic end generated code: output=7898a52e8e66e016 input=a062ea1e9951417a]*/
+arrayiter_reduce(arrayiterobject *it)
 {
     return Py_BuildValue("N(O)n", _PyObject_GetBuiltin("iter"),
-                         self->ao, self->index);
+                         it->ao, it->index);
 }
 
-/*[clinic input]
-array.arrayiterator.__setstate__
-
-    state: object
-    /
-
-Set state information for unpickling.
-[clinic start generated code]*/
-
 static PyObject *
-array_arrayiterator___setstate__(arrayiterobject *self, PyObject *state)
-/*[clinic end generated code: output=397da9904e443cbe input=f47d5ceda19e787b]*/
+arrayiter_setstate(arrayiterobject *it, PyObject *state)
 {
     Py_ssize_t index = PyLong_AsSsize_t(state);
     if (index == -1 && PyErr_Occurred())
         return NULL;
     if (index < 0)
         index = 0;
-    else if (index > Py_SIZE(self->ao))
-        index = Py_SIZE(self->ao); /* iterator exhausted */
-    self->index = index;
+    else if (index > Py_SIZE(it->ao))
+        index = Py_SIZE(it->ao); /* iterator exhausted */
+    it->index = index;
     Py_RETURN_NONE;
 }
 
+PyDoc_STRVAR(setstate_doc, "Set state information for unpickling.");
 static PyMethodDef arrayiter_methods[] = {
-    ARRAY_ARRAYITERATOR___REDUCE___METHODDEF
-    ARRAY_ARRAYITERATOR___SETSTATE___METHODDEF
+    {"__reduce__",      (PyCFunction)arrayiter_reduce, METH_NOARGS,
+     reduce_doc},
+    {"__setstate__",    (PyCFunction)arrayiter_setstate, METH_O,
+     setstate_doc},
     {NULL, NULL} /* sentinel */
 };
 
@@ -2977,21 +2890,39 @@ static PyTypeObject PyArrayIter_Type = {
 
 /* No functions in array module. */
 static PyMethodDef a_methods[] = {
-    ARRAY__ARRAY_RECONSTRUCTOR_METHODDEF
+    {"_array_reconstructor", array_reconstructor, METH_VARARGS,
+     PyDoc_STR("Internal. Used for pickling support.")},
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
-static int
-array_modexec(PyObject *m)
+static struct PyModuleDef arraymodule = {
+    PyModuleDef_HEAD_INIT,
+    "array",
+    module_doc,
+    -1,
+    a_methods,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+};
+
+
+PyMODINIT_FUNC
+PyInit_array(void)
 {
+    PyObject *m;
     char buffer[Py_ARRAY_LENGTH(descriptors)], *p;
     PyObject *typecodes;
     Py_ssize_t size = 0;
     struct arraydescr *descr;
 
     if (PyType_Ready(&Arraytype) < 0)
-        return -1;
+        return NULL;
     Py_TYPE(&PyArrayIter_Type) = &PyType_Type;
+    m = PyModule_Create(&arraymodule);
+    if (m == NULL)
+        return NULL;
 
     Py_INCREF((PyObject *)&Arraytype);
     PyModule_AddObject(m, "ArrayType", (PyObject *)&Arraytype);
@@ -3014,30 +2945,5 @@ array_modexec(PyObject *m)
         Py_DECREF(m);
         m = NULL;
     }
-    return 0;
-}
-
-static PyModuleDef_Slot arrayslots[] = {
-    {Py_mod_exec, array_modexec},
-    {0, NULL}
-};
-
-
-static struct PyModuleDef arraymodule = {
-    PyModuleDef_HEAD_INIT,
-    "array",
-    module_doc,
-    0,
-    a_methods,
-    arrayslots,
-    NULL,
-    NULL,
-    NULL
-};
-
-
-PyMODINIT_FUNC
-PyInit_array(void)
-{
-    return PyModuleDef_Init(&arraymodule);
+    return m;
 }

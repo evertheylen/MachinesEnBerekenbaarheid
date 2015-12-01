@@ -375,17 +375,11 @@ optionally followed by an import of the module::
    int
    main(int argc, char *argv[])
    {
-       wchar_t *program = Py_DecodeLocale(argv[0], NULL);
-       if (program == NULL) {
-           fprintf(stderr, "Fatal error: cannot decode argv[0]\n");
-           exit(1);
-       }
-
        /* Add a built-in module, before Py_Initialize */
        PyImport_AppendInittab("spam", PyInit_spam);
 
        /* Pass argv[0] to the Python interpreter */
-       Py_SetProgramName(program);
+       Py_SetProgramName(argv[0]);
 
        /* Initialize the Python interpreter.  Required. */
        Py_Initialize();
@@ -396,10 +390,6 @@ optionally followed by an import of the module::
        PyImport_ImportModule("spam");
 
        ...
-
-       PyMem_RawFree(program);
-       return 0;
-   }
 
 .. note::
 
@@ -412,13 +402,6 @@ optionally followed by an import of the module::
 A more substantial example module is included in the Python source distribution
 as :file:`Modules/xxmodule.c`.  This file may be used as a  template or simply
 read as an example.
-
-.. note::
-
-   Unlike our ``spam`` example, ``xxmodule`` uses *multi-phase initialization*
-   (new in Python 3.5), where a PyModuleDef structure is returned from
-   ``PyInit_spam``, and creation of the module is left to the import machinery.
-   For details on multi-phase initialization, see :PEP:`489`.
 
 
 .. _compilation:
@@ -607,7 +590,7 @@ Extracting Parameters in Extension Functions
 
 The :c:func:`PyArg_ParseTuple` function is declared as follows::
 
-   int PyArg_ParseTuple(PyObject *arg, const char *format, ...);
+   int PyArg_ParseTuple(PyObject *arg, char *format, ...);
 
 The *arg* argument must be a tuple object containing an argument list passed
 from Python to a C function.  The *format* argument must be a format string,
@@ -700,7 +683,7 @@ Keyword Parameters for Extension Functions
 The :c:func:`PyArg_ParseTupleAndKeywords` function is declared as follows::
 
    int PyArg_ParseTupleAndKeywords(PyObject *arg, PyObject *kwdict,
-                                   const char *format, char *kwlist[], ...);
+                                   char *format, char *kwlist[], ...);
 
 The *arg* and *format* parameters are identical to those of the
 :c:func:`PyArg_ParseTuple` function.  The *kwdict* parameter is the dictionary of
@@ -777,7 +760,7 @@ Building Arbitrary Values
 This function is the counterpart to :c:func:`PyArg_ParseTuple`.  It is declared
 as follows::
 
-   PyObject *Py_BuildValue(const char *format, ...);
+   PyObject *Py_BuildValue(char *format, ...);
 
 It recognizes a set of format units similar to the ones recognized by
 :c:func:`PyArg_ParseTuple`, but the arguments (which are input to the function,

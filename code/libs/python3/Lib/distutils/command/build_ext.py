@@ -4,10 +4,7 @@ Implements the Distutils 'build_ext' command, for building extension
 modules (currently limited to C extensions, should accommodate C++
 extensions ASAP)."""
 
-import contextlib
-import os
-import re
-import sys
+import sys, os, re
 from distutils.core import Command
 from distutils.errors import *
 from distutils.sysconfig import customize_compiler, get_python_version
@@ -18,6 +15,10 @@ from distutils.util import get_platform
 from distutils import log
 
 from site import USER_BASE
+
+if os.name == 'nt':
+    from distutils.msvccompiler import get_build_version
+    MSVC_VERSION = int(get_build_version())
 
 # An extension name is just a dot-separated list of Python NAMEs (ie.
 # the same as a fully-qualified module name).
@@ -84,8 +85,6 @@ class build_ext(Command):
          "forcibly build everything (ignore file timestamps)"),
         ('compiler=', 'c',
          "specify the compiler type"),
-        ('parallel=', 'j',
-         "number of parallel build jobs"),
         ('swig-cpp', None,
          "make SWIG create C++ files (default is C)"),
         ('swig-opts=', None,
@@ -125,7 +124,6 @@ class build_ext(Command):
         self.swig_cpp = None
         self.swig_opts = None
         self.user = None
-        self.parallel = None
 
     def finalize_options(self):
         from distutils import sysconfig
@@ -136,7 +134,6 @@ class build_ext(Command):
                                    ('compiler', 'compiler'),
                                    ('debug', 'debug'),
                                    ('force', 'force'),
-                                   ('parallel', 'parallel'),
                                    ('plat_name', 'plat_name'),
                                    )
 
@@ -202,17 +199,27 @@ class build_ext(Command):
             _sys_home = getattr(sys, '_home', None)
             if _sys_home:
                 self.library_dirs.append(_sys_home)
+            if MSVC_VERSION >= 9:
+                # Use the .lib files for the correct architecture
+                if self.plat_name == 'win32':
+                    suffix = ''
+                else:
+                    # win-amd64 or win-ia64
+                    suffix = self.plat_name[4:]
+                new_lib = os.path.join(sys.exec_prefix, 'PCbuild')
+                if suffix:
+                    new_lib = os.path.join(new_lib, suffix)
+                self.library_dirs.append(new_lib)
 
-            # Use the .lib files for the correct architecture
-            if self.plat_name == 'win32':
-                suffix = 'win32'
+            elif MSVC_VERSION == 8:
+                self.library_dirs.append(os.path.join(sys.exec_prefix,
+                                         'PC', 'VS8.0'))
+            elif MSVC_VERSION == 7:
+                self.library_dirs.append(os.path.join(sys.exec_prefix,
+                                         'PC', 'VS7.1'))
             else:
-                # win-amd64 or win-ia64
-                suffix = self.plat_name[4:]
-            new_lib = os.path.join(sys.exec_prefix, 'PCbuild')
-            if suffix:
-                new_lib = os.path.join(new_lib, suffix)
-            self.library_dirs.append(new_lib)
+                self.library_dirs.append(os.path.join(sys.exec_prefix,
+                                         'PC', 'VC6'))
 
         # for extensions under Cygwin and AtheOS Python's library directory must be
         # appended to library_dirs
@@ -266,12 +273,6 @@ class build_ext(Command):
             if os.path.isdir(user_lib):
                 self.library_dirs.append(user_lib)
                 self.rpath.append(user_lib)
-
-        if isinstance(self.parallel, str):
-            try:
-                self.parallel = int(self.parallel)
-            except ValueError:
-                raise DistutilsOptionError("parallel should be an integer")
 
     def run(self):
         from distutils.ccompiler import new_compiler
@@ -441,45 +442,15 @@ class build_ext(Command):
     def build_extensions(self):
         # First, sanity-check the 'extensions' list
         self.check_extensions_list(self.extensions)
-        if self.parallel:
-            self._build_extensions_parallel()
-        else:
-            self._build_extensions_serial()
 
-    def _build_extensions_parallel(self):
-        workers = self.parallel
-        if self.parallel is True:
-            workers = os.cpu_count()  # may return None
-        try:
-            from concurrent.futures import ThreadPoolExecutor
-        except ImportError:
-            workers = None
-
-        if workers is None:
-            self._build_extensions_serial()
-            return
-
-        with ThreadPoolExecutor(max_workers=workers) as executor:
-            futures = [executor.submit(self.build_extension, ext)
-                       for ext in self.extensions]
-            for ext, fut in zip(self.extensions, futures):
-                with self._filter_build_errors(ext):
-                    fut.result()
-
-    def _build_extensions_serial(self):
         for ext in self.extensions:
-            with self._filter_build_errors(ext):
+            try:
                 self.build_extension(ext)
-
-    @contextlib.contextmanager
-    def _filter_build_errors(self, ext):
-        try:
-            yield
-        except (CCompilerError, DistutilsError, CompileError) as e:
-            if not ext.optional:
-                raise
-            self.warn('building extension "%s" failed: %s' %
-                      (ext.name, e))
+            except (CCompilerError, DistutilsError, CompileError) as e:
+                if not ext.optional:
+                    raise
+                self.warn('building extension "%s" failed: %s' %
+                          (ext.name, e))
 
     def build_extension(self, ext):
         sources = ext.sources
@@ -531,8 +502,15 @@ class build_ext(Command):
                                          extra_postargs=extra_args,
                                          depends=ext.depends)
 
-        # XXX outdated variable, kept here in case third-part code
-        # needs it.
+        # XXX -- this is a Vile HACK!
+        #
+        # The setup.py script for Python on Unix needs to be able to
+        # get this list so it can perform all the clean up needed to
+        # avoid keeping object files around when cleaning out a failed
+        # build of an extension module.  Since Distutils does not
+        # track dependencies, we have to get rid of intermediates to
+        # ensure all the intermediates will be properly re-built.
+        #
         self._built_objects = objects[:]
 
         # Now link the object files together into a "shared object" --
@@ -677,7 +655,10 @@ class build_ext(Command):
         """
         from distutils.sysconfig import get_config_var
         ext_path = ext_name.split('.')
+        # extensions in debug_mode are named 'module_d.pyd' under windows
         ext_suffix = get_config_var('EXT_SUFFIX')
+        if os.name == 'nt' and self.debug:
+            return os.path.join(*ext_path) + '_d' + ext_suffix
         return os.path.join(*ext_path) + ext_suffix
 
     def get_export_symbols(self, ext):
@@ -702,7 +683,7 @@ class build_ext(Command):
         # to need it mentioned explicitly, though, so that's what we do.
         # Append '_d' to the python import library on debug builds.
         if sys.platform == "win32":
-            from distutils._msvccompiler import MSVCCompiler
+            from distutils.msvccompiler import MSVCCompiler
             if not isinstance(self.compiler, MSVCCompiler):
                 template = "python%d%d"
                 if self.debug:

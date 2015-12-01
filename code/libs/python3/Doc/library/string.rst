@@ -95,10 +95,6 @@ implementation as the built-in :meth:`format` method.
       an arbitrary set of positional and keyword arguments.
       :meth:`format` is just a wrapper that calls :meth:`vformat`.
 
-      .. deprecated:: 3.5
-         Passing a format string as keyword argument *format_string* has been
-         deprecated.
-
    .. method:: vformat(format_string, args, kwargs)
 
       This function does the actual work of formatting.  It is exposed as a
@@ -644,14 +640,12 @@ Instead of the normal ``%``\ -based substitutions, Templates support ``$``\
 * ``$$`` is an escape; it is replaced with a single ``$``.
 
 * ``$identifier`` names a substitution placeholder matching a mapping key of
-  ``"identifier"``.  By default, ``"identifier"`` is restricted to any
-  case-insensitive ASCII alphanumeric string (including underscores) that
-  starts with an underscore or ASCII letter.  The first non-identifier
-  character after the ``$`` character terminates this placeholder
-  specification.
+  ``"identifier"``.  By default, ``"identifier"`` must spell a Python
+  identifier.  The first non-identifier character after the ``$`` character
+  terminates this placeholder specification.
 
-* ``${identifier}`` is equivalent to ``$identifier``.  It is required when
-  valid identifier characters follow the placeholder but are not part of the
+* ``${identifier}`` is equivalent to ``$identifier``.  It is required when valid
+  identifier characters follow the placeholder but are not part of the
   placeholder, such as ``"${noun}ification"``.
 
 Any other appearance of ``$`` in the string will result in a :exc:`ValueError`

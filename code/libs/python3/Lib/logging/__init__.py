@@ -1,4 +1,4 @@
-# Copyright 2001-2015 by Vinay Sajip. All Rights Reserved.
+# Copyright 2001-2014 by Vinay Sajip. All Rights Reserved.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted,
@@ -18,7 +18,7 @@
 Logging package for Python. Based on PEP 282 and comments thereto in
 comp.lang.python.
 
-Copyright (C) 2001-2015 Vinay Sajip. All Rights Reserved.
+Copyright (C) 2001-2014 Vinay Sajip. All Rights Reserved.
 
 To use, simply 'import logging' and log away!
 """
@@ -315,8 +315,6 @@ class LogRecord(object):
     def __str__(self):
         return '<LogRecord: %s, %s, %s, %s, "%s">'%(self.name, self.levelno,
             self.pathname, self.lineno, self.msg)
-
-    __repr__ = __str__
 
     def getMessage(self):
         """
@@ -1013,19 +1011,14 @@ class FileHandler(StreamHandler):
         """
         self.acquire()
         try:
-            try:
-                if self.stream:
-                    try:
-                        self.flush()
-                    finally:
-                        stream = self.stream
-                        self.stream = None
-                        if hasattr(stream, "close"):
-                            stream.close()
-            finally:
-                # Issue #19523: call unconditionally to
-                # prevent a handler leak when delay is set
-                StreamHandler.close(self)
+            if self.stream:
+                self.flush()
+                if hasattr(self.stream, "close"):
+                    self.stream.close()
+                self.stream = None
+            # Issue #19523: call unconditionally to
+            # prevent a handler leak when delay is set
+            StreamHandler.close(self)
         finally:
             self.release()
 
@@ -1093,6 +1086,7 @@ class PlaceHolder(object):
 #
 #   Determine which class to use when instantiating loggers.
 #
+_loggerClass = None
 
 def setLoggerClass(klass):
     """
@@ -1111,6 +1105,7 @@ def getLoggerClass():
     """
     Return the class to be used when instantiating a logger.
     """
+
     return _loggerClass
 
 class Manager(object):
@@ -1307,11 +1302,12 @@ class Logger(Filterer):
         if self.isEnabledFor(ERROR):
             self._log(ERROR, msg, args, **kwargs)
 
-    def exception(self, msg, *args, exc_info=True, **kwargs):
+    def exception(self, msg, *args, **kwargs):
         """
         Convenience method for logging an ERROR with exception information.
         """
-        self.error(msg, *args, exc_info=exc_info, **kwargs)
+        kwargs['exc_info'] = True
+        self.error(msg, *args, **kwargs)
 
     def critical(self, msg, *args, **kwargs):
         """
@@ -1406,9 +1402,7 @@ class Logger(Filterer):
         else: # pragma: no cover
             fn, lno, func = "(unknown file)", 0, "(unknown function)"
         if exc_info:
-            if isinstance(exc_info, BaseException):
-                exc_info = (type(exc_info), exc_info, exc_info.__traceback__)
-            elif not isinstance(exc_info, tuple):
+            if not isinstance(exc_info, tuple):
                 exc_info = sys.exc_info()
         record = self.makeRecord(self.name, level, fn, lno, msg, args,
                                  exc_info, func, extra, sinfo)
@@ -1618,11 +1612,12 @@ class LoggerAdapter(object):
         """
         self.log(ERROR, msg, *args, **kwargs)
 
-    def exception(self, msg, *args, exc_info=True, **kwargs):
+    def exception(self, msg, *args, **kwargs):
         """
         Delegate an exception call to the underlying logger.
         """
-        self.log(ERROR, msg, *args, exc_info=exc_info, **kwargs)
+        kwargs["exc_info"] = True
+        self.log(ERROR, msg, *args, **kwargs)
 
     def critical(self, msg, *args, **kwargs):
         """
@@ -1739,8 +1734,8 @@ def basicConfig(**kwargs):
                                      "specified together with 'handlers'")
             if handlers is None:
                 filename = kwargs.pop("filename", None)
-                mode = kwargs.pop("filemode", 'a')
                 if filename:
+                    mode = kwargs.pop("filemode", 'a')
                     h = FileHandler(filename, mode)
                 else:
                     stream = kwargs.pop("stream", None)
@@ -1804,13 +1799,14 @@ def error(msg, *args, **kwargs):
         basicConfig()
     root.error(msg, *args, **kwargs)
 
-def exception(msg, *args, exc_info=True, **kwargs):
+def exception(msg, *args, **kwargs):
     """
     Log a message with severity 'ERROR' on the root logger, with exception
     information. If the logger has no handlers, basicConfig() is called to add
     a console handler with a pre-defined format.
     """
-    error(msg, *args, exc_info=exc_info, **kwargs)
+    kwargs['exc_info'] = True
+    error(msg, *args, **kwargs)
 
 def warning(msg, *args, **kwargs):
     """

@@ -350,7 +350,7 @@ Functions
    the *nframe* parameter of the :func:`start` function to store more frames.
 
    The :mod:`tracemalloc` module must be tracing memory allocations to take a
-   snapshot, see the :func:`start` function.
+   snapshot, see the the :func:`start` function.
 
    See also the :func:`get_object_traceback` function.
 
@@ -363,7 +363,7 @@ Filter
    Filter on traces of memory blocks.
 
    See the :func:`fnmatch.fnmatch` function for the syntax of
-   *filename_pattern*. The ``'.pyc'`` file extension is
+   *filename_pattern*. The ``'.pyc'`` and ``'.pyo'`` file extensions are
    replaced with ``'.py'``.
 
    Examples:
@@ -373,10 +373,6 @@ Filter
    * ``Filter(False, tracemalloc.__file__)`` excludes traces of the
      :mod:`tracemalloc` module
    * ``Filter(False, "<unknown>")`` excludes empty tracebacks
-
-
-   .. versionchanged:: 3.5
-      The ``'.pyo'`` file extension is no longer replaced with ``'.py'``.
 
    .. attribute:: inclusive
 
@@ -635,3 +631,4 @@ Traceback
               obj = Object()
             File "test.py", line 12
               tb = tracemalloc.get_object_traceback(f())
+

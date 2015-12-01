@@ -4,7 +4,7 @@ Tests for the threading module.
 
 import test.support
 from test.support import verbose, strip_python_stderr, import_module, cpython_only
-from test.support.script_helper import assert_python_ok, assert_python_failure
+from test.script_helper import assert_python_ok, assert_python_failure
 
 import random
 import re
@@ -629,7 +629,7 @@ class ThreadTests(BaseTestCase):
 
         def generator():
             while 1:
-                yield "generator"
+                yield "genereator"
 
         def callback():
             if callback.gen is None:
@@ -945,7 +945,7 @@ class ThreadingExceptionTests(BaseTestCase):
             def outer():
                 try:
                     recurse()
-                except RecursionError:
+                except RuntimeError:
                     pass
 
             w = threading.Thread(target=outer)

@@ -52,9 +52,7 @@ class LoaderTest(unittest.TestCase):
     @unittest.skipUnless(os.name in ("nt", "ce"),
                          'test specific to Windows (NT/CE)')
     def test_load_library(self):
-        # CRT is no longer directly loadable. See issue23606 for the
-        # discussion about alternative approaches.
-        #self.assertIsNotNone(libc_name)
+        self.assertIsNotNone(libc_name)
         if test.support.verbose:
             print(find_library("kernel32"))
             print(find_library("user32"))

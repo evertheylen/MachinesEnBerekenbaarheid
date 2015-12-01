@@ -190,8 +190,6 @@ class DebuggerTests(unittest.TestCase):
             'linux-vdso.so',
             'warning: Could not load shared library symbols for '
             'linux-gate.so',
-            'warning: Could not load shared library symbols for '
-            'linux-vdso64.so',
             'Do you need "set solib-search-path" or '
             '"set sysroot"?',
             'warning: Source file is more recent than executable.',
@@ -802,27 +800,25 @@ id(42)
                          "Python was compiled without thread support")
     def test_pycfunction(self):
         'Verify that "py-bt" displays invocations of PyCFunction instances'
-        # Tested function must not be defined with METH_NOARGS or METH_O,
-        # otherwise call_function() doesn't call PyCFunction_Call()
-        cmd = ('from time import gmtime\n'
+        cmd = ('from time import sleep\n'
                'def foo():\n'
-               '    gmtime(1)\n'
+               '    sleep(1)\n'
                'def bar():\n'
                '    foo()\n'
                'bar()\n')
         # Verify with "py-bt":
         gdb_output = self.get_stack_trace(cmd,
-                                          breakpoint='time_gmtime',
+                                          breakpoint='time_sleep',
                                           cmds_after_breakpoint=['bt', 'py-bt'],
                                           )
-        self.assertIn('<built-in method gmtime', gdb_output)
+        self.assertIn('<built-in method sleep', gdb_output)
 
         # Verify with "py-bt-full":
         gdb_output = self.get_stack_trace(cmd,
-                                          breakpoint='time_gmtime',
+                                          breakpoint='time_sleep',
                                           cmds_after_breakpoint=['py-bt-full'],
                                           )
-        self.assertIn('#0 <built-in method gmtime', gdb_output)
+        self.assertIn('#0 <built-in method sleep', gdb_output)
 
 
 class PyPrintTests(DebuggerTests):

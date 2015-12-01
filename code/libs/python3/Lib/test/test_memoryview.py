@@ -369,12 +369,12 @@ class AbstractMemoryTests:
         d = memoryview(b)
 
         del b
-
+ 
         self.assertEqual(c[0], 256)
         self.assertEqual(d[0], 256)
         self.assertEqual(c.format, "H")
         self.assertEqual(d.format, "H")
-
+ 
         _ = m.cast('I')
         self.assertEqual(c[0], 256)
         self.assertEqual(d[0], 256)
@@ -492,26 +492,8 @@ class ArrayMemorySliceSliceTest(unittest.TestCase,
     pass
 
 
-class OtherTest(unittest.TestCase):
-    def test_ctypes_cast(self):
-        # Issue 15944: Allow all source formats when casting to bytes.
-        ctypes = test.support.import_module("ctypes")
-        p6 = bytes(ctypes.c_double(0.6))
-
-        d = ctypes.c_double()
-        m = memoryview(d).cast("B")
-        m[:2] = p6[:2]
-        m[2:] = p6[2:]
-        self.assertEqual(d.value, 0.6)
-
-        for format in "Bbc":
-            with self.subTest(format):
-                d = ctypes.c_double()
-                m = memoryview(d).cast(format)
-                m[:2] = memoryview(p6).cast(format)[:2]
-                m[2:] = memoryview(p6).cast(format)[2:]
-                self.assertEqual(d.value, 0.6)
-
+def test_main():
+    test.support.run_unittest(__name__)
 
 if __name__ == "__main__":
-    unittest.main()
+    test_main()

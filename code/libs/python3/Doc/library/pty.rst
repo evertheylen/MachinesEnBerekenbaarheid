@@ -58,32 +58,40 @@ The following program acts like the Unix command :manpage:`script(1)`, using a
 pseudo-terminal to record all input and output of a terminal session in a
 "typescript". ::
 
-    import argparse
-    import os
-    import pty
-    import sys
-    import time
+   import sys, os, time, getopt
+   import pty
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-a', dest='append', action='store_true')
-    parser.add_argument('-p', dest='use_python', action='store_true')
-    parser.add_argument('filename', nargs='?', default='typescript')
-    options = parser.parse_args()
+   mode = 'wb'
+   shell = 'sh'
+   filename = 'typescript'
+   if 'SHELL' in os.environ:
+       shell = os.environ['SHELL']
 
-    shell = sys.executable if options.use_python else os.environ.get('SHELL', 'sh')
-    filename = options.filename
-    mode = 'ab' if options.append else 'wb'
+   try:
+       opts, args = getopt.getopt(sys.argv[1:], 'ap')
+   except getopt.error as msg:
+       print('%s: %s' % (sys.argv[0], msg))
+       sys.exit(2)
 
-    with open(filename, mode) as script:
-        def read(fd):
-            data = os.read(fd, 1024)
-            script.write(data)
-            return data
+   for opt, arg in opts:
+       # option -a: append to typescript file
+       if opt == '-a':
+           mode = 'ab'
+       # option -p: use a Python shell as the terminal command
+       elif opt == '-p':
+           shell = sys.executable
+   if args:
+       filename = args[0]
 
-        print('Script started, file is', filename)
-        script.write(('Script started on %s\n' % time.asctime()).encode())
+   script = open(filename, mode)
 
-        pty.spawn(shell, read)
+   def read(fd):
+       data = os.read(fd, 1024)
+       script.write(data)
+       return data
 
-        script.write(('Script done on %s\n' % time.asctime()).encode())
-        print('Script done, file is', filename)
+   sys.stdout.write('Script started, file is %s\n' % filename)
+   script.write(('Script started on %s\n' % time.asctime()).encode())
+   pty.spawn(shell, read)
+   script.write(('Script done on %s\n' % time.asctime()).encode())
+   sys.stdout.write('Script done, file is %s\n' % filename)

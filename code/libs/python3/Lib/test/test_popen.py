@@ -57,5 +57,8 @@ class PopenTest(unittest.TestCase):
         with os.popen("echo hello") as f:
             self.assertEqual(list(f), ["hello\n"])
 
+def test_main():
+    support.run_unittest(PopenTest)
+
 if __name__ == "__main__":
-    unittest.main()
+    test_main()

@@ -7,6 +7,8 @@ ctype_types = [c_byte, c_ubyte, c_short, c_ushort, c_int, c_uint,
                  c_long, c_ulong, c_longlong, c_ulonglong, c_double, c_float]
 python_types = [int, int, int, int, int, int,
                 int, int, int, int, float, float]
+LargeNamedType = type('T' * 2 ** 25, (Structure,), {})
+large_string = 'T' * 2 ** 25
 
 class PointersTestCase(unittest.TestCase):
 
@@ -22,10 +24,7 @@ class PointersTestCase(unittest.TestCase):
     def test_pass_pointers(self):
         dll = CDLL(_ctypes_test.__file__)
         func = dll._testfunc_p_p
-        if sizeof(c_longlong) == sizeof(c_void_p):
-            func.restype = c_longlong
-        else:
-            func.restype = c_long
+        func.restype = c_long
 
         i = c_int(12345678)
 ##        func.argtypes = (POINTER(c_int),)
@@ -192,11 +191,9 @@ class PointersTestCase(unittest.TestCase):
             self.assertEqual(bool(mth), True)
 
     def test_pointer_type_name(self):
-        LargeNamedType = type('T' * 2 ** 25, (Structure,), {})
         self.assertTrue(POINTER(LargeNamedType))
 
     def test_pointer_type_str_name(self):
-        large_string = 'T' * 2 ** 25
         self.assertTrue(POINTER(large_string))
 
 if __name__ == '__main__':

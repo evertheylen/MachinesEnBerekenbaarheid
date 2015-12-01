@@ -71,7 +71,6 @@ import re
 import urllib   # For urllib.parse.unquote
 from string import hexdigits
 from collections import OrderedDict
-from operator import itemgetter
 from email import _encoded_words as _ew
 from email import errors
 from email import utils
@@ -320,18 +319,17 @@ class TokenList(list):
         return ''.join(res)
 
     def _fold(self, folded):
-        encoding = 'utf-8' if folded.policy.utf8 else 'ascii'
         for part in self.parts:
             tstr = str(part)
             tlen = len(tstr)
             try:
-                str(part).encode(encoding)
+                str(part).encode('us-ascii')
             except UnicodeEncodeError:
                 if any(isinstance(x, errors.UndecodableBytesDefect)
                         for x in part.all_defects):
                     charset = 'unknown-8bit'
                 else:
-                    # XXX: this should be a policy setting when utf8 is False.
+                    # XXX: this should be a policy setting
                     charset = 'utf-8'
                 tstr = part.cte_encode(charset, folded.policy)
                 tlen = len(tstr)
@@ -395,12 +393,11 @@ class UnstructuredTokenList(TokenList):
 
     def _fold(self, folded):
         last_ew = None
-        encoding = 'utf-8' if folded.policy.utf8 else 'ascii'
         for part in self.parts:
             tstr = str(part)
             is_ew = False
             try:
-                str(part).encode(encoding)
+                str(part).encode('us-ascii')
             except UnicodeEncodeError:
                 if any(isinstance(x, errors.UndecodableBytesDefect)
                        for x in part.all_defects):
@@ -477,13 +474,12 @@ class Phrase(TokenList):
         # comment that becomes a barrier across which we can't compose encoded
         # words.
         last_ew = None
-        encoding = 'utf-8' if folded.policy.utf8 else 'ascii'
         for part in self.parts:
             tstr = str(part)
             tlen = len(tstr)
             has_ew = False
             try:
-                str(part).encode(encoding)
+                str(part).encode('us-ascii')
             except UnicodeEncodeError:
                 if any(isinstance(x, errors.UndecodableBytesDefect)
                         for x in part.all_defects):
@@ -1102,34 +1098,15 @@ class MimeParameters(TokenList):
                 params[name] = []
             params[name].append((token.section_number, token))
         for name, parts in params.items():
-            parts = sorted(parts, key=itemgetter(0))
-            first_param = parts[0][1]
-            charset = first_param.charset
-            # Our arbitrary error recovery is to ignore duplicate parameters,
-            # to use appearance order if there are duplicate rfc 2231 parts,
-            # and to ignore gaps.  This mimics the error recovery of get_param.
-            if not first_param.extended and len(parts) > 1:
-                if parts[1][0] == 0:
-                    parts[1][1].defects.append(errors.InvalidHeaderDefect(
-                        'duplicate parameter name; duplicate(s) ignored'))
-                    parts = parts[:1]
-                # Else assume the *0* was missing...note that this is different
-                # from get_param, but we registered a defect for this earlier.
+            parts = sorted(parts)
+            # XXX: there might be more recovery we could do here if, for
+            # example, this is really a case of a duplicate attribute name.
             value_parts = []
-            i = 0
-            for section_number, param in parts:
+            charset = parts[0][1].charset
+            for i, (section_number, param) in enumerate(parts):
                 if section_number != i:
-                    # We could get fancier here and look for a complete
-                    # duplicate extended parameter and ignore the second one
-                    # seen.  But we're not doing that.  The old code didn't.
-                    if not param.extended:
-                        param.defects.append(errors.InvalidHeaderDefect(
-                            'duplicate parameter name; duplicate ignored'))
-                        continue
-                    else:
-                        param.defects.append(errors.InvalidHeaderDefect(
-                            "inconsistent RFC2231 parameter numbering"))
-                i += 1
+                    param.defects.append(errors.InvalidHeaderDefect(
+                        "inconsistent multipart parameter numbering"))
                 value = param.param_value
                 if param.extended:
                     try:

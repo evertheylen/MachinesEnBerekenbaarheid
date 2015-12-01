@@ -927,21 +927,20 @@ class Message:
         """
         return [part.get_content_charset(failobj) for part in self.walk()]
 
-    def get_content_disposition(self):
-        """Return the message's content-disposition if it exists, or None.
-
-        The return values can be either 'inline', 'attachment' or None
-        according to the rfc2183.
-        """
-        value = self.get('content-disposition')
-        if value is None:
-            return None
-        c_d = _splitparam(value)[0].lower()
-        return c_d
-
     # I.e. def walk(self): ...
     from email.iterators import walk
 
+# XXX Support for temporary deprecation hack for is_attachment property.
+class _IsAttachment:
+    def __init__(self, value):
+        self.value = value
+    def __call__(self):
+        return self.value
+    def __bool__(self):
+        warnings.warn("is_attachment will be a method, not a property, in 3.5",
+                      DeprecationWarning,
+                      stacklevel=3)
+        return self.value
 
 class MIMEPart(Message):
 
@@ -951,9 +950,12 @@ class MIMEPart(Message):
             policy = default
         Message.__init__(self, policy)
 
+    @property
     def is_attachment(self):
         c_d = self.get('content-disposition')
-        return False if c_d is None else c_d.content_disposition == 'attachment'
+        result = False if c_d is None else c_d.content_disposition == 'attachment'
+        # XXX transitional hack to raise deprecation if not called.
+        return _IsAttachment(result)
 
     def _find_body(self, part, preferencelist):
         if part.is_attachment():

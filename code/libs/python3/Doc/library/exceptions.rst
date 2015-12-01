@@ -162,8 +162,7 @@ The following exceptions are the exceptions that are usually raised.
 
 .. exception:: GeneratorExit
 
-   Raised when a :term:`generator` or :term:`coroutine` is closed;
-   see :meth:`generator.close` and :meth:`coroutine.close`.  It
+   Raised when a :term:`generator`\'s :meth:`close` method is called.  It
    directly inherits from :exc:`BaseException` instead of :exc:`Exception` since
    it is technically not an error.
 
@@ -282,16 +281,6 @@ The following exceptions are the exceptions that are usually raised.
    handling in C, most floating point operations are not checked.
 
 
-.. exception:: RecursionError
-
-   This exception is derived from :exc:`RuntimeError`.  It is raised when the
-   interpreter detects that the maximum recursion depth (see
-   :func:`sys.getrecursionlimit`) is exceeded.
-
-   .. versionadded:: 3.5
-      Previously, a plain :exc:`RuntimeError` was raised.
-
-
 .. exception:: ReferenceError
 
    This exception is raised when a weak reference proxy, created by the
@@ -317,29 +306,13 @@ The following exceptions are the exceptions that are usually raised.
    given as an argument when constructing the exception, and defaults
    to :const:`None`.
 
-   When a :term:`generator` or :term:`coroutine` function
-   returns, a new :exc:`StopIteration` instance is
+   When a generator function returns, a new :exc:`StopIteration` instance is
    raised, and the value returned by the function is used as the
    :attr:`value` parameter to the constructor of the exception.
-
-   If a generator function defined in the presence of a ``from __future__
-   import generator_stop`` directive raises :exc:`StopIteration`, it will be
-   converted into a :exc:`RuntimeError` (retaining the :exc:`StopIteration`
-   as the new exception's cause).
 
    .. versionchanged:: 3.3
       Added ``value`` attribute and the ability for generator functions to
       use it to return a value.
-
-   .. versionchanged:: 3.5
-      Introduced the RuntimeError transformation.
-
-.. exception:: StopAsyncIteration
-
-   Must be raised by :meth:`__anext__` method of an
-   :term:`asynchronous iterator` object to stop the iteration.
-
-   .. versionadded:: 3.5
 
 .. exception:: SyntaxError
 
@@ -380,16 +353,17 @@ The following exceptions are the exceptions that are usually raised.
 
 .. exception:: SystemExit
 
-   This exception is raised by the :func:`sys.exit` function.  It inherits from
-   :exc:`BaseException` instead of :exc:`Exception` so that it is not accidentally
-   caught by code that catches :exc:`Exception`.  This allows the exception to
-   properly propagate up and cause the interpreter to exit.  When it is not
-   handled, the Python interpreter exits; no stack traceback is printed.  The
-   constructor accepts the same optional argument passed to :func:`sys.exit`.
-   If the value is an integer, it specifies the system exit status (passed to
-   C's :c:func:`exit` function); if it is ``None``, the exit status is zero; if
-   it has another type (such as a string), the object's value is printed and
+   This exception is raised by the :func:`sys.exit` function.  When it is not
+   handled, the Python interpreter exits; no stack traceback is printed.  If the
+   associated value is an integer, it specifies the system exit status (passed
+   to C's :c:func:`exit` function); if it is ``None``, the exit status is zero;
+   if it has another type (such as a string), the object's value is printed and
    the exit status is one.
+
+   Instances have an attribute :attr:`!code` which is set to the proposed exit
+   status or error message (defaulting to ``None``). Also, this exception derives
+   directly from :exc:`BaseException` and not :exc:`Exception`, since it is not
+   technically an error.
 
    A call to :func:`sys.exit` is translated into an exception so that clean-up
    handlers (:keyword:`finally` clauses of :keyword:`try` statements) can be
@@ -398,10 +372,9 @@ The following exceptions are the exceptions that are usually raised.
    absolutely positively necessary to exit immediately (for example, in the child
    process after a call to :func:`os.fork`).
 
-   .. attribute:: code
-
-      The exit status or error message that is passed to the constructor.
-      (Defaults to ``None``.)
+   The exception inherits from :exc:`BaseException` instead of :exc:`Exception` so
+   that it is not accidentally caught by code that catches :exc:`Exception`.  This
+   allows the exception to properly propagate up and cause the interpreter to exit.
 
 
 .. exception:: TypeError
@@ -563,12 +536,7 @@ depending on the system error code.
 .. exception:: InterruptedError
 
    Raised when a system call is interrupted by an incoming signal.
-   Corresponds to :c:data:`errno` :py:data:`~errno.EINTR`.
-
-   .. versionchanged:: 3.5
-      Python now retries system calls when a syscall is interrupted by a
-      signal, except if the signal handler raises an exception (see :pep:`475`
-      for the rationale), instead of raising :exc:`InterruptedError`.
+   Corresponds to :c:data:`errno` ``EINTR``.
 
 .. exception:: IsADirectoryError
 

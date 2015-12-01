@@ -297,9 +297,6 @@ The special characters are:
       >>> m.group(0)
       'egg'
 
-   .. versionchanged: 3.5
-      Added support for group references of fixed length.
-
 ``(?<!...)``
    Matches if the current position in the string is not preceded by a match for
    ``...``.  This is called a :dfn:`negative lookbehind assertion`.  Similar to
@@ -438,10 +435,6 @@ three digits in length.
 .. versionchanged:: 3.3
    The ``'\u'`` and ``'\U'`` escape sequences have been added.
 
-.. deprecated-removed:: 3.5 3.6
-   Unknown escapes consist of ``'\'`` and ASCII letter now raise a
-   deprecation warning and will be forbidden in Python 3.6.
-
 
 .. seealso::
 
@@ -528,11 +521,7 @@ form.
    current locale. The use of this flag is discouraged as the locale mechanism
    is very unreliable, and it only handles one "culture" at a time anyway;
    you should use Unicode matching instead, which is the default in Python 3
-   for Unicode (str) patterns. This flag makes sense only with bytes patterns.
-
-   .. deprecated-removed:: 3.5 3.6
-      Deprecated the use of  :const:`re.LOCALE` with string patterns or
-      :const:`re.ASCII`.
+   for Unicode (str) patterns.
 
 
 .. data:: M
@@ -633,37 +622,17 @@ form.
    That way, separator components are always found at the same relative
    indices within the result list.
 
-   .. note::
+   Note that *split* will never split a string on an empty pattern match.
+   For example:
 
-      :func:`split` doesn't currently split a string on an empty pattern match.
-      For example:
-
-         >>> re.split('x*', 'axbc')
-         ['a', 'bc']
-
-      Even though ``'x*'`` also matches 0 'x' before 'a', between 'b' and 'c',
-      and after 'c', currently these matches are ignored.  The correct behavior
-      (i.e. splitting on empty matches too and returning ``['', 'a', 'b', 'c',
-      '']``) will be implemented in future versions of Python, but since this
-      is a backward incompatible change, a :exc:`FutureWarning` will be raised
-      in the meanwhile.
-
-      Patterns that can only match empty strings currently never split the
-      string.  Since this doesn't match the expected behavior, a
-      :exc:`ValueError` will be raised starting from Python 3.5::
-
-         >>> re.split("^$", "foo\n\nbar\n", flags=re.M)
-         Traceback (most recent call last):
-           File "<stdin>", line 1, in <module>
-           ...
-         ValueError: split() requires a non-empty pattern match.
+      >>> re.split('x*', 'foo')
+      ['foo']
+      >>> re.split("(?m)^$", "foo\n\nbar\n")
+      ['foo\n\nbar\n']
 
    .. versionchanged:: 3.1
       Added the optional flags argument.
 
-   .. versionchanged:: 3.5
-      Splitting on a pattern that could match an empty string now raises
-      a warning.  Patterns that can only match empty strings are now rejected.
 
 .. function:: findall(pattern, string, flags=0)
 
@@ -691,7 +660,7 @@ form.
    *string* is returned unchanged.  *repl* can be a string or a function; if it is
    a string, any backslash escapes in it are processed.  That is, ``\n`` is
    converted to a single newline character, ``\r`` is converted to a carriage return, and
-   so forth.  Unknown escapes such as ``\&`` are left alone.  Backreferences, such
+   so forth.  Unknown escapes such as ``\j`` are left alone.  Backreferences, such
    as ``\6``, are replaced with the substring matched by group 6 in the pattern.
    For example:
 
@@ -733,13 +702,6 @@ form.
    .. versionchanged:: 3.1
       Added the optional flags argument.
 
-   .. versionchanged:: 3.5
-      Unmatched groups are replaced with an empty string.
-
-   .. deprecated-removed:: 3.5 3.6
-      Unknown escapes consist of ``'\'`` and ASCII letter now raise a
-      deprecation warning and will be forbidden in Python 3.6.
-
 
 .. function:: subn(pattern, repl, string, count=0, flags=0)
 
@@ -748,9 +710,6 @@ form.
 
    .. versionchanged:: 3.1
       Added the optional flags argument.
-
-   .. versionchanged:: 3.5
-      Unmatched groups are replaced with an empty string.
 
 
 .. function:: escape(string)
@@ -768,36 +727,13 @@ form.
    Clear the regular expression cache.
 
 
-.. exception:: error(msg, pattern=None, pos=None)
+.. exception:: error
 
    Exception raised when a string passed to one of the functions here is not a
    valid regular expression (for example, it might contain unmatched parentheses)
    or when some other error occurs during compilation or matching.  It is never an
-   error if a string contains no match for a pattern.  The error instance has
-   the following additional attributes:
+   error if a string contains no match for a pattern.
 
-   .. attribute:: msg
-
-      The unformatted error message.
-
-   .. attribute:: pattern
-
-      The regular expression pattern.
-
-   .. attribute:: pos
-
-      The index of *pattern* where compilation failed.
-
-   .. attribute:: lineno
-
-      The line corresponding to *pos*.
-
-   .. attribute:: colno
-
-      The column corresponding to *pos*.
-
-   .. versionchanged:: 3.5
-      Added additional attributes.
 
 .. _re-objects:
 
@@ -950,8 +886,6 @@ Match objects support the following methods and attributes:
    (``\g<1>``, ``\g<name>``) are replaced by the contents of the
    corresponding group.
 
-   .. versionchanged:: 3.5
-      Unmatched groups are replaced with an empty string.
 
 .. method:: match.group([group1, ...])
 

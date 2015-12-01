@@ -7,8 +7,6 @@
 .. sectionauthor:: Tim Peters <tim@zope.com>
 .. sectionauthor:: A.M. Kuchling <amk@amk.ca>
 
-**Source code:** :source:`Lib/datetime.py`
-
 .. XXX what order should the types be discussed in?
 
 The :mod:`datetime` module supplies classes for manipulating dates and times in
@@ -666,8 +664,8 @@ Example of working with :class:`date`:
 
 .. _datetime-datetime:
 
-:class:`.datetime` Objects
---------------------------
+:class:`datetime` Objects
+-------------------------
 
 A :class:`.datetime` object is a single object containing all the information
 from a :class:`date` object and a :class:`.time` object.  Like a :class:`date`
@@ -759,19 +757,13 @@ Other constructors, all class methods:
    :attr:`tzinfo` ``None``. This may raise :exc:`OverflowError`, if the timestamp is
    out of the range of values supported by the platform C :c:func:`gmtime` function,
    and :exc:`OSError` on :c:func:`gmtime` failure.
-   It's common for this to be restricted to years in 1970 through 2038.
+   It's common for this to be restricted to years in 1970 through 2038. See also
+   :meth:`fromtimestamp`.
 
-   To get an aware :class:`.datetime` object, call :meth:`fromtimestamp`::
+   On the POSIX compliant platforms, ``utcfromtimestamp(timestamp)``
+   is equivalent to the following expression::
 
-     datetime.fromtimestamp(timestamp, timezone.utc)
-
-   On the POSIX compliant platforms, it is equivalent to the following
-   expression::
-
-     datetime(1970, 1, 1, tzinfo=timezone.utc) + timedelta(seconds=timestamp)
-
-   except the latter formula always supports the full years range: between
-   :const:`MINYEAR` and :const:`MAXYEAR` inclusive.
+     datetime(1970, 1, 1) + timedelta(seconds=timestamp)
 
    .. versionchanged:: 3.3
       Raise :exc:`OverflowError` instead of :exc:`ValueError` if the timestamp
@@ -1384,13 +1376,10 @@ Supported operations:
 
 * efficient pickling
 
-In boolean contexts, a :class:`.time` object is always considered to be true.
+* in Boolean contexts, a :class:`.time` object is considered to be true if and
+  only if, after converting it to minutes and subtracting :meth:`utcoffset` (or
+  ``0`` if that's ``None``), the result is non-zero.
 
-.. versionchanged:: 3.5
-   Before Python 3.5, a :class:`.time` object was considered to be false if it
-   represented midnight in UTC.  This behavior was considered obscure and
-   error-prone and has been removed in Python 3.5.  See :issue:`13936` for full
-   details.
 
 Instance methods:
 

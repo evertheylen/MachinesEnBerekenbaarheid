@@ -325,7 +325,7 @@ thus can only be used in the body of a function definition.  Using a yield
 expression in a function's body causes that function to be a generator.
 
 When a generator function is called, it returns an iterator known as a
-generator.  That generator then controls the execution of the generator function.
+generator.  That generator then controls the execution of a generator function.
 The execution starts when one of the generator's methods is called.  At that
 time, the execution proceeds to the first yield expression, where it is
 suspended again, returning the value of :token:`expression_list` to the generator's
@@ -390,7 +390,6 @@ on the right hand side of an assignment statement.
       to sub-generators easy.
 
 .. index:: object: generator
-.. _generator-methods:
 
 Generator-iterator methods
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -444,12 +443,12 @@ is already executing raises a :exc:`ValueError` exception.
 .. method:: generator.close()
 
    Raises a :exc:`GeneratorExit` at the point where the generator function was
-   paused.  If the generator function then exits gracefully, is already closed,
-   or raises :exc:`GeneratorExit` (by not catching the exception), close
-   returns to its caller.  If the generator yields a value, a
-   :exc:`RuntimeError` is raised.  If the generator raises any other exception,
-   it is propagated to the caller.  :meth:`close` does nothing if the generator
-   has already exited due to an exception or normal exit.
+   paused.  If the generator function then raises :exc:`StopIteration` (by
+   exiting normally, or due to already being closed) or :exc:`GeneratorExit` (by
+   not catching the exception), close returns to its caller.  If the generator
+   yields a value, a :exc:`RuntimeError` is raised.  If the generator raises any
+   other exception, it is propagated to the caller.  :meth:`close` does nothing
+   if the generator has already exited due to an exception or normal exit.
 
 .. index:: single: yield; examples
 
@@ -812,20 +811,6 @@ a class instance:
    if that method was called.
 
 
-.. _await:
-
-Await expression
-================
-
-Suspend the execution of :term:`coroutine` on an :term:`awaitable` object.
-Can only be used inside a :term:`coroutine function`.
-
-.. productionlist::
-   await: ["await"] `primary`
-
-.. versionadded:: 3.5
-
-
 .. _power:
 
 The power operator
@@ -835,7 +820,7 @@ The power operator binds more tightly than unary operators on its left; it binds
 less tightly than unary operators on its right.  The syntax is:
 
 .. productionlist::
-   power: `await` ["**" `u_expr`]
+   power: `primary` ["**" `u_expr`]
 
 Thus, in an unparenthesized sequence of power and unary operators, the operators
 are evaluated from right to left (this does not constrain the evaluation order
@@ -906,9 +891,8 @@ from the power operator, there are only two levels, one for multiplicative
 operators and one for additive operators:
 
 .. productionlist::
-   m_expr: `u_expr` | `m_expr` "*" `u_expr` | `m_expr` "@" `m_expr` |
-         : `m_expr` "//" `u_expr`| `m_expr` "/" `u_expr` |
-         : `m_expr` "%" `u_expr`
+   m_expr: `u_expr` | `m_expr` "*" `u_expr` | `m_expr` "//" `u_expr` | `m_expr` "/" `u_expr`
+         : | `m_expr` "%" `u_expr`
    a_expr: `m_expr` | `a_expr` "+" `m_expr` | `a_expr` "-" `m_expr`
 
 .. index:: single: multiplication
@@ -918,13 +902,6 @@ arguments must either both be numbers, or one argument must be an integer and
 the other must be a sequence. In the former case, the numbers are converted to a
 common type and then multiplied together.  In the latter case, sequence
 repetition is performed; a negative repetition factor yields an empty sequence.
-
-.. index:: single: matrix multiplication
-
-The ``@`` (at) operator is intended to be used for matrix multiplication.  No
-builtin Python types implement this operator.
-
-.. versionadded:: 3.5
 
 .. index::
    exception: ZeroDivisionError
@@ -1090,7 +1067,7 @@ Comparison of objects of the same type depends on the type:
 * Numbers are compared arithmetically.
 
 * The values :const:`float('NaN')` and :const:`Decimal('NaN')` are special.
-  They are identical to themselves, ``x is x`` but are not equal to themselves,
+  The are identical to themselves, ``x is x`` but are not equal to themselves,
   ``x != x``.  Additionally, comparing any value to a not-a-number value
   will return ``False``.  For example, both ``3 < float('NaN')`` and
   ``float('NaN') < 3`` will return ``False``.
@@ -1118,7 +1095,7 @@ Comparison of objects of the same type depends on the type:
 
 * Sets and frozensets define comparison operators to mean subset and superset
   tests.  Those relations do not define total orderings (the two sets ``{1,2}``
-  and ``{2,3}`` are not equal, nor subsets of one another, nor supersets of one
+  and {2,3} are not equal, nor subsets of one another, nor supersets of one
   another).  Accordingly, sets are not appropriate arguments for functions
   which depend on total ordering.  For example, :func:`min`, :func:`max`, and
   :func:`sorted` produce undefined results given a list of sets as inputs.
@@ -1369,15 +1346,12 @@ precedence and have a left-to-right chaining feature as described in the
 +-----------------------------------------------+-------------------------------------+
 | ``+``, ``-``                                  | Addition and subtraction            |
 +-----------------------------------------------+-------------------------------------+
-| ``*``, ``@``, ``/``, ``//``, ``%``            | Multiplication, matrix              |
-|                                               | multiplication division,            |
-|                                               | remainder [#]_                      |
+| ``*``, ``/``, ``//``, ``%``                   | Multiplication, division, remainder |
+|                                               | [#]_                                |
 +-----------------------------------------------+-------------------------------------+
 | ``+x``, ``-x``, ``~x``                        | Positive, negative, bitwise NOT     |
 +-----------------------------------------------+-------------------------------------+
 | ``**``                                        | Exponentiation [#]_                 |
-+-----------------------------------------------+-------------------------------------+
-| ``await`` ``x``                               | Await expression                    |
 +-----------------------------------------------+-------------------------------------+
 | ``x[index]``, ``x[index:index]``,             | Subscription, slicing,              |
 | ``x(arguments...)``, ``x.attribute``          | call, attribute reference           |
@@ -1407,7 +1381,7 @@ precedence and have a left-to-right chaining feature as described in the
 
 .. [#] While comparisons between strings make sense at the byte level, they may
    be counter-intuitive to users.  For example, the strings ``"\u00C7"`` and
-   ``"\u0043\u0327"`` compare differently, even though they both represent the
+   ``"\u0327\u0043"`` compare differently, even though they both represent the
    same unicode character (LATIN CAPITAL LETTER C WITH CEDILLA).  To compare
    strings in a human recognizable way, compare using
    :func:`unicodedata.normalize`.

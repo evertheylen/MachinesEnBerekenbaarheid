@@ -12,7 +12,6 @@ import socket
 import sys
 import time
 import unittest
-import warnings
 import unittest.mock
 try:
     import threading
@@ -39,7 +38,7 @@ if threading:
             self.start_resend_event = None
 
         def run(self):
-            self.sock.listen()
+            self.sock.listen(1)
             self.event.set()
             conn, client = self.sock.accept()
             self.buffer = b""
@@ -299,10 +298,7 @@ class TestHelperFunctions(unittest.TestCase):
 
 class TestFifo(unittest.TestCase):
     def test_basic(self):
-        with self.assertWarns(DeprecationWarning) as cm:
-            f = asynchat.fifo()
-        self.assertEqual(str(cm.warning),
-                         "fifo class will be removed in Python 3.6")
+        f = asynchat.fifo()
         f.push(7)
         f.push(b'a')
         self.assertEqual(len(f), 2)
@@ -317,10 +313,7 @@ class TestFifo(unittest.TestCase):
         self.assertEqual(f.pop(), (0, None))
 
     def test_given_list(self):
-        with self.assertWarns(DeprecationWarning) as cm:
-            f = asynchat.fifo([b'x', 17, 3])
-        self.assertEqual(str(cm.warning),
-                         "fifo class will be removed in Python 3.6")
+        f = asynchat.fifo([b'x', 17, 3])
         self.assertEqual(len(f), 3)
         self.assertEqual(f.pop(), (1, b'x'))
         self.assertEqual(f.pop(), (1, 17))

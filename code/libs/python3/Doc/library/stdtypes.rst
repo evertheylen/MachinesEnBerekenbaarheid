@@ -354,7 +354,7 @@ Notes:
    The numeric literals accepted include the digits ``0`` to ``9`` or any
    Unicode equivalent (code points with the ``Nd`` property).
 
-   See http://www.unicode.org/Public/8.0.0/ucd/extracted/DerivedNumericType.txt
+   See http://www.unicode.org/Public/6.3.0/ucd/extracted/DerivedNumericType.txt
    for a complete list of code points with the ``Nd`` property.
 
 
@@ -1855,42 +1855,10 @@ expression support in the :mod:`re` module).
 
 .. method:: str.splitlines([keepends])
 
-   Return a list of the lines in the string, breaking at line boundaries.  Line
-   breaks are not included in the resulting list unless *keepends* is given and
-   true.
-
-   This method splits on the following line boundaries.  In particular, the
-   boundaries are a superset of :term:`universal newlines`.
-
-   +-----------------------+-----------------------------+
-   | Representation        | Description                 |
-   +=======================+=============================+
-   | ``\n``                | Line Feed                   |
-   +-----------------------+-----------------------------+
-   | ``\r``                | Carriage Return             |
-   +-----------------------+-----------------------------+
-   | ``\r\n``              | Carriage Return + Line Feed |
-   +-----------------------+-----------------------------+
-   | ``\v`` or ``\x0b``    | Line Tabulation             |
-   +-----------------------+-----------------------------+
-   | ``\f`` or ``\x0c``    | Form Feed                   |
-   +-----------------------+-----------------------------+
-   | ``\x1c``              | File Separator              |
-   +-----------------------+-----------------------------+
-   | ``\x1d``              | Group Separator             |
-   +-----------------------+-----------------------------+
-   | ``\x1e``              | Record Separator            |
-   +-----------------------+-----------------------------+
-   | ``\x85``              | Next Line (C1 Control Code) |
-   +-----------------------+-----------------------------+
-   | ``\u2028``            | Line Separator              |
-   +-----------------------+-----------------------------+
-   | ``\u2029``            | Paragraph Separator         |
-   +-----------------------+-----------------------------+
-
-   .. versionchanged:: 3.2
-
-      ``\v`` and ``\f`` added to list of line boundaries.
+   Return a list of the lines in the string, breaking at line boundaries.
+   This method uses the :term:`universal newlines` approach to splitting lines.
+   Line breaks are not included in the resulting list unless *keepends* is
+   given and true.
 
    For example::
 
@@ -1937,16 +1905,6 @@ expression support in the :mod:`re` module).
       >>> 'www.example.com'.strip('cmowz.')
       'example'
 
-   The outermost leading and trailing *chars* argument values are stripped
-   from the string. Characters are removed from the leading end until
-   reaching a string character that is not contained in the set of
-   characters in *chars*. A similar action takes place on the trailing end.
-   For example::
-
-      >>> comment_string = '#....... Section 3.2.1 Issue #32 .......'
-      >>> comment_string.strip('.#! ')
-      'Section 3.2.1 Issue #32'
-
 
 .. method:: str.swapcase()
 
@@ -1986,22 +1944,21 @@ expression support in the :mod:`re` module).
         "They're Bill's Friends."
 
 
-.. method:: str.translate(table)
+.. method:: str.translate(map)
 
-   Return a copy of the string in which each character has been mapped through
-   the given translation table.  The table must be an object that implements
-   indexing via :meth:`__getitem__`, typically a :term:`mapping` or
-   :term:`sequence`.  When indexed by a Unicode ordinal (an integer), the
-   table object can do any of the following: return a Unicode ordinal or a
-   string, to map the character to one or more other characters; return
-   ``None``, to delete the character from the return string; or raise a
-   :exc:`LookupError` exception, to map the character to itself.
+   Return a copy of the *s* where all characters have been mapped through the
+   *map* which must be a dictionary of Unicode ordinals (integers) to Unicode
+   ordinals, strings or ``None``.  Unmapped characters are left untouched.
+   Characters mapped to ``None`` are deleted.
 
    You can use :meth:`str.maketrans` to create a translation map from
    character-to-character mappings in different formats.
 
-   See also the :mod:`codecs` module for a more flexible approach to custom
-   character mappings.
+   .. note::
+
+      An even more flexible approach is to create a custom character mapping
+      codec using the :mod:`codecs` module (see :mod:`encodings.cp1251` for an
+      example).
 
 
 .. method:: str.upper()
@@ -2019,7 +1976,7 @@ expression support in the :mod:`re` module).
 .. method:: str.zfill(width)
 
    Return a copy of the string left filled with ASCII ``'0'`` digits to
-   make a string of length *width*. A leading sign prefix (``'+'``/``'-'``)
+   make a string of length *width*. A leading sign prefix (``'+'``/``'-'``
    is handled by inserting the padding *after* the sign character rather
    than before. The original string is returned if *width* is less than
    or equal to ``len(s)``.
@@ -2300,19 +2257,6 @@ the bytes type has an additional class method to read data in that format:
    >>> bytes.fromhex('2Ef0 F1f2  ')
    b'.\xf0\xf1\xf2'
 
-A reverse conversion function exists to transform a bytes object into its
-hexadecimal representation.
-
-.. method:: bytes.hex()
-
-   Return a string object containing two hexadecimal digits for each
-   byte in the instance.
-
-   >>> b'\xf0\xf1\xf2'.hex()
-   'f0f1f2'
-
-   .. versionadded:: 3.5
-
 Since bytes objects are sequences of integers (akin to a tuple), for a bytes
 object *b*, ``b[0]`` will be an integer, while ``b[0:1]`` will be a bytes
 object of length 1.  (This contrasts with text strings, where both indexing
@@ -2367,19 +2311,6 @@ the bytearray type has an additional class method to read data in that format:
 
    >>> bytearray.fromhex('2Ef0 F1f2  ')
    bytearray(b'.\xf0\xf1\xf2')
-
-A reverse conversion function exists to transform a bytearray object into its
-hexadecimal representation.
-
-.. method:: bytearray.hex()
-
-   Return a string object containing two hexadecimal digits for each
-   byte in the instance.
-
-   >>> bytearray(b'\xf0\xf1\xf2').hex()
-   'f0f1f2'
-
-   .. versionadded:: 3.5
 
 Since bytearray objects are sequences of integers (akin to a list), for a
 bytearray object *b*, ``b[0]`` will be an integer, while ``b[0:1]`` will be
@@ -2520,7 +2451,7 @@ arbitrary binary data.
    Return a bytes or bytearray object which is the concatenation of the
    binary data sequences in the :term:`iterable` *iterable*.  A
    :exc:`TypeError` will be raised if there are any values in *iterable*
-   that are not :term:`bytes-like objects <bytes-like object>`, including
+   that are note :term:`bytes-like objects <bytes-like object>`, including
    :class:`str` objects.  The separator between elements is the contents
    of the bytes or bytearray object providing this method.
 
@@ -2949,8 +2880,8 @@ place, and instead produce new objects.
 .. method:: bytes.isupper()
             bytearray.isupper()
 
-   Return true if there is at least one uppercase alphabetic ASCII character
-   in the sequence and no lowercase ASCII characters, false otherwise.
+   Return true if there is at least one lowercase alphabetic ASCII character
+   in the sequence and no uppercase ASCII characters, false otherwise.
 
    For example::
 
@@ -3126,203 +3057,6 @@ place, and instead produce new objects.
       always produces a new object, even if no changes were made.
 
 
-.. _bytes-formatting:
-
-``printf``-style Bytes Formatting
-----------------------------------
-
-.. index::
-   single: formatting, bytes (%)
-   single: formatting, bytearray (%)
-   single: interpolation, bytes (%)
-   single: interpolation, bytearray (%)
-   single: bytes; formatting
-   single: bytearray; formatting
-   single: bytes; interpolation
-   single: bytearray; interpolation
-   single: printf-style formatting
-   single: sprintf-style formatting
-   single: % formatting
-   single: % interpolation
-
-.. note::
-
-   The formatting operations described here exhibit a variety of quirks that
-   lead to a number of common errors (such as failing to display tuples and
-   dictionaries correctly).  If the value being printed may be a tuple or
-   dictionary, wrap it in a tuple.
-
-Bytes objects (``bytes``/``bytearray``) have one unique built-in operation:
-the ``%`` operator (modulo).
-This is also known as the bytes *formatting* or *interpolation* operator.
-Given ``format % values`` (where *format* is a bytes object), ``%`` conversion
-specifications in *format* are replaced with zero or more elements of *values*.
-The effect is similar to using the :c:func:`sprintf` in the C language.
-
-If *format* requires a single argument, *values* may be a single non-tuple
-object. [5]_  Otherwise, *values* must be a tuple with exactly the number of
-items specified by the format bytes object, or a single mapping object (for
-example, a dictionary).
-
-A conversion specifier contains two or more characters and has the following
-components, which must occur in this order:
-
-#. The ``'%'`` character, which marks the start of the specifier.
-
-#. Mapping key (optional), consisting of a parenthesised sequence of characters
-   (for example, ``(somename)``).
-
-#. Conversion flags (optional), which affect the result of some conversion
-   types.
-
-#. Minimum field width (optional).  If specified as an ``'*'`` (asterisk), the
-   actual width is read from the next element of the tuple in *values*, and the
-   object to convert comes after the minimum field width and optional precision.
-
-#. Precision (optional), given as a ``'.'`` (dot) followed by the precision.  If
-   specified as ``'*'`` (an asterisk), the actual precision is read from the next
-   element of the tuple in *values*, and the value to convert comes after the
-   precision.
-
-#. Length modifier (optional).
-
-#. Conversion type.
-
-When the right argument is a dictionary (or other mapping type), then the
-formats in the bytes object *must* include a parenthesised mapping key into that
-dictionary inserted immediately after the ``'%'`` character. The mapping key
-selects the value to be formatted from the mapping.  For example:
-
-   >>> print(b'%(language)s has %(number)03d quote types.' %
-   ...       {b'language': b"Python", b"number": 2})
-   b'Python has 002 quote types.'
-
-In this case no ``*`` specifiers may occur in a format (since they require a
-sequential parameter list).
-
-The conversion flag characters are:
-
-+---------+---------------------------------------------------------------------+
-| Flag    | Meaning                                                             |
-+=========+=====================================================================+
-| ``'#'`` | The value conversion will use the "alternate form" (where defined   |
-|         | below).                                                             |
-+---------+---------------------------------------------------------------------+
-| ``'0'`` | The conversion will be zero padded for numeric values.              |
-+---------+---------------------------------------------------------------------+
-| ``'-'`` | The converted value is left adjusted (overrides the ``'0'``         |
-|         | conversion if both are given).                                      |
-+---------+---------------------------------------------------------------------+
-| ``' '`` | (a space) A blank should be left before a positive number (or empty |
-|         | string) produced by a signed conversion.                            |
-+---------+---------------------------------------------------------------------+
-| ``'+'`` | A sign character (``'+'`` or ``'-'``) will precede the conversion   |
-|         | (overrides a "space" flag).                                         |
-+---------+---------------------------------------------------------------------+
-
-A length modifier (``h``, ``l``, or ``L``) may be present, but is ignored as it
-is not necessary for Python -- so e.g. ``%ld`` is identical to ``%d``.
-
-The conversion types are:
-
-+------------+-----------------------------------------------------+-------+
-| Conversion | Meaning                                             | Notes |
-+============+=====================================================+=======+
-| ``'d'``    | Signed integer decimal.                             |       |
-+------------+-----------------------------------------------------+-------+
-| ``'i'``    | Signed integer decimal.                             |       |
-+------------+-----------------------------------------------------+-------+
-| ``'o'``    | Signed octal value.                                 | \(1)  |
-+------------+-----------------------------------------------------+-------+
-| ``'u'``    | Obsolete type -- it is identical to ``'d'``.        | \(8)  |
-+------------+-----------------------------------------------------+-------+
-| ``'x'``    | Signed hexadecimal (lowercase).                     | \(2)  |
-+------------+-----------------------------------------------------+-------+
-| ``'X'``    | Signed hexadecimal (uppercase).                     | \(2)  |
-+------------+-----------------------------------------------------+-------+
-| ``'e'``    | Floating point exponential format (lowercase).      | \(3)  |
-+------------+-----------------------------------------------------+-------+
-| ``'E'``    | Floating point exponential format (uppercase).      | \(3)  |
-+------------+-----------------------------------------------------+-------+
-| ``'f'``    | Floating point decimal format.                      | \(3)  |
-+------------+-----------------------------------------------------+-------+
-| ``'F'``    | Floating point decimal format.                      | \(3)  |
-+------------+-----------------------------------------------------+-------+
-| ``'g'``    | Floating point format. Uses lowercase exponential   | \(4)  |
-|            | format if exponent is less than -4 or not less than |       |
-|            | precision, decimal format otherwise.                |       |
-+------------+-----------------------------------------------------+-------+
-| ``'G'``    | Floating point format. Uses uppercase exponential   | \(4)  |
-|            | format if exponent is less than -4 or not less than |       |
-|            | precision, decimal format otherwise.                |       |
-+------------+-----------------------------------------------------+-------+
-| ``'c'``    | Single byte (accepts integer or single              |       |
-|            | byte objects).                                      |       |
-+------------+-----------------------------------------------------+-------+
-| ``'b'``    | Bytes (any object that follows the                  | \(5)  |
-|            | :ref:`buffer protocol <bufferobjects>` or has       |       |
-|            | :meth:`__bytes__`).                                 |       |
-+------------+-----------------------------------------------------+-------+
-| ``'s'``    | ``'s'`` is an alias for ``'b'`` and should only     | \(6)  |
-|            | be used for Python2/3 code bases.                   |       |
-+------------+-----------------------------------------------------+-------+
-| ``'a'``    | Bytes (converts any Python object using             | \(5)  |
-|            | ``repr(obj).encode('ascii','backslashreplace)``).   |       |
-+------------+-----------------------------------------------------+-------+
-| ``'r'``    | ``'r'`` is an alias for ``'a'`` and should only     | \(7)  |
-|            | be used for Python2/3 code bases.                   |       |
-+------------+-----------------------------------------------------+-------+
-| ``'%'``    | No argument is converted, results in a ``'%'``      |       |
-|            | character in the result.                            |       |
-+------------+-----------------------------------------------------+-------+
-
-Notes:
-
-(1)
-   The alternate form causes a leading zero (``'0'``) to be inserted between
-   left-hand padding and the formatting of the number if the leading character
-   of the result is not already a zero.
-
-(2)
-   The alternate form causes a leading ``'0x'`` or ``'0X'`` (depending on whether
-   the ``'x'`` or ``'X'`` format was used) to be inserted between left-hand padding
-   and the formatting of the number if the leading character of the result is not
-   already a zero.
-
-(3)
-   The alternate form causes the result to always contain a decimal point, even if
-   no digits follow it.
-
-   The precision determines the number of digits after the decimal point and
-   defaults to 6.
-
-(4)
-   The alternate form causes the result to always contain a decimal point, and
-   trailing zeroes are not removed as they would otherwise be.
-
-   The precision determines the number of significant digits before and after the
-   decimal point and defaults to 6.
-
-(5)
-   If precision is ``N``, the output is truncated to ``N`` characters.
-
-(6)
-   ``b'%s'`` is deprecated, but will not be removed during the 3.x series.
-
-(7)
-   ``b'%r'`` is deprecated, but will not be removed during the 3.x series.
-
-(8)
-   See :pep:`237`.
-
-.. note::
-
-   The bytearray version of this method does *not* operate in place - it
-   always produces a new object, even if no changes were made.
-
-.. seealso:: :pep:`461`.
-.. versionadded:: 3.5
-
 .. _typememoryview:
 
 Memory Views
@@ -3351,8 +3085,10 @@ copying.
    the view. The :class:`~memoryview.itemsize` attribute will give you the
    number of bytes in a single element.
 
-   A :class:`memoryview` supports slicing and indexing to expose its data.
-   One-dimensional slicing will result in a subview::
+   A :class:`memoryview` supports slicing to expose its data. If
+   :class:`~memoryview.format` is one of the native format specifiers
+   from the :mod:`struct` module, indexing will return a single element
+   with the correct type. Full slicing will result in a subview::
 
     >>> v = memoryview(b'abcefg')
     >>> v[1]
@@ -3364,29 +3100,25 @@ copying.
     >>> bytes(v[1:4])
     b'bce'
 
-   If :class:`~memoryview.format` is one of the native format specifiers
-   from the :mod:`struct` module, indexing with an integer or a tuple of
-   integers is also supported and returns a single *element* with
-   the correct type.  One-dimensional memoryviews can be indexed
-   with an integer or a one-integer tuple.  Multi-dimensional memoryviews
-   can be indexed with tuples of exactly *ndim* integers where *ndim* is
-   the number of dimensions.  Zero-dimensional memoryviews can be indexed
-   with the empty tuple.
-
-   Here is an example with a non-byte format::
+   Other native formats::
 
       >>> import array
       >>> a = array.array('l', [-11111111, 22222222, -33333333, 44444444])
-      >>> m = memoryview(a)
-      >>> m[0]
+      >>> a[0]
       -11111111
-      >>> m[-1]
+      >>> a[-1]
       44444444
-      >>> m[::2].tolist()
+      >>> a[2:3].tolist()
+      [-33333333]
+      >>> a[::2].tolist()
       [-11111111, -33333333]
+      >>> a[::-1].tolist()
+      [44444444, -33333333, 22222222, -11111111]
 
-   If the underlying object is writable, the memoryview supports
-   one-dimensional slice assignment. Resizing is not allowed::
+   .. versionadded:: 3.3
+
+   If the underlying object is writable, the memoryview supports slice
+   assignment. Resizing is not allowed::
 
       >>> data = bytearray(b'abcefg')
       >>> v = memoryview(data)
@@ -3419,15 +3151,11 @@ copying.
       True
 
    .. versionchanged:: 3.3
-      One-dimensional memoryviews can now be sliced.
       One-dimensional memoryviews with formats 'B', 'b' or 'c' are now hashable.
 
    .. versionchanged:: 3.4
       memoryview is now registered automatically with
       :class:`collections.abc.Sequence`
-
-   .. versionchanged:: 3.5
-      memoryviews can now be indexed with tuple of integers.
 
    :class:`memoryview` has several methods:
 
@@ -3495,17 +3223,6 @@ copying.
       supports all format strings, including those that are not in
       :mod:`struct` module syntax.
 
-   .. method:: hex()
-
-      Return a string object containing two hexadecimal digits for each
-      byte in the buffer. ::
-
-         >>> m = memoryview(b"abc")
-         >>> m.hex()
-         '616263'
-
-      .. versionadded:: 3.5
-
    .. method:: tolist()
 
       Return the data in the buffer as a list of elements. ::
@@ -3561,10 +3278,10 @@ copying.
       Cast a memoryview to a new format or shape. *shape* defaults to
       ``[byte_length//new_itemsize]``, which means that the result view
       will be one-dimensional. The return value is a new memoryview, but
-      the buffer itself is not copied. Supported casts are 1D -> C-:term:`contiguous`
+      the buffer itself is not copied. Supported casts are 1D -> C-contiguous
       and C-contiguous -> 1D.
 
-      The destination format is restricted to a single element native format in
+      Both formats are restricted to single element native formats in
       :mod:`struct` syntax. One of the formats must be a byte format
       ('B', 'b' or 'c'). The byte length of the result must be the same
       as the original length.
@@ -3644,9 +3361,6 @@ copying.
          [[0, 1, 2], [3, 4, 5]]
 
       .. versionadded:: 3.3
-
-      .. versionchanged:: 3.5
-         The source format is no longer restricted when casting to a byte view.
 
    There are also several readonly attributes available:
 
@@ -3752,19 +3466,19 @@ copying.
 
    .. attribute:: c_contiguous
 
-      A bool indicating whether the memory is C-:term:`contiguous`.
+      A bool indicating whether the memory is C-contiguous.
 
       .. versionadded:: 3.3
 
    .. attribute:: f_contiguous
 
-      A bool indicating whether the memory is Fortran :term:`contiguous`.
+      A bool indicating whether the memory is Fortran contiguous.
 
       .. versionadded:: 3.3
 
    .. attribute:: contiguous
 
-      A bool indicating whether the memory is :term:`contiguous`.
+      A bool indicating whether the memory is contiguous.
 
       .. versionadded:: 3.3
 
@@ -4158,10 +3872,6 @@ pairs within braces, for example: ``{'jack': 4098, 'sjoerd': 4127}`` or ``{4098:
 
       Return a new view of the dictionary's values.  See the
       :ref:`documentation of view objects <dict-views>`.
-
-   Dictionaries compare equal if and only if they have the same ``(key,
-   value)`` pairs. Order comparisons ('<', '<=', '>=', '>') raise
-   :exc:`TypeError`.
 
 .. seealso::
    :class:`types.MappingProxyType` can be used to create a read-only view

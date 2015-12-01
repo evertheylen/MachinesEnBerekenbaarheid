@@ -193,38 +193,58 @@ select_select(PyObject *self, PyObject *args)
 #endif /* SELECT_USES_HEAP */
     PyObject *ifdlist, *ofdlist, *efdlist;
     PyObject *ret = NULL;
-    PyObject *timeout_obj = Py_None;
+    PyObject *tout = Py_None;
     fd_set ifdset, ofdset, efdset;
     struct timeval tv, *tvp;
     int imax, omax, emax, max;
     int n;
-    _PyTime_t timeout, deadline = 0;
 
     /* convert arguments */
     if (!PyArg_UnpackTuple(args, "select", 3, 4,
-                          &ifdlist, &ofdlist, &efdlist, &timeout_obj))
+                          &ifdlist, &ofdlist, &efdlist, &tout))
         return NULL;
 
-    if (timeout_obj == Py_None)
-        tvp = (struct timeval *)NULL;
+    if (tout == Py_None)
+        tvp = (struct timeval *)0;
+    else if (!PyNumber_Check(tout)) {
+        PyErr_SetString(PyExc_TypeError,
+                        "timeout must be a float or None");
+        return NULL;
+    }
     else {
-        if (_PyTime_FromSecondsObject(&timeout, timeout_obj,
-                                      _PyTime_ROUND_CEILING) < 0) {
-            if (PyErr_ExceptionMatches(PyExc_TypeError)) {
-                PyErr_SetString(PyExc_TypeError,
-                                "timeout must be a float or None");
-            }
+        /* On OpenBSD 5.4, timeval.tv_sec is a long.
+         * Example: long is 64-bit, whereas time_t is 32-bit. */
+        time_t sec;
+        /* On OS X 64-bit, timeval.tv_usec is an int (and thus still 4
+           bytes as required), but no longer defined by a long. */
+        long usec;
+        if (_PyTime_ObjectToTimeval(tout, &sec, &usec,
+                                    _PyTime_ROUND_UP) == -1)
+            return NULL;
+#ifdef MS_WINDOWS
+        /* On Windows, timeval.tv_sec is a long (32 bit),
+         * whereas time_t can be 64-bit. */
+        assert(sizeof(tv.tv_sec) == sizeof(long));
+#if SIZEOF_TIME_T > SIZEOF_LONG
+        if (sec > LONG_MAX) {
+            PyErr_SetString(PyExc_OverflowError,
+                            "timeout is too large");
             return NULL;
         }
-
-        if (_PyTime_AsTimeval(timeout, &tv, _PyTime_ROUND_CEILING) == -1)
-            return NULL;
+#endif
+        tv.tv_sec = (long)sec;
+#else
+        assert(sizeof(tv.tv_sec) >= sizeof(sec));
+        tv.tv_sec = sec;
+#endif
+        tv.tv_usec = usec;
         if (tv.tv_sec < 0) {
             PyErr_SetString(PyExc_ValueError, "timeout must be non-negative");
             return NULL;
         }
         tvp = &tv;
     }
+
 
 #ifdef SELECT_USES_HEAP
     /* Allocate memory for the lists */
@@ -238,7 +258,6 @@ select_select(PyObject *self, PyObject *args)
         return PyErr_NoMemory();
     }
 #endif /* SELECT_USES_HEAP */
-
     /* Convert sequences to fd_sets, and get maximum fd number
      * propagates the Python exception set in seq2set()
      */
@@ -251,37 +270,13 @@ select_select(PyObject *self, PyObject *args)
         goto finally;
     if ((emax=seq2set(efdlist, &efdset, efd2obj)) < 0)
         goto finally;
-
     max = imax;
     if (omax > max) max = omax;
     if (emax > max) max = emax;
 
-    if (tvp)
-        deadline = _PyTime_GetMonotonicClock() + timeout;
-
-    do {
-        Py_BEGIN_ALLOW_THREADS
-        errno = 0;
-        n = select(max, &ifdset, &ofdset, &efdset, tvp);
-        Py_END_ALLOW_THREADS
-
-        if (errno != EINTR)
-            break;
-
-        /* select() was interrupted by a signal */
-        if (PyErr_CheckSignals())
-            goto finally;
-
-        if (tvp) {
-            timeout = deadline - _PyTime_GetMonotonicClock();
-            if (timeout < 0) {
-                n = 0;
-                break;
-            }
-            _PyTime_AsTimeval_noraise(timeout, &tv, _PyTime_ROUND_CEILING);
-            /* retry select() with the recomputed timeout */
-        }
-    } while (1);
+    Py_BEGIN_ALLOW_THREADS
+    n = select(max, &ifdset, &ofdset, &efdset, tvp);
+    Py_END_ALLOW_THREADS
 
 #ifdef MS_WINDOWS
     if (n == SOCKET_ERROR) {
@@ -521,39 +516,30 @@ any descriptors that have events or errors to report.");
 static PyObject *
 poll_poll(pollObject *self, PyObject *args)
 {
-    PyObject *result_list = NULL, *timeout_obj = NULL;
-    int poll_result, i, j;
+    PyObject *result_list = NULL, *tout = NULL;
+    int timeout = 0, poll_result, i, j;
     PyObject *value = NULL, *num = NULL;
-    _PyTime_t timeout, ms, deadline;
-    int async_err = 0;
 
-    if (!PyArg_ParseTuple(args, "|O:poll", &timeout_obj)) {
+    if (!PyArg_UnpackTuple(args, "poll", 0, 1, &tout)) {
         return NULL;
     }
 
     /* Check values for timeout */
-    if (timeout_obj == NULL || timeout_obj == Py_None) {
+    if (tout == NULL || tout == Py_None)
         timeout = -1;
-        ms = -1;
-        deadline = 0;   /* initialize to prevent gcc warning */
+    else if (!PyNumber_Check(tout)) {
+        PyErr_SetString(PyExc_TypeError,
+                        "timeout must be an integer or None");
+        return NULL;
     }
     else {
-        if (_PyTime_FromMillisecondsObject(&timeout, timeout_obj,
-                                           _PyTime_ROUND_CEILING) < 0) {
-            if (PyErr_ExceptionMatches(PyExc_TypeError)) {
-                PyErr_SetString(PyExc_TypeError,
-                                "timeout must be an integer or None");
-            }
+        tout = PyNumber_Long(tout);
+        if (!tout)
             return NULL;
-        }
-
-        ms = _PyTime_AsMilliseconds(timeout, _PyTime_ROUND_CEILING);
-        if (ms < INT_MIN || ms > INT_MAX) {
-            PyErr_SetString(PyExc_OverflowError, "timeout is too large");
+        timeout = _PyLong_AsInt(tout);
+        Py_DECREF(tout);
+        if (timeout == -1 && PyErr_Occurred())
             return NULL;
-        }
-
-        deadline = _PyTime_GetMonotonicClock() + timeout;
     }
 
     /* Avoid concurrent poll() invocation, issue 8865 */
@@ -571,38 +557,14 @@ poll_poll(pollObject *self, PyObject *args)
     self->poll_running = 1;
 
     /* call poll() */
-    async_err = 0;
-    do {
-        Py_BEGIN_ALLOW_THREADS
-        errno = 0;
-        poll_result = poll(self->ufds, self->ufd_len, (int)ms);
-        Py_END_ALLOW_THREADS
-
-        if (errno != EINTR)
-            break;
-
-        /* poll() was interrupted by a signal */
-        if (PyErr_CheckSignals()) {
-            async_err = 1;
-            break;
-        }
-
-        if (timeout >= 0) {
-            timeout = deadline - _PyTime_GetMonotonicClock();
-            if (timeout < 0) {
-                poll_result = 0;
-                break;
-            }
-            ms = _PyTime_AsMilliseconds(timeout, _PyTime_ROUND_CEILING);
-            /* retry poll() with the recomputed timeout */
-        }
-    } while (1);
+    Py_BEGIN_ALLOW_THREADS
+    poll_result = poll(self->ufds, self->ufd_len, timeout);
+    Py_END_ALLOW_THREADS
 
     self->poll_running = 0;
 
     if (poll_result < 0) {
-        if (!async_err)
-            PyErr_SetFromErrno(PyExc_OSError);
+        PyErr_SetFromErrno(PyExc_OSError);
         return NULL;
     }
 
@@ -611,40 +573,41 @@ poll_poll(pollObject *self, PyObject *args)
     result_list = PyList_New(poll_result);
     if (!result_list)
         return NULL;
+    else {
+        for (i = 0, j = 0; j < poll_result; j++) {
+            /* skip to the next fired descriptor */
+            while (!self->ufds[i].revents) {
+                i++;
+            }
+            /* if we hit a NULL return, set value to NULL
+               and break out of loop; code at end will
+               clean up result_list */
+            value = PyTuple_New(2);
+            if (value == NULL)
+                goto error;
+            num = PyLong_FromLong(self->ufds[i].fd);
+            if (num == NULL) {
+                Py_DECREF(value);
+                goto error;
+            }
+            PyTuple_SET_ITEM(value, 0, num);
 
-    for (i = 0, j = 0; j < poll_result; j++) {
-        /* skip to the next fired descriptor */
-        while (!self->ufds[i].revents) {
+            /* The &0xffff is a workaround for AIX.  'revents'
+               is a 16-bit short, and IBM assigned POLLNVAL
+               to be 0x8000, so the conversion to int results
+               in a negative number. See SF bug #923315. */
+            num = PyLong_FromLong(self->ufds[i].revents & 0xffff);
+            if (num == NULL) {
+                Py_DECREF(value);
+                goto error;
+            }
+            PyTuple_SET_ITEM(value, 1, num);
+            if ((PyList_SetItem(result_list, j, value)) == -1) {
+                Py_DECREF(value);
+                goto error;
+            }
             i++;
         }
-        /* if we hit a NULL return, set value to NULL
-           and break out of loop; code at end will
-           clean up result_list */
-        value = PyTuple_New(2);
-        if (value == NULL)
-            goto error;
-        num = PyLong_FromLong(self->ufds[i].fd);
-        if (num == NULL) {
-            Py_DECREF(value);
-            goto error;
-        }
-        PyTuple_SET_ITEM(value, 0, num);
-
-        /* The &0xffff is a workaround for AIX.  'revents'
-           is a 16-bit short, and IBM assigned POLLNVAL
-           to be 0x8000, so the conversion to int results
-           in a negative number. See SF bug #923315. */
-        num = PyLong_FromLong(self->ufds[i].revents & 0xffff);
-        if (num == NULL) {
-            Py_DECREF(value);
-            goto error;
-        }
-        PyTuple_SET_ITEM(value, 1, num);
-        if ((PyList_SetItem(result_list, j, value)) == -1) {
-            Py_DECREF(value);
-            goto error;
-        }
-        i++;
     }
     return result_list;
 
@@ -755,10 +718,14 @@ static int devpoll_flush(devpollObject *self)
     size = sizeof(struct pollfd)*self->n_fds;
     self->n_fds = 0;
 
-    n = _Py_write(self->fd_devpoll, self->fds, size);
-    if (n == -1)
-        return -1;
+    Py_BEGIN_ALLOW_THREADS
+    n = write(self->fd_devpoll, self->fds, size);
+    Py_END_ALLOW_THREADS
 
+    if (n == -1 ) {
+        PyErr_SetFromErrno(PyExc_IOError);
+        return -1;
+    }
     if (n < size) {
         /*
         ** Data writed to /dev/poll is a binary data structure. It is not
@@ -876,38 +843,40 @@ static PyObject *
 devpoll_poll(devpollObject *self, PyObject *args)
 {
     struct dvpoll dvp;
-    PyObject *result_list = NULL, *timeout_obj = NULL;
+    PyObject *result_list = NULL, *tout = NULL;
     int poll_result, i;
+    long timeout;
     PyObject *value, *num1, *num2;
-    _PyTime_t timeout, ms, deadline = 0;
 
     if (self->fd_devpoll < 0)
         return devpoll_err_closed();
 
-    if (!PyArg_ParseTuple(args, "|O:poll", &timeout_obj)) {
+    if (!PyArg_UnpackTuple(args, "poll", 0, 1, &tout)) {
         return NULL;
     }
 
     /* Check values for timeout */
-    if (timeout_obj == NULL || timeout_obj == Py_None) {
+    if (tout == NULL || tout == Py_None)
         timeout = -1;
-        ms = -1;
+    else if (!PyNumber_Check(tout)) {
+        PyErr_SetString(PyExc_TypeError,
+                        "timeout must be an integer or None");
+        return NULL;
     }
     else {
-        if (_PyTime_FromMillisecondsObject(&timeout, timeout_obj,
-                                           _PyTime_ROUND_CEILING) < 0) {
-            if (PyErr_ExceptionMatches(PyExc_TypeError)) {
-                PyErr_SetString(PyExc_TypeError,
-                                "timeout must be an integer or None");
-            }
+        tout = PyNumber_Long(tout);
+        if (!tout)
             return NULL;
-        }
+        timeout = PyLong_AsLong(tout);
+        Py_DECREF(tout);
+        if (timeout == -1 && PyErr_Occurred())
+            return NULL;
+    }
 
-        ms = _PyTime_AsMilliseconds(timeout, _PyTime_ROUND_CEILING);
-        if (ms < -1 || ms > INT_MAX) {
-            PyErr_SetString(PyExc_OverflowError, "timeout is too large");
-            return NULL;
-        }
+    if ((timeout < -1) || (timeout > INT_MAX)) {
+        PyErr_SetString(PyExc_OverflowError,
+                        "timeout is out of range");
+        return NULL;
     }
 
     if (devpoll_flush(self))
@@ -915,36 +884,12 @@ devpoll_poll(devpollObject *self, PyObject *args)
 
     dvp.dp_fds = self->fds;
     dvp.dp_nfds = self->max_n_fds;
-    dvp.dp_timeout = (int)ms;
+    dvp.dp_timeout = timeout;
 
-    if (timeout >= 0)
-        deadline = _PyTime_GetMonotonicClock() + timeout;
-
-    do {
-        /* call devpoll() */
-        Py_BEGIN_ALLOW_THREADS
-        errno = 0;
-        poll_result = ioctl(self->fd_devpoll, DP_POLL, &dvp);
-        Py_END_ALLOW_THREADS
-
-        if (errno != EINTR)
-            break;
-
-        /* devpoll() was interrupted by a signal */
-        if (PyErr_CheckSignals())
-            return NULL;
-
-        if (timeout >= 0) {
-            timeout = deadline - _PyTime_GetMonotonicClock();
-            if (timeout < 0) {
-                poll_result = 0;
-                break;
-            }
-            ms = _PyTime_AsMilliseconds(timeout, _PyTime_ROUND_CEILING);
-            dvp.dp_timeout = (int)ms;
-            /* retry devpoll() with the recomputed timeout */
-        }
-    } while (1);
+    /* call devpoll() */
+    Py_BEGIN_ALLOW_THREADS
+    poll_result = ioctl(self->fd_devpoll, DP_POLL, &dvp);
+    Py_END_ALLOW_THREADS
 
     if (poll_result < 0) {
         PyErr_SetFromErrno(PyExc_IOError);
@@ -952,26 +897,28 @@ devpoll_poll(devpollObject *self, PyObject *args)
     }
 
     /* build the result list */
+
     result_list = PyList_New(poll_result);
     if (!result_list)
         return NULL;
-
-    for (i = 0; i < poll_result; i++) {
-        num1 = PyLong_FromLong(self->fds[i].fd);
-        num2 = PyLong_FromLong(self->fds[i].revents);
-        if ((num1 == NULL) || (num2 == NULL)) {
-            Py_XDECREF(num1);
-            Py_XDECREF(num2);
-            goto error;
-        }
-        value = PyTuple_Pack(2, num1, num2);
-        Py_DECREF(num1);
-        Py_DECREF(num2);
-        if (value == NULL)
-            goto error;
-        if ((PyList_SetItem(result_list, i, value)) == -1) {
-            Py_DECREF(value);
-            goto error;
+    else {
+        for (i = 0; i < poll_result; i++) {
+            num1 = PyLong_FromLong(self->fds[i].fd);
+            num2 = PyLong_FromLong(self->fds[i].revents);
+            if ((num1 == NULL) || (num2 == NULL)) {
+                Py_XDECREF(num1);
+                Py_XDECREF(num2);
+                goto error;
+            }
+            value = PyTuple_Pack(2, num1, num2);
+            Py_DECREF(num1);
+            Py_DECREF(num2);
+            if (value == NULL)
+                goto error;
+            if ((PyList_SetItem(result_list, i, value)) == -1) {
+                Py_DECREF(value);
+                goto error;
+            }
         }
     }
 
@@ -1066,6 +1013,7 @@ newDevPollObject(void)
     struct pollfd *fds;
     struct rlimit limit;
 
+    Py_BEGIN_ALLOW_THREADS
     /*
     ** If we try to process more that getrlimit()
     ** fds, the kernel will give an error, so
@@ -1073,14 +1021,18 @@ newDevPollObject(void)
     ** value, because we can change rlimit() anytime.
     */
     limit_result = getrlimit(RLIMIT_NOFILE, &limit);
+    if (limit_result != -1)
+        fd_devpoll = _Py_open("/dev/poll", O_RDWR);
+    Py_END_ALLOW_THREADS
+
     if (limit_result == -1) {
         PyErr_SetFromErrno(PyExc_OSError);
         return NULL;
     }
-
-    fd_devpoll = _Py_open("/dev/poll", O_RDWR);
-    if (fd_devpoll == -1)
+    if (fd_devpoll == -1) {
+        PyErr_SetFromErrnoWithFilename(PyExc_IOError, "/dev/poll");
         return NULL;
+    }
 
     fds = PyMem_NEW(struct pollfd, limit.rlim_cur);
     if (fds == NULL) {
@@ -1485,46 +1437,34 @@ fd is the target file descriptor of the operation.");
 static PyObject *
 pyepoll_poll(pyEpoll_Object *self, PyObject *args, PyObject *kwds)
 {
-    static char *kwlist[] = {"timeout", "maxevents", NULL};
-    PyObject *timeout_obj = NULL;
+    double dtimeout = -1.;
+    int timeout;
     int maxevents = -1;
     int nfds, i;
     PyObject *elist = NULL, *etuple = NULL;
     struct epoll_event *evs = NULL;
-    _PyTime_t timeout, ms, deadline;
+    static char *kwlist[] = {"timeout", "maxevents", NULL};
 
     if (self->epfd < 0)
         return pyepoll_err_closed();
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|Oi:poll", kwlist,
-                                     &timeout_obj, &maxevents)) {
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|di:poll", kwlist,
+                                     &dtimeout, &maxevents)) {
         return NULL;
     }
 
-    if (timeout_obj == NULL || timeout_obj == Py_None) {
+    if (dtimeout < 0) {
         timeout = -1;
-        ms = -1;
-        deadline = 0;   /* initialize to prevent gcc warning */
+    }
+    else if (dtimeout * 1000.0 > INT_MAX) {
+        PyErr_SetString(PyExc_OverflowError,
+                        "timeout is too large");
+        return NULL;
     }
     else {
-        /* epoll_wait() has a resolution of 1 millisecond, round towards
-           infinity to wait at least timeout seconds. */
-        if (_PyTime_FromSecondsObject(&timeout, timeout_obj,
-                                      _PyTime_ROUND_CEILING) < 0) {
-            if (PyErr_ExceptionMatches(PyExc_TypeError)) {
-                PyErr_SetString(PyExc_TypeError,
-                                "timeout must be an integer or None");
-            }
-            return NULL;
-        }
-
-        ms = _PyTime_AsMilliseconds(timeout, _PyTime_ROUND_CEILING);
-        if (ms < INT_MIN || ms > INT_MAX) {
-            PyErr_SetString(PyExc_OverflowError, "timeout is too large");
-            return NULL;
-        }
-
-        deadline = _PyTime_GetMonotonicClock() + timeout;
+        /* epoll_wait() has a resolution of 1 millisecond, round away from zero
+           to wait *at least* dtimeout seconds. */
+        timeout = (int)ceil(dtimeout * 1000.0);
     }
 
     if (maxevents == -1) {
@@ -1543,30 +1483,9 @@ pyepoll_poll(pyEpoll_Object *self, PyObject *args, PyObject *kwds)
         return NULL;
     }
 
-    do {
-        Py_BEGIN_ALLOW_THREADS
-        errno = 0;
-        nfds = epoll_wait(self->epfd, evs, maxevents, (int)ms);
-        Py_END_ALLOW_THREADS
-
-        if (errno != EINTR)
-            break;
-
-        /* poll() was interrupted by a signal */
-        if (PyErr_CheckSignals())
-            goto error;
-
-        if (timeout >= 0) {
-            timeout = deadline - _PyTime_GetMonotonicClock();
-            if (timeout < 0) {
-                nfds = 0;
-                break;
-            }
-            ms = _PyTime_AsMilliseconds(timeout, _PyTime_ROUND_CEILING);
-            /* retry epoll_wait() with the recomputed timeout */
-        }
-    } while(1);
-
+    Py_BEGIN_ALLOW_THREADS
+    nfds = epoll_wait(self->epfd, evs, maxevents, timeout);
+    Py_END_ALLOW_THREADS
     if (nfds < 0) {
         PyErr_SetFromErrno(PyExc_OSError);
         goto error;
@@ -2103,9 +2022,8 @@ kqueue_queue_control(kqueue_queue_Object *self, PyObject *args)
     PyObject *result = NULL;
     struct kevent *evl = NULL;
     struct kevent *chl = NULL;
-    struct timespec timeoutspec;
+    struct timespec timeout;
     struct timespec *ptimeoutspec;
-    _PyTime_t timeout, deadline = 0;
 
     if (self->kqfd < 0)
         return kqueue_queue_err_closed();
@@ -2123,25 +2041,24 @@ kqueue_queue_control(kqueue_queue_Object *self, PyObject *args)
     if (otimeout == Py_None || otimeout == NULL) {
         ptimeoutspec = NULL;
     }
-    else {
-        if (_PyTime_FromSecondsObject(&timeout,
-                                      otimeout, _PyTime_ROUND_CEILING) < 0) {
-            PyErr_Format(PyExc_TypeError,
-                "timeout argument must be an number "
-                "or None, got %.200s",
-                Py_TYPE(otimeout)->tp_name);
-            return NULL;
-        }
-
-        if (_PyTime_AsTimespec(timeout, &timeoutspec) == -1)
+    else if (PyNumber_Check(otimeout)) {
+        if (_PyTime_ObjectToTimespec(otimeout, &timeout.tv_sec,
+                                     &timeout.tv_nsec, _PyTime_ROUND_UP) == -1)
             return NULL;
 
-        if (timeoutspec.tv_sec < 0) {
+        if (timeout.tv_sec < 0) {
             PyErr_SetString(PyExc_ValueError,
                             "timeout must be positive or None");
             return NULL;
         }
-        ptimeoutspec = &timeoutspec;
+        ptimeoutspec = &timeout;
+    }
+    else {
+        PyErr_Format(PyExc_TypeError,
+            "timeout argument must be an number "
+            "or None, got %.200s",
+            Py_TYPE(otimeout)->tp_name);
+        return NULL;
     }
 
     if (ch != NULL && ch != Py_None) {
@@ -2186,34 +2103,10 @@ kqueue_queue_control(kqueue_queue_Object *self, PyObject *args)
         }
     }
 
-    if (ptimeoutspec)
-        deadline = _PyTime_GetMonotonicClock() + timeout;
-
-    do {
-        Py_BEGIN_ALLOW_THREADS
-        errno = 0;
-        gotevents = kevent(self->kqfd, chl, nchanges,
-                           evl, nevents, ptimeoutspec);
-        Py_END_ALLOW_THREADS
-
-        if (errno != EINTR)
-            break;
-
-        /* kevent() was interrupted by a signal */
-        if (PyErr_CheckSignals())
-            goto error;
-
-        if (ptimeoutspec) {
-            timeout = deadline - _PyTime_GetMonotonicClock();
-            if (timeout < 0) {
-                gotevents = 0;
-                break;
-            }
-            if (_PyTime_AsTimespec(timeout, &timeoutspec) == -1)
-                goto error;
-            /* retry kevent() with the recomputed timeout */
-        }
-    } while (1);
+    Py_BEGIN_ALLOW_THREADS
+    gotevents = kevent(self->kqfd, chl, nchanges,
+                       evl, nevents, ptimeoutspec);
+    Py_END_ALLOW_THREADS
 
     if (gotevents == -1) {
         PyErr_SetFromErrno(PyExc_OSError);
@@ -2479,22 +2372,11 @@ PyInit_select(void)
     PyModule_AddIntMacro(m, EPOLLONESHOT);
 #endif
     /* PyModule_AddIntConstant(m, "EPOLL_RDHUP", EPOLLRDHUP); */
-
-#ifdef EPOLLRDNORM
     PyModule_AddIntMacro(m, EPOLLRDNORM);
-#endif
-#ifdef EPOLLRDBAND
     PyModule_AddIntMacro(m, EPOLLRDBAND);
-#endif
-#ifdef EPOLLWRNORM
     PyModule_AddIntMacro(m, EPOLLWRNORM);
-#endif
-#ifdef EPOLLWRBAND
     PyModule_AddIntMacro(m, EPOLLWRBAND);
-#endif
-#ifdef EPOLLMSG
     PyModule_AddIntMacro(m, EPOLLMSG);
-#endif
 
 #ifdef EPOLL_CLOEXEC
     PyModule_AddIntMacro(m, EPOLL_CLOEXEC);

@@ -1,7 +1,7 @@
 # test for xml.dom.minidom
 
 import pickle
-from test.support import findfile
+from test.support import run_unittest, findfile
 import unittest
 
 import xml.dom.minidom
@@ -49,29 +49,8 @@ class MinidomTest(unittest.TestCase):
         t = node.wholeText
         self.confirm(t == s, "looking for %r, found %r" % (s, t))
 
-    def testDocumentAsyncAttr(self):
-        doc = Document()
-        self.assertFalse(doc.async_)
-        with self.assertWarns(DeprecationWarning):
-            self.assertFalse(getattr(doc, 'async', True))
-        with self.assertWarns(DeprecationWarning):
-            setattr(doc, 'async', True)
-        with self.assertWarns(DeprecationWarning):
-            self.assertTrue(getattr(doc, 'async', False))
-        self.assertTrue(doc.async_)
-
-        self.assertFalse(Document.async_)
-        with self.assertWarns(DeprecationWarning):
-            self.assertFalse(getattr(Document, 'async', True))
-
-    def testParseFromBinaryFile(self):
-        with open(tstfile, 'rb') as file:
-            dom = parse(file)
-            dom.unlink()
-            self.confirm(isinstance(dom, Document))
-
-    def testParseFromTextFile(self):
-        with open(tstfile, 'r', encoding='iso-8859-1') as file:
+    def testParseFromFile(self):
+        with open(tstfile) as file:
             dom = parse(file)
             dom.unlink()
             self.confirm(isinstance(dom, Document))
@@ -1560,5 +1539,8 @@ class MinidomTest(unittest.TestCase):
         pi = doc.createProcessingInstruction("y", "z")
         pi.nodeValue = "crash"
 
+def test_main():
+    run_unittest(MinidomTest)
+
 if __name__ == "__main__":
-    unittest.main()
+    test_main()

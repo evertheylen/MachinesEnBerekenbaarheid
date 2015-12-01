@@ -72,7 +72,7 @@
 #define HAVE_BIND_TEXTDOMAIN_CODESET 1
 
 /* Define to 1 if you have the <bluetooth/bluetooth.h> header file. */
-#define HAVE_BLUETOOTH_BLUETOOTH_H 1
+/* #undef HAVE_BLUETOOTH_BLUETOOTH_H */
 
 /* Define to 1 if you have the <bluetooth.h> header file. */
 /* #undef HAVE_BLUETOOTH_H */
@@ -101,9 +101,6 @@
 
 /* Define if `unsetenv` does not return an int. */
 /* #undef HAVE_BROKEN_UNSETENV */
-
-/* Has builtin atomics */
-#define HAVE_BUILTIN_ATOMIC 1
 
 /* Define this if you have the type _Bool. */
 #define HAVE_C99_BOOL 1
@@ -183,9 +180,6 @@
 
 /* Define to 1 if you have the <direct.h> header file. */
 /* #undef HAVE_DIRECT_H */
-
-/* Define to 1 if the dirent structure has a d_type field */
-#define HAVE_DIRENT_D_TYPE 1
 
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
@@ -320,9 +314,6 @@
 /* Define to 1 if you have the `gamma' function. */
 #define HAVE_GAMMA 1
 
-/* Define if we can use gcc inline assembler to get and set mc68881 fpcr */
-/* #undef HAVE_GCC_ASM_FOR_MC68881 */
-
 /* Define if we can use x64 gcc inline assembler */
 #define HAVE_GCC_ASM_FOR_X64 1
 
@@ -395,9 +386,6 @@
 
 /* Define to 1 if you have the `getpwent' function. */
 #define HAVE_GETPWENT 1
-
-/* Define to 1 if the Linux getrandom() syscall is available */
-#define HAVE_GETRANDOM_SYSCALL 1
 
 /* Define to 1 if you have the `getresgid' function. */
 #define HAVE_GETRESGID 1
@@ -531,9 +519,6 @@
 
 /* Define to 1 if you have the <linux/can.h> header file. */
 #define HAVE_LINUX_CAN_H 1
-
-/* Define if compiling using Linux 3.6 or later. */
-#define HAVE_LINUX_CAN_RAW_FD_FRAMES 1
 
 /* Define to 1 if you have the <linux/can/raw.h> header file. */
 #define HAVE_LINUX_CAN_RAW_H 1
@@ -708,9 +693,6 @@
 
 /* Define to 1 if you have the `renameat' function. */
 #define HAVE_RENAMEAT 1
-
-/* Define if readline supports append_history */
-#define HAVE_RL_APPEND_HISTORY 1
 
 /* Define if you have readline 2.1 */
 #define HAVE_RL_CALLBACK 1
@@ -889,9 +871,6 @@
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #define HAVE_STDLIB_H 1
-
-/* Has stdatomic.h, atomic_int and _Atomic void* types work */
-#define HAVE_STD_ATOMIC 1
 
 /* Define to 1 if you have the `strdup' function. */
 #define HAVE_STRDUP 1

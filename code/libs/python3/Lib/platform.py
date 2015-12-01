@@ -114,8 +114,6 @@ __version__ = '1.0.7'
 import collections
 import sys, os, re, subprocess
 
-import warnings
-
 ### Globals & Constants
 
 # Determine the platform's /dev/null device
@@ -165,39 +163,40 @@ def libc_ver(executable=sys.executable, lib='', version='',
         # here to work around problems with Cygwin not being
         # able to open symlinks for reading
         executable = os.path.realpath(executable)
-    with open(executable, 'rb') as f:
-        binary = f.read(chunksize)
-        pos = 0
-        while 1:
-            if b'libc' in binary or b'GLIBC' in binary:
-                m = _libc_search.search(binary, pos)
-            else:
-                m = None
-            if not m:
-                binary = f.read(chunksize)
-                if not binary:
-                    break
-                pos = 0
-                continue
-            libcinit, glibc, glibcversion, so, threads, soversion = [
-                s.decode('latin1') if s is not None else s
-                for s in m.groups()]
-            if libcinit and not lib:
+    f = open(executable, 'rb')
+    binary = f.read(chunksize)
+    pos = 0
+    while 1:
+        if b'libc' in binary or b'GLIBC' in binary:
+            m = _libc_search.search(binary, pos)
+        else:
+            m = None
+        if not m:
+            binary = f.read(chunksize)
+            if not binary:
+                break
+            pos = 0
+            continue
+        libcinit, glibc, glibcversion, so, threads, soversion = [
+            s.decode('latin1') if s is not None else s
+            for s in m.groups()]
+        if libcinit and not lib:
+            lib = 'libc'
+        elif glibc:
+            if lib != 'glibc':
+                lib = 'glibc'
+                version = glibcversion
+            elif glibcversion > version:
+                version = glibcversion
+        elif so:
+            if lib != 'glibc':
                 lib = 'libc'
-            elif glibc:
-                if lib != 'glibc':
-                    lib = 'glibc'
-                    version = glibcversion
-                elif glibcversion > version:
-                    version = glibcversion
-            elif so:
-                if lib != 'glibc':
-                    lib = 'libc'
-                    if soversion and soversion > version:
-                        version = soversion
-                    if threads and version[-len(threads):] != threads:
-                        version = version + threads
-            pos = m.end()
+                if soversion and soversion > version:
+                    version = soversion
+                if threads and version[-len(threads):] != threads:
+                    version = version + threads
+        pos = m.end()
+    f.close()
     return lib, version
 
 def _dist_try_harder(distname, version, id):
@@ -299,15 +298,6 @@ def linux_distribution(distname='', version='', id='',
 
                        supported_dists=_supported_dists,
                        full_distribution_name=1):
-    import warnings
-    warnings.warn("dist() and linux_distribution() functions are deprecated "
-                  "in Python 3.5 and will be removed in Python 3.7",
-                  PendingDeprecationWarning, stacklevel=2)
-    return _linux_distribution(distname, version, id, supported_dists,
-                               full_distribution_name)
-
-def _linux_distribution(distname, version, id, supported_dists,
-                        full_distribution_name):
 
     """ Tries to determine the name of the Linux OS distribution name.
 
@@ -374,13 +364,9 @@ def dist(distname='', version='', id='',
         args given as parameters.
 
     """
-    import warnings
-    warnings.warn("dist() and linux_distribution() functions are deprecated "
-                  "in Python 3.5 and will be removed in Python 3.7",
-                  PendingDeprecationWarning, stacklevel=2)
-    return _linux_distribution(distname, version, id,
-                               supported_dists=supported_dists,
-                               full_distribution_name=0)
+    return linux_distribution(distname, version, id,
+                              supported_dists=supported_dists,
+                              full_distribution_name=0)
 
 def popen(cmd, mode='r', bufsize=-1):
 
@@ -440,7 +426,7 @@ def _syscmd_ver(system='', release='', version='',
     # Try some common cmd strings
     for cmd in ('ver', 'command /c ver', 'cmd /c ver'):
         try:
-            pipe = os.popen(cmd)
+            pipe = popen(cmd)
             info = pipe.read()
             if pipe.close():
                 raise OSError('command failed')
@@ -1440,15 +1426,7 @@ def platform(aliased=0, terse=0):
 
     elif system in ('Linux',):
         # Linux based systems
-        with warnings.catch_warnings():
-            # see issue #1322 for more information
-            warnings.filterwarnings(
-                'ignore',
-                'dist\(\) and linux_distribution\(\) '
-                'functions are deprecated .*',
-                PendingDeprecationWarning,
-            )
-            distname, distversion, distid = dist('')
+        distname, distversion, distid = dist('')
         if distname and not terse:
             platform = _platform(system, release, machine, processor,
                                  'with',

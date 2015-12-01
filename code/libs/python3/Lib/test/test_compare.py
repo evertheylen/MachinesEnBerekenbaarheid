@@ -1,4 +1,5 @@
 import unittest
+from test import support
 
 class Empty:
     def __repr__(self):
@@ -120,5 +121,8 @@ class ComparisonTest(unittest.TestCase):
         self.assertEqual(Anything(), y)
 
 
+def test_main():
+    support.run_unittest(ComparisonTest)
+
 if __name__ == '__main__':
-    unittest.main()
+    test_main()

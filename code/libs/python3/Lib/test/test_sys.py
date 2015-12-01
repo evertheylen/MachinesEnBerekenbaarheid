@@ -1,5 +1,5 @@
 import unittest, test.support
-from test.support.script_helper import assert_python_ok, assert_python_failure
+from test.script_helper import assert_python_ok, assert_python_failure
 import sys, io, os
 import struct
 import subprocess
@@ -211,8 +211,8 @@ class SysModuleTest(unittest.TestCase):
             for i in (50, 1000):
                 # Issue #5392: stack overflow after hitting recursion limit twice
                 sys.setrecursionlimit(i)
-                self.assertRaises(RecursionError, f)
-                self.assertRaises(RecursionError, f)
+                self.assertRaises(RuntimeError, f)
+                self.assertRaises(RuntimeError, f)
         finally:
             sys.setrecursionlimit(oldlimit)
 
@@ -225,7 +225,7 @@ class SysModuleTest(unittest.TestCase):
             def f():
                 try:
                     f()
-                except RecursionError:
+                except RuntimeError:
                     f()
 
             sys.setrecursionlimit(%d)
@@ -636,53 +636,6 @@ class SysModuleTest(unittest.TestCase):
             expected = None
         self.check_fsencoding(fs_encoding, expected)
 
-    def c_locale_get_error_handler(self, isolated=False, encoding=None):
-        # Force the POSIX locale
-        env = os.environ.copy()
-        env["LC_ALL"] = "C"
-        code = '\n'.join((
-            'import sys',
-            'def dump(name):',
-            '    std = getattr(sys, name)',
-            '    print("%s: %s" % (name, std.errors))',
-            'dump("stdin")',
-            'dump("stdout")',
-            'dump("stderr")',
-        ))
-        args = [sys.executable, "-c", code]
-        if isolated:
-            args.append("-I")
-        elif encoding:
-            env['PYTHONIOENCODING'] = encoding
-        p = subprocess.Popen(args,
-                              stdout=subprocess.PIPE,
-                              stderr=subprocess.STDOUT,
-                              env=env,
-                              universal_newlines=True)
-        stdout, stderr = p.communicate()
-        return stdout
-
-    def test_c_locale_surrogateescape(self):
-        out = self.c_locale_get_error_handler(isolated=True)
-        self.assertEqual(out,
-                         'stdin: surrogateescape\n'
-                         'stdout: surrogateescape\n'
-                         'stderr: backslashreplace\n')
-
-        # replace the default error handler
-        out = self.c_locale_get_error_handler(encoding=':strict')
-        self.assertEqual(out,
-                         'stdin: strict\n'
-                         'stdout: strict\n'
-                         'stderr: backslashreplace\n')
-
-        # force the encoding
-        out = self.c_locale_get_error_handler(encoding='iso8859-1')
-        self.assertEqual(out,
-                         'stdin: surrogateescape\n'
-                         'stdout: surrogateescape\n'
-                         'stderr: backslashreplace\n')
-
     def test_implementation(self):
         # This test applies to all implementations equally.
 
@@ -708,7 +661,7 @@ class SysModuleTest(unittest.TestCase):
     @test.support.cpython_only
     def test_debugmallocstats(self):
         # Test sys._debugmallocstats()
-        from test.support.script_helper import assert_python_ok
+        from test.script_helper import assert_python_ok
         args = ['-c', 'import sys; sys._debugmallocstats()']
         ret, out, err = assert_python_ok(*args)
         self.assertIn(b"free PyDictObjects", err)
@@ -744,27 +697,6 @@ class SysModuleTest(unittest.TestCase):
         gc.collect()
         c = sys.getallocatedblocks()
         self.assertIn(c, range(b - 50, b + 50))
-
-    def test_is_finalizing(self):
-        self.assertIs(sys.is_finalizing(), False)
-        # Don't use the atexit module because _Py_Finalizing is only set
-        # after calling atexit callbacks
-        code = """if 1:
-            import sys
-
-            class AtExit:
-                is_finalizing = sys.is_finalizing
-                print = print
-
-                def __del__(self):
-                    self.print(self.is_finalizing(), flush=True)
-
-            # Keep a reference in the __main__ module namespace, so the
-            # AtExit destructor will be called at Python exit
-            ref = AtExit()
-        """
-        rc, stdout, stderr = assert_python_ok('-c', code)
-        self.assertEqual(stdout.rstrip(), b'True')
 
 
 @test.support.cpython_only
@@ -838,7 +770,7 @@ class SizeofTest(unittest.TestCase):
         # buffer
         # XXX
         # builtin_function_or_method
-        check(len, size('4P')) # XXX check layout
+        check(len, size('3P')) # XXX check layout
         # bytearray
         samples = [b'', b'u'*100000]
         for sample in samples:
@@ -846,9 +778,6 @@ class SizeofTest(unittest.TestCase):
             check(x, vsize('n2Pi') + x.__alloc__())
         # bytearray_iterator
         check(iter(bytearray()), size('nP'))
-        # bytes
-        check(b'', vsize('n') + 1)
-        check(b'x' * 10, vsize('n') + 11)
         # cell
         def get_cell():
             x = 42
@@ -942,7 +871,7 @@ class SizeofTest(unittest.TestCase):
             check(bar, size('PP'))
         # generator
         def get_gen(): yield 1
-        check(get_gen(), size('Pb2PPP'))
+        check(get_gen(), size('Pb2P'))
         # iterator
         check(iter('abc'), size('lP'))
         # callable-iterator
@@ -968,6 +897,8 @@ class SizeofTest(unittest.TestCase):
         check(int(PyLong_BASE), vsize('') + 2*self.longdigit)
         check(int(PyLong_BASE**2-1), vsize('') + 2*self.longdigit)
         check(int(PyLong_BASE**2), vsize('') + 3*self.longdigit)
+        # memoryview
+        check(memoryview(b''), size('Pnin 2P2n2i5P 3cPn'))
         # module
         check(unittest, size('PnPPP'))
         # None
@@ -996,7 +927,7 @@ class SizeofTest(unittest.TestCase):
         # frozenset
         PySet_MINSIZE = 8
         samples = [[], range(10), range(50)]
-        s = size('3nP' + PySet_MINSIZE*'nP' + '2nP')
+        s = size('3n2P' + PySet_MINSIZE*'nP' + 'nP')
         for sample in samples:
             minused = len(sample)
             if minused == 0: tmp = 1
@@ -1025,9 +956,9 @@ class SizeofTest(unittest.TestCase):
         # static type: PyTypeObject
         s = vsize('P2n15Pl4Pn9Pn11PIP')
         check(int, s)
-        # (PyTypeObject + PyAsyncMethods + PyNumberMethods + PyMappingMethods +
+        # (PyTypeObject + PyNumberMethods + PyMappingMethods +
         #  PySequenceMethods + PyBufferProcs + 4P)
-        s = vsize('P2n17Pl4Pn9Pn11PIP') + struct.calcsize('34P 3P 3P 10P 2P 4P')
+        s = vsize('P2n15Pl4Pn9Pn11PIP') + struct.calcsize('34P 3P 10P 2P 4P')
         # Separate block for PyDictKeysObject with 4 entries
         s += struct.calcsize("2nPn") + 4*struct.calcsize("n2P")
         # class

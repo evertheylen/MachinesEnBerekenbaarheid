@@ -190,5 +190,10 @@ class UserDictTest(mapping_tests.TestHashMappingProtocol):
 
 
 
+def test_main():
+    support.run_unittest(
+        UserDictTest,
+    )
+
 if __name__ == "__main__":
-    unittest.main()
+    test_main()

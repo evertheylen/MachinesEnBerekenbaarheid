@@ -99,7 +99,7 @@ To schedule a callback from a different thread, the
 :meth:`BaseEventLoop.call_soon_threadsafe` method should be used. Example to
 schedule a coroutine from a different thread::
 
-    loop.call_soon_threadsafe(asyncio.ensure_future, coro_func())
+    loop.call_soon_threadsafe(asyncio.async, coro_func())
 
 Most asyncio objects are not thread safe. You should only worry if you access
 objects outside the event loop. For example, to cancel a future, don't call
@@ -162,10 +162,10 @@ Detect coroutine objects never scheduled
 ----------------------------------------
 
 When a coroutine function is called and its result is not passed to
-:func:`ensure_future` or to the :meth:`BaseEventLoop.create_task` method,
-the execution of the coroutine object will never be scheduled which is
-probably a bug.  :ref:`Enable the debug mode of asyncio <asyncio-debug-mode>`
-to :ref:`log a warning <asyncio-logger>` to detect it.
+:func:`async` or to the :meth:`BaseEventLoop.create_task` method, the execution
+of the coroutine object will never be scheduled which is probably a bug.
+:ref:`Enable the debug mode of asyncio <asyncio-debug-mode>` to :ref:`log a
+warning <asyncio-logger>` to detect it.
 
 Example with the bug::
 
@@ -184,7 +184,7 @@ Output in debug mode::
       File "test.py", line 7, in <module>
         test()
 
-The fix is to call the :func:`ensure_future` function or the
+The fix is to call the :func:`async` function or the
 :meth:`BaseEventLoop.create_task` method with the coroutine object.
 
 .. seealso::
@@ -210,9 +210,8 @@ Example of unhandled exception::
         raise Exception("not consumed")
 
     loop = asyncio.get_event_loop()
-    asyncio.ensure_future(bug())
+    asyncio.async(bug())
     loop.run_forever()
-    loop.close()
 
 Output::
 
@@ -234,7 +233,7 @@ traceback where the task was created. Output in debug mode::
     future: <Task finished coro=<bug() done, defined at test.py:3> exception=Exception('not consumed',) created at test.py:8>
     source_traceback: Object created at (most recent call last):
       File "test.py", line 8, in <module>
-        asyncio.ensure_future(bug())
+        asyncio.async(bug())
     Traceback (most recent call last):
       File "asyncio/tasks.py", line 237, in _step
         result = next(coro)
@@ -257,14 +256,13 @@ coroutine in another coroutine and use classic try/except::
             print("exception consumed")
 
     loop = asyncio.get_event_loop()
-    asyncio.ensure_future(handle_exception())
+    asyncio.async(handle_exception())
     loop.run_forever()
-    loop.close()
 
 Another option is to use the :meth:`BaseEventLoop.run_until_complete`
 function::
 
-    task = asyncio.ensure_future(bug())
+    task = asyncio.async(bug())
     try:
         loop.run_until_complete(task)
     except Exception:
@@ -303,14 +301,14 @@ operations::
 
     @asyncio.coroutine
     def test():
-        asyncio.ensure_future(create())
-        asyncio.ensure_future(write())
-        asyncio.ensure_future(close())
+        asyncio.async(create())
+        asyncio.async(write())
+        asyncio.async(close())
         yield from asyncio.sleep(2.0)
         loop.stop()
 
     loop = asyncio.get_event_loop()
-    asyncio.ensure_future(test())
+    asyncio.async(test())
     loop.run_forever()
     print("Pending tasks at exit: %s" % asyncio.Task.all_tasks(loop))
     loop.close()
@@ -338,13 +336,13 @@ To fix the example, tasks must be marked with ``yield from``::
 
     @asyncio.coroutine
     def test():
-        yield from asyncio.ensure_future(create())
-        yield from asyncio.ensure_future(write())
-        yield from asyncio.ensure_future(close())
+        yield from asyncio.async(create())
+        yield from asyncio.async(write())
+        yield from asyncio.async(close())
         yield from asyncio.sleep(2.0)
         loop.stop()
 
-Or without ``asyncio.ensure_future()``::
+Or without ``asyncio.async()``::
 
     @asyncio.coroutine
     def test():
@@ -374,7 +372,7 @@ traceback where the task was created. Example of log in debug mode::
     Task was destroyed but it is pending!
     source_traceback: Object created at (most recent call last):
       File "test.py", line 15, in <module>
-        task = asyncio.ensure_future(coro, loop=loop)
+        task = asyncio.async(coro, loop=loop)
     task: <Task pending coro=<kill_me() done, defined at test.py:5> wait_for=<Future pending cb=[Task._wakeup()] created at test.py:7> created at test.py:15>
 
 

@@ -107,7 +107,7 @@ class ForkServer(object):
                 address = connection.arbitrary_address('AF_UNIX')
                 listener.bind(address)
                 os.chmod(address, 0o600)
-                listener.listen()
+                listener.listen(100)
 
                 # all client processes own the write end of the "alive" pipe;
                 # when they all terminate the read end becomes ready.
@@ -188,6 +188,8 @@ def main(listener_fd, alive_r, preload, main_path=None, sys_path=None):
                         finally:
                             os._exit(code)
 
+            except InterruptedError:
+                pass
             except OSError as e:
                 if e.errno != errno.ECONNABORTED:
                     raise
@@ -228,7 +230,13 @@ def read_unsigned(fd):
     data = b''
     length = UNSIGNED_STRUCT.size
     while len(data) < length:
-        s = os.read(fd, length - len(data))
+        while True:
+            try:
+                s = os.read(fd, length - len(data))
+            except InterruptedError:
+                pass
+            else:
+                break
         if not s:
             raise EOFError('unexpected EOF')
         data += s
@@ -237,7 +245,13 @@ def read_unsigned(fd):
 def write_unsigned(fd, n):
     msg = UNSIGNED_STRUCT.pack(n)
     while msg:
-        nbytes = os.write(fd, msg)
+        while True:
+            try:
+                nbytes = os.write(fd, msg)
+            except InterruptedError:
+                pass
+            else:
+                break
         if nbytes == 0:
             raise RuntimeError('should not get here')
         msg = msg[nbytes:]

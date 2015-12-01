@@ -5,8 +5,6 @@ The tests can be really simple. Given a small fragment of source
 code, print out a table with tokens. The ENDMARKER is omitted for
 brevity.
 
-    >>> import glob
-
     >>> dump_tokens("1 + 1")
     ENCODING   'utf-8'       (0, 0) (0, 0)
     NUMBER     '1'           (1, 0) (1, 1)
@@ -466,7 +464,7 @@ Additive
 
 Multiplicative
 
-    >>> dump_tokens("x = 1//1*1/5*12%0x12@42")
+    >>> dump_tokens("x = 1//1*1/5*12%0x12")
     ENCODING   'utf-8'       (0, 0) (0, 0)
     NAME       'x'           (1, 0) (1, 1)
     OP         '='           (1, 2) (1, 3)
@@ -481,8 +479,6 @@ Multiplicative
     NUMBER     '12'          (1, 13) (1, 15)
     OP         '%'           (1, 15) (1, 16)
     NUMBER     '0x12'        (1, 16) (1, 20)
-    OP         '@'           (1, 20) (1, 21)
-    NUMBER     '42'          (1, 21) (1, 23)
 
 Unary
 
@@ -643,276 +639,6 @@ Legacy unicode literals:
     NAME       'grün'        (2, 0) (2, 4)
     OP         '='           (2, 5) (2, 6)
     STRING     "U'green'"    (2, 7) (2, 15)
-
-Async/await extension:
-
-    >>> dump_tokens("async = 1")
-    ENCODING   'utf-8'       (0, 0) (0, 0)
-    NAME       'async'       (1, 0) (1, 5)
-    OP         '='           (1, 6) (1, 7)
-    NUMBER     '1'           (1, 8) (1, 9)
-
-    >>> dump_tokens("a = (async = 1)")
-    ENCODING   'utf-8'       (0, 0) (0, 0)
-    NAME       'a'           (1, 0) (1, 1)
-    OP         '='           (1, 2) (1, 3)
-    OP         '('           (1, 4) (1, 5)
-    NAME       'async'       (1, 5) (1, 10)
-    OP         '='           (1, 11) (1, 12)
-    NUMBER     '1'           (1, 13) (1, 14)
-    OP         ')'           (1, 14) (1, 15)
-
-    >>> dump_tokens("async()")
-    ENCODING   'utf-8'       (0, 0) (0, 0)
-    NAME       'async'       (1, 0) (1, 5)
-    OP         '('           (1, 5) (1, 6)
-    OP         ')'           (1, 6) (1, 7)
-
-    >>> dump_tokens("class async(Bar):pass")
-    ENCODING   'utf-8'       (0, 0) (0, 0)
-    NAME       'class'       (1, 0) (1, 5)
-    NAME       'async'       (1, 6) (1, 11)
-    OP         '('           (1, 11) (1, 12)
-    NAME       'Bar'         (1, 12) (1, 15)
-    OP         ')'           (1, 15) (1, 16)
-    OP         ':'           (1, 16) (1, 17)
-    NAME       'pass'        (1, 17) (1, 21)
-
-    >>> dump_tokens("class async:pass")
-    ENCODING   'utf-8'       (0, 0) (0, 0)
-    NAME       'class'       (1, 0) (1, 5)
-    NAME       'async'       (1, 6) (1, 11)
-    OP         ':'           (1, 11) (1, 12)
-    NAME       'pass'        (1, 12) (1, 16)
-
-    >>> dump_tokens("await = 1")
-    ENCODING   'utf-8'       (0, 0) (0, 0)
-    NAME       'await'       (1, 0) (1, 5)
-    OP         '='           (1, 6) (1, 7)
-    NUMBER     '1'           (1, 8) (1, 9)
-
-    >>> dump_tokens("foo.async")
-    ENCODING   'utf-8'       (0, 0) (0, 0)
-    NAME       'foo'         (1, 0) (1, 3)
-    OP         '.'           (1, 3) (1, 4)
-    NAME       'async'       (1, 4) (1, 9)
-
-    >>> dump_tokens("async for a in b: pass")
-    ENCODING   'utf-8'       (0, 0) (0, 0)
-    NAME       'async'       (1, 0) (1, 5)
-    NAME       'for'         (1, 6) (1, 9)
-    NAME       'a'           (1, 10) (1, 11)
-    NAME       'in'          (1, 12) (1, 14)
-    NAME       'b'           (1, 15) (1, 16)
-    OP         ':'           (1, 16) (1, 17)
-    NAME       'pass'        (1, 18) (1, 22)
-
-    >>> dump_tokens("async with a as b: pass")
-    ENCODING   'utf-8'       (0, 0) (0, 0)
-    NAME       'async'       (1, 0) (1, 5)
-    NAME       'with'        (1, 6) (1, 10)
-    NAME       'a'           (1, 11) (1, 12)
-    NAME       'as'          (1, 13) (1, 15)
-    NAME       'b'           (1, 16) (1, 17)
-    OP         ':'           (1, 17) (1, 18)
-    NAME       'pass'        (1, 19) (1, 23)
-
-    >>> dump_tokens("async.foo")
-    ENCODING   'utf-8'       (0, 0) (0, 0)
-    NAME       'async'       (1, 0) (1, 5)
-    OP         '.'           (1, 5) (1, 6)
-    NAME       'foo'         (1, 6) (1, 9)
-
-    >>> dump_tokens("async")
-    ENCODING   'utf-8'       (0, 0) (0, 0)
-    NAME       'async'       (1, 0) (1, 5)
-
-    >>> dump_tokens("async\\n#comment\\nawait")
-    ENCODING   'utf-8'       (0, 0) (0, 0)
-    NAME       'async'       (1, 0) (1, 5)
-    NEWLINE    '\\n'          (1, 5) (1, 6)
-    COMMENT    '#comment'    (2, 0) (2, 8)
-    NL         '\\n'          (2, 8) (2, 9)
-    NAME       'await'       (3, 0) (3, 5)
-
-    >>> dump_tokens("async\\n...\\nawait")
-    ENCODING   'utf-8'       (0, 0) (0, 0)
-    NAME       'async'       (1, 0) (1, 5)
-    NEWLINE    '\\n'          (1, 5) (1, 6)
-    OP         '...'         (2, 0) (2, 3)
-    NEWLINE    '\\n'          (2, 3) (2, 4)
-    NAME       'await'       (3, 0) (3, 5)
-
-    >>> dump_tokens("async\\nawait")
-    ENCODING   'utf-8'       (0, 0) (0, 0)
-    NAME       'async'       (1, 0) (1, 5)
-    NEWLINE    '\\n'          (1, 5) (1, 6)
-    NAME       'await'       (2, 0) (2, 5)
-
-    >>> dump_tokens("foo.async + 1")
-    ENCODING   'utf-8'       (0, 0) (0, 0)
-    NAME       'foo'         (1, 0) (1, 3)
-    OP         '.'           (1, 3) (1, 4)
-    NAME       'async'       (1, 4) (1, 9)
-    OP         '+'           (1, 10) (1, 11)
-    NUMBER     '1'           (1, 12) (1, 13)
-
-    >>> dump_tokens("async def foo(): pass")
-    ENCODING   'utf-8'       (0, 0) (0, 0)
-    ASYNC      'async'       (1, 0) (1, 5)
-    NAME       'def'         (1, 6) (1, 9)
-    NAME       'foo'         (1, 10) (1, 13)
-    OP         '('           (1, 13) (1, 14)
-    OP         ')'           (1, 14) (1, 15)
-    OP         ':'           (1, 15) (1, 16)
-    NAME       'pass'        (1, 17) (1, 21)
-
-    >>> dump_tokens('''async def foo():
-    ...   def foo(await):
-    ...     await = 1
-    ...   if 1:
-    ...     await
-    ... async += 1
-    ... ''')
-    ENCODING   'utf-8'       (0, 0) (0, 0)
-    ASYNC      'async'       (1, 0) (1, 5)
-    NAME       'def'         (1, 6) (1, 9)
-    NAME       'foo'         (1, 10) (1, 13)
-    OP         '('           (1, 13) (1, 14)
-    OP         ')'           (1, 14) (1, 15)
-    OP         ':'           (1, 15) (1, 16)
-    NEWLINE    '\\n'          (1, 16) (1, 17)
-    INDENT     '  '          (2, 0) (2, 2)
-    NAME       'def'         (2, 2) (2, 5)
-    NAME       'foo'         (2, 6) (2, 9)
-    OP         '('           (2, 9) (2, 10)
-    AWAIT      'await'       (2, 10) (2, 15)
-    OP         ')'           (2, 15) (2, 16)
-    OP         ':'           (2, 16) (2, 17)
-    NEWLINE    '\\n'          (2, 17) (2, 18)
-    INDENT     '    '        (3, 0) (3, 4)
-    AWAIT      'await'       (3, 4) (3, 9)
-    OP         '='           (3, 10) (3, 11)
-    NUMBER     '1'           (3, 12) (3, 13)
-    NEWLINE    '\\n'          (3, 13) (3, 14)
-    DEDENT     ''            (4, 2) (4, 2)
-    NAME       'if'          (4, 2) (4, 4)
-    NUMBER     '1'           (4, 5) (4, 6)
-    OP         ':'           (4, 6) (4, 7)
-    NEWLINE    '\\n'          (4, 7) (4, 8)
-    INDENT     '    '        (5, 0) (5, 4)
-    AWAIT      'await'       (5, 4) (5, 9)
-    NEWLINE    '\\n'          (5, 9) (5, 10)
-    DEDENT     ''            (6, 0) (6, 0)
-    DEDENT     ''            (6, 0) (6, 0)
-    NAME       'async'       (6, 0) (6, 5)
-    OP         '+='          (6, 6) (6, 8)
-    NUMBER     '1'           (6, 9) (6, 10)
-    NEWLINE    '\\n'          (6, 10) (6, 11)
-
-    >>> dump_tokens('''async def foo():
-    ...   async for i in 1: pass''')
-    ENCODING   'utf-8'       (0, 0) (0, 0)
-    ASYNC      'async'       (1, 0) (1, 5)
-    NAME       'def'         (1, 6) (1, 9)
-    NAME       'foo'         (1, 10) (1, 13)
-    OP         '('           (1, 13) (1, 14)
-    OP         ')'           (1, 14) (1, 15)
-    OP         ':'           (1, 15) (1, 16)
-    NEWLINE    '\\n'          (1, 16) (1, 17)
-    INDENT     '  '          (2, 0) (2, 2)
-    ASYNC      'async'       (2, 2) (2, 7)
-    NAME       'for'         (2, 8) (2, 11)
-    NAME       'i'           (2, 12) (2, 13)
-    NAME       'in'          (2, 14) (2, 16)
-    NUMBER     '1'           (2, 17) (2, 18)
-    OP         ':'           (2, 18) (2, 19)
-    NAME       'pass'        (2, 20) (2, 24)
-    DEDENT     ''            (3, 0) (3, 0)
-
-    >>> dump_tokens('''async def foo(async): await''')
-    ENCODING   'utf-8'       (0, 0) (0, 0)
-    ASYNC      'async'       (1, 0) (1, 5)
-    NAME       'def'         (1, 6) (1, 9)
-    NAME       'foo'         (1, 10) (1, 13)
-    OP         '('           (1, 13) (1, 14)
-    ASYNC      'async'       (1, 14) (1, 19)
-    OP         ')'           (1, 19) (1, 20)
-    OP         ':'           (1, 20) (1, 21)
-    AWAIT      'await'       (1, 22) (1, 27)
-
-    >>> dump_tokens('''def f():
-    ...
-    ...   def baz(): pass
-    ...   async def bar(): pass
-    ...
-    ...   await = 2''')
-    ENCODING   'utf-8'       (0, 0) (0, 0)
-    NAME       'def'         (1, 0) (1, 3)
-    NAME       'f'           (1, 4) (1, 5)
-    OP         '('           (1, 5) (1, 6)
-    OP         ')'           (1, 6) (1, 7)
-    OP         ':'           (1, 7) (1, 8)
-    NEWLINE    '\\n'          (1, 8) (1, 9)
-    NL         '\\n'          (2, 0) (2, 1)
-    INDENT     '  '          (3, 0) (3, 2)
-    NAME       'def'         (3, 2) (3, 5)
-    NAME       'baz'         (3, 6) (3, 9)
-    OP         '('           (3, 9) (3, 10)
-    OP         ')'           (3, 10) (3, 11)
-    OP         ':'           (3, 11) (3, 12)
-    NAME       'pass'        (3, 13) (3, 17)
-    NEWLINE    '\\n'          (3, 17) (3, 18)
-    ASYNC      'async'       (4, 2) (4, 7)
-    NAME       'def'         (4, 8) (4, 11)
-    NAME       'bar'         (4, 12) (4, 15)
-    OP         '('           (4, 15) (4, 16)
-    OP         ')'           (4, 16) (4, 17)
-    OP         ':'           (4, 17) (4, 18)
-    NAME       'pass'        (4, 19) (4, 23)
-    NEWLINE    '\\n'          (4, 23) (4, 24)
-    NL         '\\n'          (5, 0) (5, 1)
-    NAME       'await'       (6, 2) (6, 7)
-    OP         '='           (6, 8) (6, 9)
-    NUMBER     '2'           (6, 10) (6, 11)
-    DEDENT     ''            (7, 0) (7, 0)
-
-    >>> dump_tokens('''async def f():
-    ...
-    ...   def baz(): pass
-    ...   async def bar(): pass
-    ...
-    ...   await = 2''')
-    ENCODING   'utf-8'       (0, 0) (0, 0)
-    ASYNC      'async'       (1, 0) (1, 5)
-    NAME       'def'         (1, 6) (1, 9)
-    NAME       'f'           (1, 10) (1, 11)
-    OP         '('           (1, 11) (1, 12)
-    OP         ')'           (1, 12) (1, 13)
-    OP         ':'           (1, 13) (1, 14)
-    NEWLINE    '\\n'          (1, 14) (1, 15)
-    NL         '\\n'          (2, 0) (2, 1)
-    INDENT     '  '          (3, 0) (3, 2)
-    NAME       'def'         (3, 2) (3, 5)
-    NAME       'baz'         (3, 6) (3, 9)
-    OP         '('           (3, 9) (3, 10)
-    OP         ')'           (3, 10) (3, 11)
-    OP         ':'           (3, 11) (3, 12)
-    NAME       'pass'        (3, 13) (3, 17)
-    NEWLINE    '\\n'          (3, 17) (3, 18)
-    ASYNC      'async'       (4, 2) (4, 7)
-    NAME       'def'         (4, 8) (4, 11)
-    NAME       'bar'         (4, 12) (4, 15)
-    OP         '('           (4, 15) (4, 16)
-    OP         ')'           (4, 16) (4, 17)
-    OP         ':'           (4, 17) (4, 18)
-    NAME       'pass'        (4, 19) (4, 23)
-    NEWLINE    '\\n'          (4, 23) (4, 24)
-    NL         '\\n'          (5, 0) (5, 1)
-    AWAIT      'await'       (6, 2) (6, 7)
-    OP         '='           (6, 8) (6, 9)
-    NUMBER     '2'           (6, 10) (6, 11)
-    DEDENT     ''            (7, 0) (7, 0)
 """
 
 from test import support
@@ -920,8 +646,8 @@ from tokenize import (tokenize, _tokenize, untokenize, NUMBER, NAME, OP,
                      STRING, ENDMARKER, ENCODING, tok_name, detect_encoding,
                      open as tokenize_open, Untokenizer)
 from io import BytesIO
-from unittest import TestCase, mock
-import os
+from unittest import TestCase
+import os, sys, glob
 import token
 
 def dump_tokens(s):
@@ -1332,14 +1058,6 @@ class TestDetectEncoding(TestCase):
             ins = Bunk(lines, path)
             detect_encoding(ins.readline)
 
-    def test_open_error(self):
-        # Issue #23840: open() must close the binary file on error
-        m = BytesIO(b'#coding:xxx')
-        with mock.patch('tokenize._builtin_open', return_value=m):
-            self.assertRaises(SyntaxError, tokenize_open, 'foobar')
-        self.assertTrue(m.closed)
-
-
 
 class TestTokenize(TestCase):
 
@@ -1348,7 +1066,7 @@ class TestTokenize(TestCase):
         encoding = object()
         encoding_used = None
         def mock_detect_encoding(readline):
-            return encoding, [b'first', b'second']
+            return encoding, ['first', 'second']
 
         def mock__tokenize(readline, encoding):
             nonlocal encoding_used
@@ -1367,7 +1085,7 @@ class TestTokenize(TestCase):
             counter += 1
             if counter == 5:
                 return b''
-            return str(counter).encode()
+            return counter
 
         orig_detect_encoding = tokenize_module.detect_encoding
         orig__tokenize = tokenize_module._tokenize
@@ -1375,24 +1093,12 @@ class TestTokenize(TestCase):
         tokenize_module._tokenize = mock__tokenize
         try:
             results = tokenize(mock_readline)
-            self.assertEqual(list(results),
-                             [b'first', b'second', b'1', b'2', b'3', b'4'])
+            self.assertEqual(list(results), ['first', 'second', 1, 2, 3, 4])
         finally:
             tokenize_module.detect_encoding = orig_detect_encoding
             tokenize_module._tokenize = orig__tokenize
 
         self.assertTrue(encoding_used, encoding)
-
-    def test_oneline_defs(self):
-        buf = []
-        for i in range(500):
-            buf.append('def i{i}(): return {i}'.format(i=i))
-        buf.append('OK')
-        buf = '\n'.join(buf)
-
-        # Test that 500 consequent, one-line defs is OK
-        toks = list(tokenize(BytesIO(buf.encode('utf-8')).readline))
-        self.assertEqual(toks[-2].string, 'OK') # [-1] is always ENDMARKER
 
     def assertExactTypeEqual(self, opstr, *optypes):
         tokens = list(tokenize(BytesIO(opstr.encode('utf-8')).readline))
@@ -1448,7 +1154,6 @@ class TestTokenize(TestCase):
         self.assertExactTypeEqual('//', token.DOUBLESLASH)
         self.assertExactTypeEqual('//=', token.DOUBLESLASHEQUAL)
         self.assertExactTypeEqual('@', token.AT)
-        self.assertExactTypeEqual('@=', token.ATEQUAL)
 
         self.assertExactTypeEqual('a**2+b**2==c**2',
                                   NAME, token.DOUBLESTAR, NUMBER,
@@ -1513,22 +1218,6 @@ class UntokenizeTest(TestCase):
         self.assertEqual(untokenize(iter(tokens)), b'Hello ')
 
 
-class TestRoundtrip(TestCase):
-    def roundtrip(self, code):
-        if isinstance(code, str):
-            code = code.encode('utf-8')
-        return untokenize(tokenize(BytesIO(code).readline)).decode('utf-8')
-
-    def test_indentation_semantics_retained(self):
-        """
-        Ensure that although whitespace might be mutated in a roundtrip,
-        the semantic meaning of the indentation remains consistent.
-        """
-        code = "if False:\n\tx=3\n\tx=3\n"
-        codelines = self.roundtrip(code).split('\n')
-        self.assertEqual(codelines[1], codelines[2])
-
-
 __test__ = {"doctests" : doctests, 'decistmt': decistmt}
 
 def test_main():
@@ -1539,7 +1228,6 @@ def test_main():
     support.run_unittest(TestDetectEncoding)
     support.run_unittest(TestTokenize)
     support.run_unittest(UntokenizeTest)
-    support.run_unittest(TestRoundtrip)
 
 if __name__ == "__main__":
     test_main()

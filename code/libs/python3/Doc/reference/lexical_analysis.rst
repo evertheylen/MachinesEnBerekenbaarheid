@@ -81,9 +81,7 @@ Encoding declarations
 If a comment in the first or second line of the Python script matches the
 regular expression ``coding[=:]\s*([-\w.]+)``, this comment is processed as an
 encoding declaration; the first group of this expression names the encoding of
-the source code file. The encoding declaration must appear on a line of its
-own. If it is the second line, the first line must also be a comment-only line.
-The recommended forms of an encoding expression are ::
+the source code file. The recommended forms of this expression are ::
 
    # -*- coding: <encoding-name> -*-
 
@@ -100,7 +98,7 @@ among others, by Microsoft's :program:`notepad`).
 
 If an encoding is declared, the encoding name must be recognized by Python. The
 encoding is used for all lexical analysis, including string literals, comments
-and identifiers.
+and identifiers. The encoding declaration must appear on a line of its own.
 
 .. XXX there should be a list of supported encodings.
 
@@ -313,7 +311,7 @@ The Unicode category codes mentioned above stand for:
 * *Nd* - decimal numbers
 * *Pc* - connector punctuations
 * *Other_ID_Start* - explicit list of characters in `PropList.txt
-  <http://www.unicode.org/Public/8.0.0/ucd/PropList.txt>`_ to support backwards
+  <http://www.unicode.org/Public/6.3.0/ucd/PropList.txt>`_ to support backwards
   compatibility
 * *Other_ID_Continue* - likewise
 
@@ -634,7 +632,8 @@ for disambiguation with C-style octal literals, which Python used before version
 Some examples of integer literals::
 
    7     2147483647                        0o177    0b100110111
-   3     79228162514264337593543950336     0o377    0xdeadbeef
+   3     79228162514264337593543950336     0o377    0x100000000
+         79228162514264337593543950336              0xdeadbeef
 
 
 .. _floating:
@@ -692,7 +691,7 @@ Operators
 
 The following tokens are operators::
 
-   +       -       *       **      /       //      %      @
+   +       -       *       **      /       //      %
    <<      >>      &       |       ^       ~
    <       >       <=      >=      ==      !=
 
@@ -708,7 +707,7 @@ The following tokens serve as delimiters in the grammar::
 
    (       )       [       ]       {       }
    ,       :       .       ;       @       =       ->
-   +=      -=      *=      /=      //=     %=      @=
+   +=      -=      *=      /=      //=     %=
    &=      |=      ^=      >>=     <<=     **=
 
 The period can also occur in floating-point and imaginary literals.  A sequence
@@ -729,4 +728,4 @@ occurrence outside string literals and comments is an unconditional error::
 
 .. rubric:: Footnotes
 
-.. [#] http://www.unicode.org/Public/8.0.0/ucd/NameAliases.txt
+.. [#] http://www.unicode.org/Public/6.3.0/ucd/NameAliases.txt

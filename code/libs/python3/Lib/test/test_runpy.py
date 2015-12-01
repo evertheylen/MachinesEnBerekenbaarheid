@@ -8,10 +8,10 @@ import tempfile
 import importlib, importlib.machinery, importlib.util
 import py_compile
 from test.support import (
-    forget, make_legacy_pyc, unload, verbose, no_tracing,
-    create_empty_file, temp_dir)
-from test.support.script_helper import (
-    make_pkg, make_script, make_zip_pkg, make_zip_script)
+    forget, make_legacy_pyc, run_unittest, unload, verbose, no_tracing,
+    create_empty_file)
+from test.script_helper import (
+    make_pkg, make_script, make_zip_pkg, make_zip_script, temp_dir)
 
 
 import runpy
@@ -269,7 +269,7 @@ class RunModuleTestCase(unittest.TestCase, CodeExecutionMixin):
             if verbose > 1: print(ex) # Persist with cleaning up
 
     def _fix_ns_for_legacy_pyc(self, ns, alter_sys):
-        char_to_add = "c"
+        char_to_add = "c" if __debug__ else "o"
         ns["__file__"] += char_to_add
         ns["__cached__"] = ns["__file__"]
         spec = ns["__spec__"]
@@ -673,7 +673,7 @@ class RunPathTestCase(unittest.TestCase, CodeExecutionMixin):
             script_name = self._make_test_script(script_dir, mod_name, source)
             zip_name, fname = make_zip_script(script_dir, 'test_zip', script_name)
             msg = "recursion depth exceeded"
-            self.assertRaisesRegex(RecursionError, msg, run_path, zip_name)
+            self.assertRaisesRegex(RuntimeError, msg, run_path, zip_name)
 
     def test_encoding(self):
         with temp_dir() as script_dir:

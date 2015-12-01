@@ -21,7 +21,7 @@ errors = 'surrogatepass'
 class UnicodeMethodsTest(unittest.TestCase):
 
     # update this, if the database changes
-    expectedchecksum = '5971760872b2f98bb9c701e6c0db3273d756b3ec'
+    expectedchecksum = 'e74e878de71b6e780ffac271785c3cb58f6251f3'
 
     def test_method_checksum(self):
         h = hashlib.sha1()
@@ -79,9 +79,8 @@ class UnicodeDatabaseTest(unittest.TestCase):
 
 class UnicodeFunctionsTest(UnicodeDatabaseTest):
 
-    # Update this if the database changes. Make sure to do a full rebuild
-    # (e.g. 'make distclean && make') to get the correct checksum.
-    expectedchecksum = '5e74827cd07f9e546a30f34b7bcf6cc2eac38c8c'
+    # update this, if the database changes
+    expectedchecksum = 'f0b74d26776331cc7bdc3a4698f037d73f2cee2b'
     def test_function_checksum(self):
         data = []
         h = hashlib.sha1()
@@ -313,5 +312,12 @@ class UnicodeMiscTest(UnicodeDatabaseTest):
                 self.assertEqual(len(lines), 1,
                                  r"\u%.4x should not be a linebreak" % i)
 
+def test_main():
+    test.support.run_unittest(
+        UnicodeMiscTest,
+        UnicodeMethodsTest,
+        UnicodeFunctionsTest
+    )
+
 if __name__ == "__main__":
-    unittest.main()
+    test_main()

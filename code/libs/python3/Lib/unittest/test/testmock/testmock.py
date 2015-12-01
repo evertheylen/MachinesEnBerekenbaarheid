@@ -1,6 +1,5 @@
 import copy
 import sys
-import tempfile
 
 import unittest
 from unittest.test.testmock.support import is_instance
@@ -174,15 +173,6 @@ class MockTest(unittest.TestCase):
         self.assertEqual([mock(), mock(), mock()], [3, 2, 1],
                           "callable side effect not used correctly")
 
-    def test_autospec_side_effect_exception(self):
-        # Test for issue 23661
-        def f():
-            pass
-
-        mock = create_autospec(f)
-        mock.side_effect = ValueError('Bazinga!')
-        self.assertRaisesRegex(ValueError, 'Bazinga!', mock)
-
     @unittest.skipUnless('java' in sys.platform,
                           'This test only applies to Jython')
     def test_java_exception_side_effect(self):
@@ -247,9 +237,6 @@ class MockTest(unittest.TestCase):
         # used to cause recursion
         mock.reset_mock()
 
-    def test_reset_mock_on_mock_open_issue_18622(self):
-        a = mock.mock_open()
-        a.reset_mock()
 
     def test_call(self):
         mock = Mock()
@@ -1200,42 +1187,6 @@ class MockTest(unittest.TestCase):
         m = mock.create_autospec(object(), name='sweet_func')
         self.assertIn('sweet_func', repr(m))
 
-    #Issue21238
-    def test_mock_unsafe(self):
-        m = Mock()
-        with self.assertRaises(AttributeError):
-            m.assert_foo_call()
-        with self.assertRaises(AttributeError):
-            m.assret_foo_call()
-        m = Mock(unsafe=True)
-        m.assert_foo_call()
-        m.assret_foo_call()
-
-    #Issue21262
-    def test_assert_not_called(self):
-        m = Mock()
-        m.hello.assert_not_called()
-        m.hello()
-        with self.assertRaises(AssertionError):
-            m.hello.assert_not_called()
-
-    #Issue21256 printout of keyword args should be in deterministic order
-    def test_sorted_call_signature(self):
-        m = Mock()
-        m.hello(name='hello', daddy='hero')
-        text = "call(daddy='hero', name='hello')"
-        self.assertEqual(repr(m.hello.call_args), text)
-
-    #Issue21270 overrides tuple methods for mock.call objects
-    def test_override_tuple_methods(self):
-        c = call.count()
-        i = call.index(132,'hello')
-        m = Mock()
-        m.count()
-        m.index(132,"hello")
-        self.assertEqual(m.method_calls[0], c)
-        self.assertEqual(m.method_calls[1], i)
-
     def test_mock_add_spec(self):
         class _One(object):
             one = 1
@@ -1372,32 +1323,6 @@ class MockTest(unittest.TestCase):
             self.assertEqual(m.mock_calls, [call.__int__(), call.__float__()])
             self.assertEqual(m.method_calls, [])
 
-    def test_mock_open_reuse_issue_21750(self):
-        mocked_open = mock.mock_open(read_data='data')
-        f1 = mocked_open('a-name')
-        f1_data = f1.read()
-        f2 = mocked_open('another-name')
-        f2_data = f2.read()
-        self.assertEqual(f1_data, f2_data)
-
-    def test_mock_open_write(self):
-        # Test exception in file writing write()
-        mock_namedtemp = mock.mock_open(mock.MagicMock(name='JLV'))
-        with mock.patch('tempfile.NamedTemporaryFile', mock_namedtemp):
-            mock_filehandle = mock_namedtemp.return_value
-            mock_write = mock_filehandle.write
-            mock_write.side_effect = OSError('Test 2 Error')
-            def attempt():
-                tempfile.NamedTemporaryFile().write('asd')
-            self.assertRaises(OSError, attempt)
-
-    def test_mock_open_alter_readline(self):
-        mopen = mock.mock_open(read_data='foo\nbarn')
-        mopen.return_value.readline.side_effect = lambda *args:'abc'
-        first = mopen().readline()
-        second = mopen().readline()
-        self.assertEqual('abc', first)
-        self.assertEqual('abc', second)
 
     def test_mock_parents(self):
         for Klass in Mock, MagicMock:

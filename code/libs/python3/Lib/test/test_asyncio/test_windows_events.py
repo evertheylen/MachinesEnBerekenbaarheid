@@ -37,7 +37,7 @@ class ProactorTests(test_utils.TestCase):
     def test_close(self):
         a, b = self.loop._socketpair()
         trans = self.loop._make_socket_transport(a, asyncio.Protocol())
-        f = asyncio.ensure_future(self.loop.sock_recv(b, 100))
+        f = asyncio.async(self.loop.sock_recv(b, 100))
         trans.close()
         self.loop.run_until_complete(f)
         self.assertEqual(f.result(), b'')
@@ -132,8 +132,7 @@ class ProactorTests(test_utils.TestCase):
         self.assertTrue(fut.result())
         self.assertTrue(0 <= elapsed < 0.3, elapsed)
 
-        # asyncio issue #195: cancelling a done _WaitHandleFuture
-        # must not crash
+        # Tulip issue #195: cancelling a done _WaitHandleFuture must not crash
         fut.cancel()
 
     def test_wait_for_handle_cancel(self):
@@ -150,8 +149,7 @@ class ProactorTests(test_utils.TestCase):
         elapsed = self.loop.time() - start
         self.assertTrue(0 <= elapsed < 0.1, elapsed)
 
-        # asyncio issue #195: cancelling a _WaitHandleFuture twice
-        # must not crash
+        # Tulip issue #195: cancelling a _WaitHandleFuture twice must not crash
         fut = self.loop._proactor.wait_for_handle(event)
         fut.cancel()
         fut.cancel()

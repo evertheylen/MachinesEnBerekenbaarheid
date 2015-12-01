@@ -23,6 +23,7 @@ color formats, and for calculating other color values.
 import sys
 import re
 from types import *
+import operator
 
 class BadColor(Exception):
     pass
@@ -229,8 +230,9 @@ def triplet_to_rrggbb(rgbtuple):
     return hexname
 
 
+_maxtuple = (256.0,) * 3
 def triplet_to_fractional_rgb(rgbtuple):
-    return [x / 256 for x in rgbtuple]
+    return list(map(operator.__div__, rgbtuple, _maxtuple))
 
 
 def triplet_to_brightness(rgbtuple):

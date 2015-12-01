@@ -10,10 +10,7 @@ import unittest
 from unittest.mock import patch
 from test import support
 import os
-try:
-    import ssl
-except ImportError:
-    ssl = None
+import ssl
 import sys
 import tempfile
 from nturl2path import url2pathname, pathname2url
@@ -383,7 +380,6 @@ Content-Type: text/html; charset=iso-8859-1
         with support.check_warnings(('',DeprecationWarning)):
             urllib.request.URLopener()
 
-    @unittest.skipUnless(ssl, "ssl module required")
     def test_cafile_and_context(self):
         context = ssl.create_default_context()
         with self.assertRaises(ValueError):
@@ -1298,6 +1294,21 @@ class Pathname_Tests(unittest.TestCase):
 class Utility_Tests(unittest.TestCase):
     """Testcase to test the various utility functions in the urllib."""
 
+    def test_splitpasswd(self):
+        """Some of password examples are not sensible, but it is added to
+        confirming to RFC2617 and addressing issue4675.
+        """
+        self.assertEqual(('user', 'ab'),urllib.parse.splitpasswd('user:ab'))
+        self.assertEqual(('user', 'a\nb'),urllib.parse.splitpasswd('user:a\nb'))
+        self.assertEqual(('user', 'a\tb'),urllib.parse.splitpasswd('user:a\tb'))
+        self.assertEqual(('user', 'a\rb'),urllib.parse.splitpasswd('user:a\rb'))
+        self.assertEqual(('user', 'a\fb'),urllib.parse.splitpasswd('user:a\fb'))
+        self.assertEqual(('user', 'a\vb'),urllib.parse.splitpasswd('user:a\vb'))
+        self.assertEqual(('user', 'a:b'),urllib.parse.splitpasswd('user:a:b'))
+        self.assertEqual(('user', 'a b'),urllib.parse.splitpasswd('user:a b'))
+        self.assertEqual(('user 2', 'ab'),urllib.parse.splitpasswd('user 2:ab'))
+        self.assertEqual(('user+1', 'a+b'),urllib.parse.splitpasswd('user+1:a+b'))
+
     def test_thishost(self):
         """Test the urllib.request.thishost utility function returns a tuple"""
         self.assertIsInstance(urllib.request.thishost(), tuple)
@@ -1335,7 +1346,7 @@ class URLopener_Tests(unittest.TestCase):
 #     serv.settimeout(3)
 #     serv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 #     serv.bind(("", 9093))
-#     serv.listen()
+#     serv.listen(5)
 #     try:
 #         conn, addr = serv.accept()
 #         conn.send("1 Hola mundo\n")

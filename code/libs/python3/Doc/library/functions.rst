@@ -156,12 +156,11 @@ are always available.  They are listed here in alphabetical order.
 
 .. function:: chr(i)
 
-   Return the string representing a character whose Unicode code point is the
-   integer *i*.  For example, ``chr(97)`` returns the string ``'a'``, while
-   ``chr(957)`` returns the string ``'ν'``. This is the inverse of :func:`ord`.
-
-   The valid range for the argument is from 0 through 1,114,111 (0x10FFFF in
-   base 16).  :exc:`ValueError` will be raised if *i* is outside that range.
+   Return the string representing a character whose Unicode code point is the integer
+   *i*.  For example, ``chr(97)`` returns the string ``'a'``. This is the
+   inverse of :func:`ord`.  The valid range for the argument is from 0 through
+   1,114,111 (0x10FFFF in base 16).  :exc:`ValueError` will be raised if *i* is
+   outside that range.
 
 
 .. function:: classmethod(function)
@@ -249,7 +248,7 @@ are always available.  They are listed here in alphabetical order.
 
 .. class:: complex([real[, imag]])
 
-   Return a complex number with the value *real* + *imag*\*1j or convert a string
+   Return a complex number with the value *real* + *imag*\*j or convert a string
    or number to a complex number.  If the first parameter is a string, it will
    be interpreted as a complex number and the function must be called without a
    second parameter.  The second parameter can never be a string. Each argument
@@ -973,11 +972,9 @@ are always available.  They are listed here in alphabetical order.
      Characters not supported by the encoding are replaced with the
      appropriate XML character reference ``&#nnn;``.
 
-   * ``'backslashreplace'`` replaces malformed data by Python's backslashed
-     escape sequences.
-
-   * ``'namereplace'`` (also only supported when writing)
-     replaces unsupported characters with ``\N{...}`` escape sequences.
+   * ``'backslashreplace'`` (also only supported when writing)
+     replaces unsupported characters with Python's backslashed escape
+     sequences.
 
    .. index::
       single: universal newlines; open() built-in function
@@ -1002,8 +999,8 @@ are always available.  They are listed here in alphabetical order.
 
    If *closefd* is ``False`` and a file descriptor rather than a filename was
    given, the underlying file descriptor will be kept open when the file is
-   closed.  If a filename is given *closefd* must be ``True`` (the default)
-   otherwise an error will be raised.
+   closed.  If a filename is given *closefd* has no effect and must be ``True``
+   (the default).
 
    A custom opener can be used by passing a callable as *opener*. The underlying
    file descriptor for the file object is then obtained by calling *opener* with
@@ -1065,18 +1062,14 @@ are always available.  They are listed here in alphabetical order.
 
       The ``'U'`` mode.
 
-   .. versionchanged:: 3.5
-      If the system call is interrupted and the signal handler does not raise an
-      exception, the function now retries the system call instead of raising an
-      :exc:`InterruptedError` exception (see :pep:`475` for the rationale).
 
-
+.. XXX works for bytes too, but should it?
 .. function:: ord(c)
 
    Given a string representing one Unicode character, return an integer
-   representing the Unicode code point of that character.  For example,
-   ``ord('a')`` returns the integer ``97`` and ``ord('ν')`` returns ``957``.
-   This is the inverse of :func:`chr`.
+   representing the Unicode code
+   point of that character.  For example, ``ord('a')`` returns the integer ``97``
+   and ``ord('\u2020')`` returns ``8224``.  This is the inverse of :func:`chr`.
 
 
 .. function:: pow(x, y[, z])
@@ -1193,9 +1186,6 @@ are always available.  They are listed here in alphabetical order.
    The returned property object also has the attributes ``fget``, ``fset``, and
    ``fdel`` corresponding to the constructor arguments.
 
-   .. versionchanged:: 3.5
-      The docstrings of property objects are now writeable.
-
 
 .. _func-range:
 .. function:: range(stop)
@@ -1228,8 +1218,8 @@ are always available.  They are listed here in alphabetical order.
 .. function:: round(number[, ndigits])
 
    Return the floating point value *number* rounded to *ndigits* digits after
-   the decimal point.  If *ndigits* is omitted, it returns the nearest integer
-   to its input.  Delegates to ``number.__round__(ndigits)``.
+   the decimal point.  If *ndigits* is omitted, it defaults to zero. Delegates
+   to ``number.__round__(ndigits)``.
 
    For the built-in types supporting :func:`round`, values are rounded to the
    closest multiple of 10 to the power minus *ndigits*; if two multiples are
@@ -1495,9 +1485,7 @@ are always available.  They are listed here in alphabetical order.
 
    The left-to-right evaluation order of the iterables is guaranteed. This
    makes possible an idiom for clustering a data series into n-length groups
-   using ``zip(*[iter(s)]*n)``.  This repeats the *same* iterator ``n`` times
-   so that each output tuple has the result of ``n`` calls to the iterator.
-   This has the effect of dividing the input into n-length chunks.
+   using ``zip(*[iter(s)]*n)``.
 
    :func:`zip` should only be used with unequal length inputs when you don't
    care about trailing, unmatched values from the longer iterables.  If those

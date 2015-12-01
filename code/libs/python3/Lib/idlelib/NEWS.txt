@@ -1,14 +1,5 @@
-What's New in IDLE 3.5.0?
+What's New in Idle 3.4.3?
 =========================
-*Release date: 2015-09-13* ??
-
-- Issue #23184: remove unused names and imports in idlelib.
-  Initial patch by Al Sweigart.
-
-- Issue #20577: Configuration of the max line length for the FormatParagraph
-  extension has been moved from the General tab of the Idle preferences dialog
-  to the FormatParagraph tab of the Config Extensions dialog.
-  Patch by Tal Einat.
 
 - Issue #16893: Update Idle doc chapter to match current Idle and add new
   information.
@@ -29,9 +20,10 @@ What's New in IDLE 3.5.0?
 
 - Issue #21986: Code objects are not normally pickled by the pickle module.
   To match this, they are no longer pickled when running under Idle.
-  
-- Issue #23180: Rename IDLE "Windows" menu item to "Window".
-  Patch by Al Sweigart.
+
+
+What's New in IDLE 3.4.2?
+=========================
 
 - Issue #17390: Adjust Editor window title; remove 'Python',
   move version to end.
@@ -67,8 +59,13 @@ What's New in IDLE 3.5.0?
 
 - Issue #18409: Add unittest for AutoComplete. Patch by Phil Webster.
 
-- Issue #21477: htest.py - Improve framework, complete set of tests.
-  Patches by Saimadhav Heblikar
+- Issue #18104: Add idlelib/idle_test/htest.py with a few sample tests to begin
+  consolidating and improving human-validated tests of Idle. Change other files
+  as needed to work with htest.  Running the module as __main__ runs all tests.
+
+
+What's New in IDLE 3.4.1?
+=========================
 
 - Issue #18104: Add idlelib/idle_test/htest.py with a few sample tests to begin
   consolidating and improving human-validated tests of Idle. Change other files
@@ -84,7 +81,6 @@ What's New in IDLE 3.5.0?
 
 What's New in IDLE 3.4.0?
 =========================
-*Release date: 2014-03-16*
 
 - Issue #17390: Display Python version on Idle title bar.
   Initial patch by Edmond Burnett.
@@ -102,7 +98,6 @@ What's New in IDLE 3.4.0?
 
 What's New in IDLE 3.3.0?
 =========================
-*Release date: 2012-09-29*
 
 - Issue #17625: Close the replace dialog after it is used.
 
@@ -145,6 +140,7 @@ What's New in IDLE 3.3.0?
 
 What's New in IDLE 3.2.1?
 =========================
+
 *Release date: 15-May-11*
 
 - Issue #6378: Further adjust idle.bat to start associated Python
@@ -162,6 +158,7 @@ What's New in IDLE 3.2.1?
 
 What's New in IDLE 3.1b1?
 =========================
+
 *Release date: 06-May-09*
 
 - Use of 'filter' in keybindingDialog.py was causing custom key assignment to
@@ -170,6 +167,7 @@ What's New in IDLE 3.1b1?
 
 What's New in IDLE 3.1a1?
 =========================
+
 *Release date: 07-Mar-09*
 
 - Issue #4815: Offer conversion to UTF-8 if source files have
@@ -187,6 +185,7 @@ What's New in IDLE 3.1a1?
 
 What's New in IDLE 2.7? (UNRELEASED, but merged into 3.1 releases above.)
 =======================
+
 *Release date: XX-XXX-2010*
 
 - idle.py modified and simplified to better support developing experimental

@@ -123,9 +123,11 @@ def overrideRootMenu(root, flist):
     #
     # Due to a (mis-)feature of TkAqua the user will also see an empty Help
     # menu.
-    from tkinter import Menu
+    from tkinter import Menu, Text, Text
+    from idlelib.EditorWindow import prepstr, get_accelerator
     from idlelib import Bindings
     from idlelib import WindowList
+    from idlelib.MultiCall import MultiCallCreator
 
     closeItem = Bindings.menudefs[0][1][-2]
 
@@ -145,7 +147,7 @@ def overrideRootMenu(root, flist):
     root.configure(menu=menubar)
     menudict = {}
 
-    menudict['windows'] = menu = Menu(menubar, name='windows', tearoff=0)
+    menudict['windows'] = menu = Menu(menubar, name='windows')
     menubar.add_cascade(label='Window', menu=menu, underline=0)
 
     def postwindowsmenu(menu=menu):
@@ -191,8 +193,7 @@ def overrideRootMenu(root, flist):
 
     if isCarbonTk():
         # for Carbon AquaTk, replace the default Tk apple menu
-        menudict['application'] = menu = Menu(menubar, name='apple',
-                                              tearoff=0)
+        menudict['application'] = menu = Menu(menubar, name='apple')
         menubar.add_cascade(label='IDLE', menu=menu)
         Bindings.menudefs.insert(0,
             ('application', [

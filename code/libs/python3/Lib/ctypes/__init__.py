@@ -237,8 +237,14 @@ _check_size(c_char)
 
 class c_char_p(_SimpleCData):
     _type_ = "z"
-    def __repr__(self):
-        return "%s(%s)" % (self.__class__.__name__, c_void_p.from_buffer(self).value)
+    if _os.name == "nt":
+        def __repr__(self):
+            if not windll.kernel32.IsBadStringPtrA(self, -1):
+                return "%s(%r)" % (self.__class__.__name__, self.value)
+            return "%s(%s)" % (self.__class__.__name__, cast(self, c_void_p).value)
+    else:
+        def __repr__(self):
+            return "%s(%s)" % (self.__class__.__name__, cast(self, c_void_p).value)
 _check_size(c_char_p, "P")
 
 class c_void_p(_SimpleCData):
@@ -253,8 +259,6 @@ from _ctypes import POINTER, pointer, _pointer_type_cache
 
 class c_wchar_p(_SimpleCData):
     _type_ = "Z"
-    def __repr__(self):
-        return "%s(%s)" % (self.__class__.__name__, c_void_p.from_buffer(self).value)
 
 class c_wchar(_SimpleCData):
     _type_ = "u"
@@ -349,7 +353,7 @@ class CDLL(object):
             self._handle = handle
 
     def __repr__(self):
-        return "<%s '%s', handle %x at %#x>" % \
+        return "<%s '%s', handle %x at %x>" % \
                (self.__class__.__name__, self._name,
                 (self._handle & (_sys.maxsize*2 + 1)),
                 id(self) & (_sys.maxsize*2 + 1))

@@ -765,7 +765,6 @@ I_set_sw(void *ptr, PyObject *value, Py_ssize_t size)
     if (get_ulong(value, &val) < 0)
         return  NULL;
     memcpy(&field, ptr, sizeof(field));
-    field = SWAP_INT(field);
     field = SET(unsigned int, field, (unsigned int)val, size);
     field = SWAP_INT(field);
     memcpy(ptr, &field, sizeof(field));
@@ -1355,6 +1354,14 @@ z_get(void *ptr, Py_ssize_t size)
 {
     /* XXX What about invalid pointers ??? */
     if (*(void **)ptr) {
+#if defined(MS_WIN32) && !defined(_WIN32_WCE)
+        if (IsBadStringPtrA(*(char **)ptr, -1)) {
+            PyErr_Format(PyExc_ValueError,
+                         "invalid string pointer %p",
+                         *(char **)ptr);
+            return NULL;
+        }
+#endif
         return PyBytes_FromStringAndSize(*(char **)ptr,
                                          strlen(*(char **)ptr));
     } else {
@@ -1411,6 +1418,14 @@ Z_get(void *ptr, Py_ssize_t size)
     wchar_t *p;
     p = *(wchar_t **)ptr;
     if (p) {
+#if defined(MS_WIN32) && !defined(_WIN32_WCE)
+        if (IsBadStringPtrW(*(wchar_t **)ptr, -1)) {
+            PyErr_Format(PyExc_ValueError,
+                         "invalid string pointer %p",
+                         *(wchar_t **)ptr);
+            return NULL;
+        }
+#endif
         return PyUnicode_FromWideChar(p, wcslen(p));
     } else {
         Py_INCREF(Py_None);
@@ -1440,15 +1455,15 @@ BSTR_set(void *ptr, PyObject *value, Py_ssize_t size)
     /* create a BSTR from value */
     if (value) {
         wchar_t* wvalue;
-        Py_ssize_t wsize;
-        wvalue = PyUnicode_AsUnicodeAndSize(value, &wsize);
+        Py_ssize_t size;
+        wvalue = PyUnicode_AsUnicodeAndSize(value, &size);
         if (wvalue == NULL)
             return NULL;
-        if ((unsigned) wsize != wsize) {
+        if ((unsigned) size != size) {
             PyErr_SetString(PyExc_ValueError, "String too long for BSTR");
             return NULL;
         }
-        bstr = SysAllocStringLen(wvalue, (unsigned)wsize);
+        bstr = SysAllocStringLen(wvalue, (unsigned)size);
         Py_DECREF(value);
     } else
         bstr = NULL;

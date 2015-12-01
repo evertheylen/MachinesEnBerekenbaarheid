@@ -139,11 +139,7 @@ PyDoc_STRVAR(range_doc,
 "range(stop) -> range object\n\
 range(start, stop[, step]) -> range object\n\
 \n\
-Return an object that produces a sequence of integers from start (inclusive)\n\
-to stop (exclusive) by step.  range(i, j) produces i, i+1, i+2, ..., j-1.\n\
-start defaults to 0, and stop is omitted!  range(4) produces 0, 1, 2, 3.\n\
-These are exactly the valid indices for a list of 4 elements.\n\
-When step is given, it specifies the increment (or decrement).");
+Return a sequence of numbers from start to stop by step.");
 
 static void
 range_dealloc(rangeobject *r)
@@ -194,11 +190,8 @@ compute_range_length(PyObject *start, PyObject *stop, PyObject *step)
     }
 
     /* if (lo >= hi), return length of 0. */
-    cmp_result = PyObject_RichCompareBool(lo, hi, Py_GE);
-    if (cmp_result != 0) {
+    if (PyObject_RichCompareBool(lo, hi, Py_GE) == 1) {
         Py_XDECREF(step);
-        if (cmp_result < 0)
-            return NULL;
         return PyLong_FromLong(0);
     }
 
@@ -994,7 +987,7 @@ static PyObject *
 longrangeiter_setstate(longrangeiterobject *r, PyObject *state)
 {
     int cmp;
-
+   
     /* clip the value */
     PyObject *zero = PyLong_FromLong(0);
     if (zero == NULL)
@@ -1014,7 +1007,7 @@ longrangeiter_setstate(longrangeiterobject *r, PyObject *state)
         return NULL;
     if (cmp > 0)
         state = r->len;
-
+    
     Py_CLEAR(r->index);
     r->index = state;
     Py_INCREF(r->index);

@@ -5,7 +5,6 @@
    :synopsis: Write and read tabular data to and from delimited files.
 .. sectionauthor:: Skip Montanaro <skip@pobox.com>
 
-**Source code:** :source:`Lib/csv.py`
 
 .. index::
    single: csv
@@ -109,7 +108,7 @@ The :mod:`csv` module defines the following functions:
           spamwriter.writerow(['Spam', 'Lovely Spam', 'Wonderful Spam'])
 
 
-.. function:: register_dialect(name[, dialect[, **fmtparams]])
+.. function:: register_dialect(name[, dialect], **fmtparams)
 
    Associate *dialect* with *name*.  *name* must be a string. The
    dialect can be specified either by passing a sub-class of :class:`Dialect`, or
@@ -419,7 +418,7 @@ Writer Objects
 
 :class:`Writer` objects (:class:`DictWriter` instances and objects returned by
 the :func:`writer` function) have the following public methods.  A *row* must be
-an iterable of strings or numbers for :class:`Writer` objects and a dictionary
+a sequence of strings or numbers for :class:`Writer` objects and a dictionary
 mapping fieldnames to strings or numbers (by passing them through :func:`str`
 first) for :class:`DictWriter` objects.  Note that complex numbers are written
 out surrounded by parens. This may cause some problems for other programs which
@@ -431,8 +430,6 @@ read CSV files (assuming they support complex numbers at all).
    Write the *row* parameter to the writer's file object, formatted according to
    the current dialect.
 
-   .. versionchanged:: 3.5
-      Added support of arbitrary iterables.
 
 .. method:: csvwriter.writerows(rows)
 

@@ -9,7 +9,7 @@ import errno
 
 from test.support import (TESTFN, captured_output, check_impl_detail,
                           check_warnings, cpython_only, gc_collect, run_unittest,
-                          no_tracing, unlink, import_module)
+                          no_tracing, unlink)
 
 class NaiveException(Exception):
     def __init__(self, x):
@@ -84,7 +84,6 @@ class ExceptionTests(unittest.TestCase):
             x += x  # this simply shouldn't blow up
 
         self.raise_catch(RuntimeError, "RuntimeError")
-        self.raise_catch(RecursionError, "RecursionError")
 
         self.raise_catch(SyntaxError, "SyntaxError")
         try: exec('/\n')
@@ -117,8 +116,6 @@ class ExceptionTests(unittest.TestCase):
         self.raise_catch(Exception, "Exception")
         try: x = 1/0
         except Exception as e: pass
-
-        self.raise_catch(StopAsyncIteration, "StopAsyncIteration")
 
     def testSyntaxErrorMessage(self):
         # make sure the right exception message is raised for each of
@@ -247,16 +244,6 @@ class ExceptionTests(unittest.TestCase):
             self.assertEqual(w.winerror, None)
             self.assertEqual(w.strerror, 'foo')
             self.assertEqual(w.filename, None)
-
-    @unittest.skipUnless(sys.platform == 'win32',
-                         'test specific to Windows')
-    def test_windows_message(self):
-        """Should fill in unknown error code in Windows error message"""
-        ctypes = import_module('ctypes')
-        # this error code has no message, Python formats it as hexadecimal
-        code = 3765269347
-        with self.assertRaisesRegex(OSError, 'Windows Error 0x%x' % code):
-            ctypes.pythonapi.PyErr_SetFromWindowsErr(code)
 
     def testAttributes(self):
         # test that exception attributes are happy
@@ -477,14 +464,14 @@ class ExceptionTests(unittest.TestCase):
     def testInfiniteRecursion(self):
         def f():
             return f()
-        self.assertRaises(RecursionError, f)
+        self.assertRaises(RuntimeError, f)
 
         def g():
             try:
                 return g()
             except ValueError:
                 return -1
-        self.assertRaises(RecursionError, g)
+        self.assertRaises(RuntimeError, g)
 
     def test_str(self):
         # Make sure both instances and classes have a str representation.
@@ -674,52 +661,6 @@ class ExceptionTests(unittest.TestCase):
             pass
         self.assertEqual(sys.exc_info(), (None, None, None))
 
-    def test_generator_leaking3(self):
-        # See issue #23353.  When gen.throw() is called, the caller's
-        # exception state should be save and restored.
-        def g():
-            try:
-                yield
-            except ZeroDivisionError:
-                yield sys.exc_info()[1]
-        it = g()
-        next(it)
-        try:
-            1/0
-        except ZeroDivisionError as e:
-            self.assertIs(sys.exc_info()[1], e)
-            gen_exc = it.throw(e)
-            self.assertIs(sys.exc_info()[1], e)
-            self.assertIs(gen_exc, e)
-        self.assertEqual(sys.exc_info(), (None, None, None))
-
-    def test_generator_leaking4(self):
-        # See issue #23353.  When an exception is raised by a generator,
-        # the caller's exception state should still be restored.
-        def g():
-            try:
-                1/0
-            except ZeroDivisionError:
-                yield sys.exc_info()[0]
-                raise
-        it = g()
-        try:
-            raise TypeError
-        except TypeError:
-            # The caller's exception state (TypeError) is temporarily
-            # saved in the generator.
-            tp = next(it)
-        self.assertIs(tp, ZeroDivisionError)
-        try:
-            next(it)
-            # We can't check it immediately, but while next() returns
-            # with an exception, it shouldn't have restored the old
-            # exception state (TypeError).
-        except ZeroDivisionError as e:
-            self.assertIs(sys.exc_info()[1], e)
-        # We used to find TypeError here.
-        self.assertEqual(sys.exc_info(), (None, None, None))
-
     def test_generator_doesnt_retain_old_exc(self):
         def g():
             self.assertIsInstance(sys.exc_info()[1], RuntimeError)
@@ -890,10 +831,10 @@ class ExceptionTests(unittest.TestCase):
         def g():
             try:
                 return g()
-            except RecursionError:
+            except RuntimeError:
                 return sys.exc_info()
         e, v, tb = g()
-        self.assertTrue(isinstance(v, RecursionError), type(v))
+        self.assertTrue(isinstance(v, RuntimeError), type(v))
         self.assertIn("maximum recursion depth exceeded", str(v))
 
 
@@ -992,10 +933,10 @@ class ExceptionTests(unittest.TestCase):
         # We cannot use assertRaises since it manually deletes the traceback
         try:
             inner()
-        except RecursionError as e:
+        except RuntimeError as e:
             self.assertNotEqual(wr(), None)
         else:
-            self.fail("RecursionError not raised")
+            self.fail("RuntimeError not raised")
         self.assertEqual(wr(), None)
 
     def test_errno_ENOTDIR(self):

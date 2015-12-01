@@ -1,4 +1,5 @@
 import unittest
+from test import support
 
 class DictSetTest(unittest.TestCase):
 
@@ -195,8 +196,11 @@ class DictSetTest(unittest.TestCase):
     def test_recursive_repr(self):
         d = {}
         d[42] = d.values()
-        self.assertRaises(RecursionError, repr, d)
+        self.assertRaises(RuntimeError, repr, d)
 
+
+def test_main():
+    support.run_unittest(DictSetTest)
 
 if __name__ == "__main__":
-    unittest.main()
+    test_main()

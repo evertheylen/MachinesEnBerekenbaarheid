@@ -6,11 +6,6 @@ import pickle
 class TupleTest(seq_tests.CommonTest):
     type2test = tuple
 
-    def test_getitem_error(self):
-        msg = "tuple indices must be integers or slices"
-        with self.assertRaisesRegex(TypeError, msg):
-            ()['a']
-
     def test_constructors(self):
         super().test_constructors()
         # calling built-in types without argument must return empty
@@ -208,13 +203,8 @@ class TupleTest(seq_tests.CommonTest):
         with self.assertRaises(TypeError):
             [3,] + T((1,2))
 
-    def test_lexicographic_ordering(self):
-        # Issue 21100
-        a = self.type2test([1, 2])
-        b = self.type2test([1, 2, 0])
-        c = self.type2test([1, 3])
-        self.assertLess(a, b)
-        self.assertLess(b, c)
+def test_main():
+    support.run_unittest(TupleTest)
 
-if __name__ == "__main__":
-    unittest.main()
+if __name__=="__main__":
+    test_main()

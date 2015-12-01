@@ -161,5 +161,8 @@ class FrameLocalsTest(unittest.TestCase):
         self.assertEqual(inner.f_locals, {})
 
 
+def test_main():
+    support.run_unittest(__name__)
+
 if __name__ == "__main__":
-    unittest.main()
+    test_main()

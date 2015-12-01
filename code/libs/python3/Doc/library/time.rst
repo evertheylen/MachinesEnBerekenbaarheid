@@ -314,9 +314,9 @@ The module defines the following functions and data items:
    processes running for more than 49 days. On more recent versions of Windows
    and on other operating systems, :func:`monotonic` is system-wide.
 
+   Availability: Windows, Mac OS X, Linux, FreeBSD, OpenBSD, Solaris.
+
    .. versionadded:: 3.3
-   .. versionchanged:: 3.5
-      The function is now always available.
 
 
 .. function:: perf_counter()
@@ -349,11 +349,6 @@ The module defines the following functions and data items:
    signal's catching routine.  Also, the suspension time may be longer than
    requested by an arbitrary amount because of the scheduling of other activity
    in the system.
-
-   .. versionchanged:: 3.5
-      The function now sleeps at least *secs* even if the sleep is interrupted
-      by a signal, except if the signal handler raises an exception (see
-      :pep:`475` for the rationale).
 
 
 .. function:: strftime(format[, t])

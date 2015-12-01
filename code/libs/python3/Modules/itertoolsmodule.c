@@ -2787,13 +2787,11 @@ cwr_next(cwrobject *co)
         if (result == NULL)
             goto empty;
         co->result = result;
-        if (n > 0) {
-            elem = PyTuple_GET_ITEM(pool, 0);
-            for (i=0; i<r ; i++) {
-                assert(indices[i] == 0);
-                Py_INCREF(elem);
-                PyTuple_SET_ITEM(result, i, elem);
-            }
+        elem = PyTuple_GET_ITEM(pool, 0);
+        for (i=0; i<r ; i++) {
+            assert(indices[i] == 0);
+            Py_INCREF(elem);
+            PyTuple_SET_ITEM(result, i, elem);
         }
     } else {
         /* Copy the previous result tuple or re-use it if available */
@@ -2987,18 +2985,18 @@ def permutations(iterable, r=None):
     cycles = range(n-r+1, n+1)[::-1]
     yield tuple(pool[i] for i in indices[:r])
     while n:
-        for i in reversed(range(r)):
-            cycles[i] -= 1
-            if cycles[i] == 0:
-                indices[i:] = indices[i+1:] + indices[i:i+1]
-                cycles[i] = n - i
-            else:
-                j = cycles[i]
-                indices[i], indices[-j] = indices[-j], indices[i]
-                yield tuple(pool[i] for i in indices[:r])
-                break
+    for i in reversed(range(r)):
+        cycles[i] -= 1
+        if cycles[i] == 0:
+        indices[i:] = indices[i+1:] + indices[i:i+1]
+        cycles[i] = n - i
         else:
-            return
+        j = cycles[i]
+        indices[i], indices[-j] = indices[-j], indices[i]
+        yield tuple(pool[i] for i in indices[:r])
+        break
+    else:
+        return
 */
 
 typedef struct {
@@ -3876,7 +3874,7 @@ typedef struct {
 
 fast_mode:  when cnt an integer < PY_SSIZE_T_MAX and no step is specified.
 
-    assert(cnt != PY_SSIZE_T_MAX && long_cnt == NULL && long_step==PyLong(1));
+    assert(cnt != PY_SSIZE_T_MAX && long_cnt == NULL && long_step==PyInt(1));
     Advances with:  cnt += 1
     When count hits Y_SSIZE_T_MAX, switch to slow_mode.
 

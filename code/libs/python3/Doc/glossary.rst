@@ -69,33 +69,10 @@ Glossary
       :ref:`the difference between arguments and parameters
       <faq-argument-vs-parameter>`, and :pep:`362`.
 
-   asynchronous context manager
-      An object which controls the environment seen in an
-      :keyword:`async with` statement by defining :meth:`__aenter__` and
-      :meth:`__aexit__` methods.  Introduced by :pep:`492`.
-
-   asynchronous iterable
-      An object, that can be used in an :keyword:`async for` statement.
-      Must return an :term:`awaitable` from its :meth:`__aiter__` method,
-      which should in turn be resolved in an :term:`asynchronous iterator`
-      object.  Introduced by :pep:`492`.
-
-   asynchronous iterator
-      An object that implements :meth:`__aiter__` and :meth:`__anext__`
-      methods, that must return :term:`awaitable` objects.
-      :keyword:`async for` resolves awaitable returned from asynchronous
-      iterator's :meth:`__anext__` method until it raises
-      :exc:`StopAsyncIteration` exception.  Introduced by :pep:`492`.
-
    attribute
       A value associated with an object which is referenced by name using
       dotted expressions.  For example, if an object *o* has an attribute
       *a* it would be referenced as *o.a*.
-
-   awaitable
-      An object that can be used in an :keyword:`await` expression.  Can be
-      a :term:`coroutine` or an object with an :meth:`__await__` method.
-      See also :pep:`492`.
 
    BDFL
       Benevolent Dictator For Life, a.k.a. `Guido van Rossum
@@ -109,21 +86,12 @@ Glossary
          A :term:`text file` reads and writes :class:`str` objects.
 
    bytes-like object
-      An object that supports the :ref:`bufferobjects` and can
-      export a C-:term:`contiguous` buffer. This includes all :class:`bytes`,
-      :class:`bytearray`, and :class:`array.array` objects, as well as many
-      common :class:`memoryview` objects.  Bytes-like objects can
-      be used for various operations that work with binary data; these include
-      compression, saving to a binary file, and sending over a socket.
-
-      Some operations need the binary data to be mutable.  The documentation
-      often refers to these as "read-write bytes-like objects".  Example
-      mutable buffer objects include :class:`bytearray` and a
-      :class:`memoryview` of a :class:`bytearray`.
-      Other operations require the binary data to be stored in
-      immutable objects ("read-only bytes-like objects"); examples
-      of these include :class:`bytes` and a :class:`memoryview`
-      of a :class:`bytes` object.
+      An object that supports the :ref:`bufferobjects`, like :class:`bytes`,
+      :class:`bytearray` or :class:`memoryview`.  Bytes-like objects can
+      be used for various operations that expect binary data, such as
+      compression, saving to a binary file or sending over a socket.
+      Some operations need the binary data to be mutable, in which case
+      not all bytes-like objects can apply.
 
    bytecode
       Python source code is compiled into bytecode, the internal representation
@@ -170,32 +138,6 @@ Glossary
       An object which controls the environment seen in a :keyword:`with`
       statement by defining :meth:`__enter__` and :meth:`__exit__` methods.
       See :pep:`343`.
-
-   contiguous
-      .. index:: C-contiguous, Fortran contiguous
-
-      A buffer is considered contiguous exactly if it is either
-      *C-contiguous* or *Fortran contiguous*.  Zero-dimensional buffers are
-      C and Fortran contiguous.  In one-dimensional arrays, the items
-      must be layed out in memory next to each other, in order of
-      increasing indexes starting from zero.  In multidimensional
-      C-contiguous arrays, the last index varies the fastest when
-      visiting items in order of memory address.  However, in
-      Fortran contiguous arrays, the first index varies the fastest.
-
-   coroutine
-      Coroutines is a more generalized form of subroutines. Subroutines are
-      entered at one point and exited at another point.  Coroutines can be
-      entered, exited, and resumed at many different points.  They can be
-      implemented with the :keyword:`async def` statement.  See also
-      :pep:`492`.
-
-   coroutine function
-      A function which returns a :term:`coroutine` object.  A coroutine
-      function may be defined with the :keyword:`async def` statement,
-      and may contain :keyword:`await`, :keyword:`async for`, and
-      :keyword:`async with` keywords.  These were introduced
-      by :pep:`492`.
 
    CPython
       The canonical implementation of the Python programming language, as
@@ -348,23 +290,14 @@ Glossary
       .. index:: single: generator
 
    generator
-      A function which returns a :term:`generator iterator`.  It looks like a
-      normal function except that it contains :keyword:`yield` expressions
-      for producing a series of values usable in a for-loop or that can be
-      retrieved one at a time with the :func:`next` function.
-
-      Usually refers to a generator function, but may refer to a
-      *generator iterator* in some contexts.  In cases where the intended
-      meaning isn't clear, using the full terms avoids ambiguity.
-
-   generator iterator
-      An object created by a :term:`generator` function.
-
-      Each :keyword:`yield` temporarily suspends processing, remembering the
-      location execution state (including local variables and pending
-      try-statements).  When the *generator iterator* resumes, it picks-up where
-      it left-off (in contrast to functions which start fresh on every
-      invocation).
+      A function which returns an iterator.  It looks like a normal function
+      except that it contains :keyword:`yield` statements for producing a series
+      of values usable in a for-loop or that can be retrieved one at a time with
+      the :func:`next` function. Each :keyword:`yield` temporarily suspends
+      processing, remembering the location execution state (including local
+      variables and pending try-statements).  When the generator resumes, it
+      picks-up where it left-off (in contrast to functions which start fresh on
+      every invocation).
 
       .. index:: single: generator expression
 
@@ -469,19 +402,6 @@ Glossary
       than compiled ones, though their programs generally also run more
       slowly.  See also :term:`interactive`.
 
-   interpreter shutdown
-      When asked to shut down, the Python interpreter enters a special phase
-      where it gradually releases all allocated resources, such as modules
-      and various critical internal structures.  It also makes several calls
-      to the :term:`garbage collector <garbage collection>`. This can trigger
-      the execution of code in user-defined destructors or weakref callbacks.
-      Code executed during the shutdown phase can encounter various
-      exceptions as the resources it relies on may not function anymore
-      (common examples are library modules or the warnings machinery).
-
-      The main reason for interpreter shutdown is that the ``__main__`` module
-      or the script being run has finished executing.
-
    iterable
       An object capable of returning its members one at a time. Examples of
       iterables include all sequence types (such as :class:`list`, :class:`str`,
@@ -524,13 +444,12 @@ Glossary
 
       A number of tools in Python accept key functions to control how elements
       are ordered or grouped.  They include :func:`min`, :func:`max`,
-      :func:`sorted`, :meth:`list.sort`, :func:`heapq.merge`,
-      :func:`heapq.nsmallest`, :func:`heapq.nlargest`, and
-      :func:`itertools.groupby`.
+      :func:`sorted`, :meth:`list.sort`, :func:`heapq.nsmallest`,
+      :func:`heapq.nlargest`, and :func:`itertools.groupby`.
 
       There are several ways to create a key function.  For example. the
       :meth:`str.lower` method can serve as a key function for case insensitive
-      sorts.  Alternatively, a key function can be built from a
+      sorts.  Alternatively, an ad-hoc key function can be built from a
       :keyword:`lambda` expression such as ``lambda r: (r[0], r[2])``.  Also,
       the :mod:`operator` module provides three key function constructors:
       :func:`~operator.attrgetter`, :func:`~operator.itemgetter`, and

@@ -44,7 +44,6 @@ line3\r\n\
 class DummyPOP3Handler(asynchat.async_chat):
 
     CAPAS = {'UIDL': [], 'IMPLEMENTATION': ['python-testlib-pop-server']}
-    enable_UTF8 = False
 
     def __init__(self, conn):
         asynchat.async_chat.__init__(self, conn)
@@ -142,11 +141,6 @@ class DummyPOP3Handler(asynchat.async_chat):
                     _ln.extend(params)
                 self.push(' '.join(_ln))
         self.push('.')
-
-    def cmd_utf8(self, arg):
-        self.push('+OK I know RFC6856'
-                  if self.enable_UTF8
-                  else '-ERR What is UTF8?!')
 
     if SUPPORTS_SSL:
 
@@ -315,16 +309,6 @@ class TestPOP3Class(TestCase):
         self.client.uidl()
         self.client.uidl('foo')
 
-    def test_utf8_raises_if_unsupported(self):
-        self.server.handler.enable_UTF8 = False
-        self.assertRaises(poplib.error_proto, self.client.utf8)
-
-    def test_utf8(self):
-        self.server.handler.enable_UTF8 = True
-        expected = b'+OK I know RFC6856'
-        result = self.client.utf8()
-        self.assertEqual(result, expected)
-
     def test_capa(self):
         capa = self.client.capa()
         self.assertTrue('IMPLEMENTATION' in capa.keys())
@@ -361,18 +345,23 @@ class TestPOP3Class(TestCase):
 
 
 if SUPPORTS_SSL:
-    from test.test_ftplib import SSLConnection
 
-    class DummyPOP3_SSLHandler(SSLConnection, DummyPOP3Handler):
+    class DummyPOP3_SSLHandler(DummyPOP3Handler):
 
         def __init__(self, conn):
             asynchat.async_chat.__init__(self, conn)
-            self.secure_connection()
+            ssl_socket = ssl.wrap_socket(self.socket, certfile=CERTFILE,
+                                          server_side=True,
+                                          do_handshake_on_connect=False)
+            self.del_channel()
+            self.set_socket(ssl_socket)
+            # Must try handshake before calling push()
+            self.tls_active = True
+            self.tls_starting = True
+            self._do_tls_handshake()
             self.set_terminator(b"\r\n")
             self.in_buffer = []
             self.push('+OK dummy pop3 server ready. <timestamp>')
-            self.tls_active = True
-            self.tls_starting = False
 
 
 @requires_ssl
@@ -463,7 +452,7 @@ class TestTimeouts(TestCase):
         del self.thread  # Clear out any dangling Thread objects.
 
     def server(self, evt, serv):
-        serv.listen()
+        serv.listen(5)
         evt.set()
         try:
             conn, addr = serv.accept()

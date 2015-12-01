@@ -48,18 +48,6 @@ def hello_app(environ,start_response):
     ])
     return [b"Hello, world!"]
 
-
-def header_app(environ, start_response):
-    start_response("200 OK", [
-        ('Content-Type', 'text/plain'),
-        ('Date', 'Mon, 05 Jun 2006 18:49:54 GMT')
-    ])
-    return [';'.join([
-        environ['HTTP_X_TEST_HEADER'], environ['QUERY_STRING'],
-        environ['PATH_INFO']
-    ]).encode('iso-8859-1')]
-
-
 def run_amock(app=hello_app, data=b"GET / HTTP/1.0\n\n"):
     server = make_server("", 80, app, MockServer, MockHandler)
     inp = BufferedReader(BytesIO(data))
@@ -129,19 +117,6 @@ class IntegrationTests(TestCase):
     def test_plain_hello(self):
         out, err = run_amock()
         self.check_hello(out)
-
-    def test_environ(self):
-        request = (
-            b"GET /p%61th/?query=test HTTP/1.0\n"
-            b"X-Test-Header: Python test \n"
-            b"X-Test-Header: Python test 2\n"
-            b"Content-Length: 0\n\n"
-        )
-        out, err = run_amock(header_app, request)
-        self.assertEqual(
-            out.splitlines()[-1],
-            b"Python test,Python test 2;query=test;/path/"
-        )
 
     def test_request_length(self):
         out, err = run_amock(data=b"GET " + (b"x" * 65537) + b" HTTP/1.0\n\n")
@@ -368,7 +343,6 @@ class HeaderTests(TestCase):
 
     def testMappingInterface(self):
         test = [('x','y')]
-        self.assertEqual(len(Headers()), 0)
         self.assertEqual(len(Headers([])),0)
         self.assertEqual(len(Headers(test[:])),1)
         self.assertEqual(Headers(test[:]).keys(), ['x'])
@@ -376,7 +350,7 @@ class HeaderTests(TestCase):
         self.assertEqual(Headers(test[:]).items(), test)
         self.assertIsNot(Headers(test).items(), test)  # must be copy!
 
-        h = Headers()
+        h=Headers([])
         del h['foo']   # should not raise an error
 
         h['Foo'] = 'bar'
@@ -401,8 +375,9 @@ class HeaderTests(TestCase):
     def testRequireList(self):
         self.assertRaises(TypeError, Headers, "foo")
 
+
     def testExtras(self):
-        h = Headers()
+        h = Headers([])
         self.assertEqual(str(h),'\r\n')
 
         h.add_header('foo','bar',baz="spam")
@@ -658,5 +633,8 @@ class HandlerTests(TestCase):
         self.assertEqual(side_effects['close_called'], True)
 
 
+def test_main():
+    support.run_unittest(__name__)
+
 if __name__ == "__main__":
-    unittest.main()
+    test_main()

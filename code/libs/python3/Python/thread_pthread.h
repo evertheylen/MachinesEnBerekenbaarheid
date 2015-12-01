@@ -608,15 +608,7 @@ PyThread_create_key(void)
 {
     pthread_key_t key;
     int fail = pthread_key_create(&key, NULL);
-    if (fail)
-        return -1;
-    if (key > INT_MAX) {
-        /* Issue #22206: handle integer overflow */
-        pthread_key_delete(key);
-        errno = ENOMEM;
-        return -1;
-    }
-    return (int)key;
+    return fail ? -1 : key;
 }
 
 void

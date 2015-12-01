@@ -4,6 +4,7 @@ Tests for the html module functions.
 
 import html
 import unittest
+from test.support import run_unittest
 
 
 class HtmlTests(unittest.TestCase):

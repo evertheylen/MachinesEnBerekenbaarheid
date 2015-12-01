@@ -238,10 +238,8 @@ class FileInput:
         self.close()
 
     def close(self):
-        try:
-            self.nextfile()
-        finally:
-            self._files = ()
+        self.nextfile()
+        self._files = ()
 
     def __enter__(self):
         return self
@@ -277,31 +275,29 @@ class FileInput:
 
     def nextfile(self):
         savestdout = self._savestdout
-        self._savestdout = None
+        self._savestdout = 0
         if savestdout:
             sys.stdout = savestdout
 
         output = self._output
-        self._output = None
-        try:
-            if output:
-                output.close()
-        finally:
-            file = self._file
-            self._file = None
-            try:
-                if file and not self._isstdin:
-                    file.close()
-            finally:
-                backupfilename = self._backupfilename
-                self._backupfilename = None
-                if backupfilename and not self._backup:
-                    try: os.unlink(backupfilename)
-                    except OSError: pass
+        self._output = 0
+        if output:
+            output.close()
 
-                self._isstdin = False
-                self._buffer = []
-                self._bufindex = 0
+        file = self._file
+        self._file = 0
+        if file and not self._isstdin:
+            file.close()
+
+        backupfilename = self._backupfilename
+        self._backupfilename = 0
+        if backupfilename and not self._backup:
+            try: os.unlink(backupfilename)
+            except OSError: pass
+
+        self._isstdin = False
+        self._buffer = []
+        self._bufindex = 0
 
     def readline(self):
         try:

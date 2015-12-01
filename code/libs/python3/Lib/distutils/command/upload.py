@@ -1,14 +1,11 @@
-"""
-distutils.command.upload
+"""distutils.command.upload
 
-Implements the Distutils 'upload' subcommand (upload package to a package
-index).
-"""
+Implements the Distutils 'upload' subcommand (upload package to PyPI)."""
 
-import os
-import io
+import sys
+import os, io
+import socket
 import platform
-import hashlib
 from base64 import standard_b64encode
 from urllib.request import urlopen, Request, HTTPError
 from urllib.parse import urlparse
@@ -16,6 +13,12 @@ from distutils.errors import DistutilsError, DistutilsOptionError
 from distutils.core import PyPIRCCommand
 from distutils.spawn import spawn
 from distutils import log
+
+# this keeps compatibility for 2.3 and 2.4
+if sys.version < "2.5":
+    from md5 import md5
+else:
+    from hashlib import md5
 
 class upload(PyPIRCCommand):
 
@@ -57,8 +60,7 @@ class upload(PyPIRCCommand):
 
     def run(self):
         if not self.distribution.dist_files:
-            msg = "No dist file created in earlier command"
-            raise DistutilsOptionError(msg)
+            raise DistutilsOptionError("No dist file created in earlier command")
         for command, pyversion, filename in self.distribution.dist_files:
             self.upload_file(command, pyversion, filename)
 
@@ -101,10 +103,10 @@ class upload(PyPIRCCommand):
             'content': (os.path.basename(filename),content),
             'filetype': command,
             'pyversion': pyversion,
-            'md5_digest': hashlib.md5(content).hexdigest(),
+            'md5_digest': md5(content).hexdigest(),
 
             # additional meta-data
-            'metadata_version': '1.0',
+            'metadata_version' : '1.0',
             'summary': meta.get_description(),
             'home_page': meta.get_url(),
             'author': meta.get_contact(),
@@ -147,7 +149,7 @@ class upload(PyPIRCCommand):
         for key, value in data.items():
             title = '\r\nContent-Disposition: form-data; name="%s"' % key
             # handle multiple entries for the same name
-            if not isinstance(value, list):
+            if type(value) != type([]):
                 value = [value]
             for value in value:
                 if type(value) is tuple:
@@ -164,15 +166,13 @@ class upload(PyPIRCCommand):
         body.write(end_boundary)
         body = body.getvalue()
 
-        msg = "Submitting %s to %s" % (filename, self.repository)
-        self.announce(msg, log.INFO)
+        self.announce("Submitting %s to %s" % (filename, self.repository), log.INFO)
 
         # build the Request
-        headers = {
-            'Content-type': 'multipart/form-data; boundary=%s' % boundary,
-            'Content-length': str(len(body)),
-            'Authorization': auth,
-        }
+        headers = {'Content-type':
+                        'multipart/form-data; boundary=%s' % boundary,
+                   'Content-length': str(len(body)),
+                   'Authorization': auth}
 
         request = Request(self.repository, data=body,
                           headers=headers)

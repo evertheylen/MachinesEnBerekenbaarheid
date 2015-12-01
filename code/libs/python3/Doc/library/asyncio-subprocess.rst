@@ -27,7 +27,7 @@ Example to use it on Windows::
 Create a subprocess: high-level API using Process
 -------------------------------------------------
 
-.. coroutinefunction:: create_subprocess_exec(\*args, stdin=None, stdout=None, stderr=None, loop=None, limit=None, \*\*kwds)
+.. function:: create_subprocess_exec(\*args, stdin=None, stdout=None, stderr=None, loop=None, limit=None, \*\*kwds)
 
    Create a subprocess.
 
@@ -39,7 +39,7 @@ Create a subprocess: high-level API using Process
 
    This function is a :ref:`coroutine <coroutine>`.
 
-.. coroutinefunction:: create_subprocess_shell(cmd, stdin=None, stdout=None, stderr=None, loop=None, limit=None, \*\*kwds)
+.. function:: create_subprocess_shell(cmd, stdin=None, stdout=None, stderr=None, loop=None, limit=None, \*\*kwds)
 
    Run the shell command *cmd*.
 
@@ -67,7 +67,7 @@ Create a subprocess: low-level API using subprocess.Popen
 
 Run subprocesses asynchronously using the :mod:`subprocess` module.
 
-.. coroutinemethod:: BaseEventLoop.subprocess_exec(protocol_factory, \*args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, \*\*kwargs)
+.. method:: BaseEventLoop.subprocess_exec(protocol_factory, \*args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, \*\*kwargs)
 
    Create a subprocess from one or more string arguments (character strings or
    bytes strings encoded to the :ref:`filesystem encoding
@@ -116,7 +116,7 @@ Run subprocesses asynchronously using the :mod:`subprocess` module.
 
    See the constructor of the :class:`subprocess.Popen` class for parameters.
 
-.. coroutinemethod:: BaseEventLoop.subprocess_shell(protocol_factory, cmd, \*, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, \*\*kwargs)
+.. method:: BaseEventLoop.subprocess_shell(protocol_factory, cmd, \*, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, \*\*kwargs)
 
    Create a subprocess from *cmd*, which is a character string or a bytes
    string encoded to the :ref:`filesystem encoding <filesystem-encoding>`,
@@ -179,7 +179,7 @@ Process
    :func:`create_subprocess_shell` function.
 
    The API of the :class:`~asyncio.subprocess.Process` class was designed to be
-   close to the API of the :class:`subprocess.Popen` class, but there are some
+   closed the API of the :class:`subprocess.Popen` class, but they are some
    differences:
 
    * There is no explicit :meth:`~subprocess.Popen.poll` method
@@ -193,10 +193,7 @@ Process
      :meth:`~subprocess.Popen.wait` method of the :class:`~subprocess.Popen`
      class is implemented as a busy loop.
 
-   This class is :ref:`not thread safe <asyncio-multithreading>`. See also the
-   :ref:`Subprocess and threads <asyncio-subprocess-threads>` section.
-
-   .. coroutinemethod:: wait()
+   .. method:: wait()
 
       Wait for child process to terminate.  Set and return :attr:`returncode`
       attribute.
@@ -210,7 +207,7 @@ Process
          blocks waiting for the OS pipe buffer to accept more data. Use the
          :meth:`communicate` method when using pipes to avoid that.
 
-   .. coroutinemethod:: communicate(input=None)
+   .. method:: communicate(input=None)
 
       Interact with process: Send data to stdin.  Read data from stdout and
       stderr, until end-of-file is reached.  Wait for process to terminate.
@@ -312,8 +309,6 @@ are limits:
 * The child watcher must be instantiated in the main thread, before executing
   subprocesses from other threads. Call the :func:`get_child_watcher`
   function in the main thread to instantiate the child watcher.
-
-The :class:`asyncio.subprocess.Process` class is not thread safe.
 
 .. seealso::
 

@@ -211,10 +211,7 @@ class TestUninstall(EnsurepipMixin, unittest.TestCase):
             ensurepip._uninstall_helper()
 
         self.run_pip.assert_called_once_with(
-            [
-                "uninstall", "-y", "--disable-pip-version-check", "pip",
-                "setuptools",
-            ]
+            ["uninstall", "-y", "pip", "setuptools"]
         )
 
     @requires_usable_pip
@@ -223,10 +220,7 @@ class TestUninstall(EnsurepipMixin, unittest.TestCase):
             ensurepip._uninstall_helper(verbosity=1)
 
         self.run_pip.assert_called_once_with(
-            [
-                "uninstall", "-y", "--disable-pip-version-check", "-v", "pip",
-                "setuptools",
-            ]
+            ["uninstall", "-y", "-v", "pip", "setuptools"]
         )
 
     @requires_usable_pip
@@ -235,10 +229,7 @@ class TestUninstall(EnsurepipMixin, unittest.TestCase):
             ensurepip._uninstall_helper(verbosity=2)
 
         self.run_pip.assert_called_once_with(
-            [
-                "uninstall", "-y", "--disable-pip-version-check", "-vv", "pip",
-                "setuptools",
-            ]
+            ["uninstall", "-y", "-vv", "pip", "setuptools"]
         )
 
     @requires_usable_pip
@@ -247,10 +238,7 @@ class TestUninstall(EnsurepipMixin, unittest.TestCase):
             ensurepip._uninstall_helper(verbosity=3)
 
         self.run_pip.assert_called_once_with(
-            [
-                "uninstall", "-y", "--disable-pip-version-check", "-vvv",
-                "pip", "setuptools",
-            ]
+            ["uninstall", "-y", "-vvv", "pip", "setuptools"]
         )
 
     @requires_usable_pip
@@ -348,13 +336,10 @@ class TestUninstallationMainFunction(EnsurepipMixin, unittest.TestCase):
             ensurepip._uninstall._main([])
 
         self.run_pip.assert_called_once_with(
-            [
-                "uninstall", "-y", "--disable-pip-version-check", "pip",
-                "setuptools",
-            ]
+            ["uninstall", "-y", "pip", "setuptools"]
         )
 
 
 
 if __name__ == "__main__":
-    unittest.main()
+    test.support.run_unittest(__name__)

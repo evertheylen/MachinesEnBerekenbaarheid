@@ -27,8 +27,7 @@ __all__ = ["register", "lookup", "open", "EncodedFile", "BOM", "BOM_BE",
            "getincrementaldecoder", "getreader", "getwriter",
            "encode", "decode", "iterencode", "iterdecode",
            "strict_errors", "ignore_errors", "replace_errors",
-           "xmlcharrefreplace_errors",
-           "backslashreplace_errors", "namereplace_errors",
+           "xmlcharrefreplace_errors", "backslashreplace_errors",
            "register_error", "lookup_error"]
 
 ### Constants
@@ -106,8 +105,8 @@ class CodecInfo(tuple):
         return self
 
     def __repr__(self):
-        return "<%s.%s object for encoding %s at %#x>" % \
-                (self.__class__.__module__, self.__class__.__qualname__,
+        return "<%s.%s object for encoding %s at 0x%x>" % \
+                (self.__class__.__module__, self.__class__.__name__,
                  self.name, id(self))
 
 class Codec:
@@ -127,8 +126,7 @@ class Codec:
          'surrogateescape' - replace with private code points U+DCnn.
          'xmlcharrefreplace' - Replace with the appropriate XML
                                character reference (only for encoding).
-         'backslashreplace'  - Replace with backslashed escape sequences.
-         'namereplace'       - Replace with \\N{...} escape sequences
+         'backslashreplace'  - Replace with backslashed escape sequences
                                (only for encoding).
 
         The set of allowed values can be extended via register_error.
@@ -143,8 +141,8 @@ class Codec:
             'strict' handling.
 
             The method may not store state in the Codec instance. Use
-            StreamWriter for codecs which have to keep state in order to
-            make encoding efficient.
+            StreamCodec for codecs which have to keep state in order to
+            make encoding/decoding efficient.
 
             The encoder must be able to handle zero length input and
             return an empty object of the output object type in this
@@ -166,8 +164,8 @@ class Codec:
             'strict' handling.
 
             The method may not store state in the Codec instance. Use
-            StreamReader for codecs which have to keep state in order to
-            make decoding efficient.
+            StreamCodec for codecs which have to keep state in order to
+            make encoding/decoding efficient.
 
             The decoder must be able to handle zero length input and
             return an empty object of the output object type in this
@@ -360,8 +358,7 @@ class StreamWriter(Codec):
              'xmlcharrefreplace' - Replace with the appropriate XML
                                    character reference.
              'backslashreplace'  - Replace with backslashed escape
-                                   sequences.
-             'namereplace'       - Replace with \\N{...} escape sequences.
+                                   sequences (only for encoding).
 
             The set of allowed parameter values can be extended via
             register_error.
@@ -431,8 +428,7 @@ class StreamReader(Codec):
 
              'strict' - raise a ValueError (or a subclass)
              'ignore' - ignore the character and continue with the next
-             'replace'- replace with a suitable replacement character
-             'backslashreplace' - Replace with backslashed escape sequences;
+             'replace'- replace with a suitable replacement character;
 
             The set of allowed parameter values can be extended via
             register_error.
@@ -1065,7 +1061,7 @@ def make_encoding_map(decoding_map):
         during translation.
 
         One example where this happens is cp875.py which decodes
-        multiple character to \\u001a.
+        multiple character to \u001a.
 
     """
     m = {}
@@ -1084,7 +1080,6 @@ try:
     replace_errors = lookup_error("replace")
     xmlcharrefreplace_errors = lookup_error("xmlcharrefreplace")
     backslashreplace_errors = lookup_error("backslashreplace")
-    namereplace_errors = lookup_error("namereplace")
 except LookupError:
     # In --disable-unicode builds, these error handler are missing
     strict_errors = None
@@ -1092,7 +1087,6 @@ except LookupError:
     replace_errors = None
     xmlcharrefreplace_errors = None
     backslashreplace_errors = None
-    namereplace_errors = None
 
 # Tell modulefinder that using codecs probably needs the encodings
 # package

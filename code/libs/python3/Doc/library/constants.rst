@@ -45,6 +45,7 @@ A small number of constants live in the built-in namespace.  They are:
    for more details.
 
 
+
 .. data:: Ellipsis
 
    The same as ``...``.  Special value used mostly in conjunction with extended

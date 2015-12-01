@@ -339,11 +339,8 @@ I/O Base Classes
       if *size* is not specified).  The current stream position isn't changed.
       This resizing can extend or reduce the current file size.  In case of
       extension, the contents of the new file area depend on the platform
-      (on most systems, additional bytes are zero-filled).  The new file size
-      is returned.
-
-   .. versionchanged:: 3.5
-      Windows will now zero-fill files when extending.
+      (on most systems, additional bytes are zero-filled, on Windows they're
+      undetermined).  The new file size is returned.
 
    .. method:: writable()
 
@@ -394,8 +391,8 @@ I/O Base Classes
    .. method:: readinto(b)
 
       Read up to ``len(b)`` bytes into :class:`bytearray` *b* and return the
-      number of bytes read.  If the object is in non-blocking mode and no bytes
-      are available, ``None`` is returned.
+      number of bytes read.  If the object is in non-blocking mode and no
+      bytes are available, ``None`` is returned.
 
    .. method:: write(b)
 
@@ -468,10 +465,9 @@ I/O Base Classes
 
    .. method:: read1(size=-1)
 
-      Read and return up to *size* bytes, with at most one call to the
-      underlying raw stream's :meth:`~RawIOBase.read` (or
-      :meth:`~RawIOBase.readinto`) method.  This can be useful if you are
-      implementing your own buffering on top of a :class:`BufferedIOBase`
+      Read and return up to *size* bytes, with at most one call to the underlying
+      raw stream's :meth:`~RawIOBase.read` method.  This can be useful if you
+      are implementing your own buffering on top of a :class:`BufferedIOBase`
       object.
 
    .. method:: readinto(b)
@@ -482,19 +478,8 @@ I/O Base Classes
       Like :meth:`read`, multiple reads may be issued to the underlying raw
       stream, unless the latter is interactive.
 
-      A :exc:`BlockingIOError` is raised if the underlying raw stream is in non
-      blocking-mode, and has no data available at the moment.
-
-   .. method:: readinto1(b)
-
-      Read up to ``len(b)`` bytes into bytearray *b*, ,using at most one call to
-      the underlying raw stream's :meth:`~RawIOBase.read` (or
-      :meth:`~RawIOBase.readinto`) method. Return the number of bytes read.
-
-      A :exc:`BlockingIOError` is raised if the underlying raw stream is in non
-      blocking-mode, and has no data available at the moment.
-
-      .. versionadded:: 3.5
+      A :exc:`BlockingIOError` is raised if the underlying raw stream is in
+      non blocking-mode, and has no data available at the moment.
 
    .. method:: write(b)
 
@@ -522,12 +507,9 @@ Raw File I/O
    The *name* can be one of two things:
 
    * a character string or :class:`bytes` object representing the path to the
-     file which will be opened. In this case closefd must be True (the default)
-     otherwise an error will be raised.
+     file which will be opened;
    * an integer representing the number of an existing OS-level file descriptor
-     to which the resulting :class:`FileIO` object will give access. When the
-     FileIO object is closed this fd will be closed as well, unless *closefd*
-     is set to ``False``.
+     to which the resulting :class:`FileIO` object will give access.
 
    The *mode* can be ``'r'``, ``'w'``, ``'x'`` or ``'a'`` for reading
    (default), writing, exclusive creation or appending. The file will be
@@ -616,11 +598,6 @@ than raw I/O does.
 
       In :class:`BytesIO`, this is the same as :meth:`read`.
 
-   .. method:: readinto1()
-
-      In :class:`BytesIO`, this is the same as :meth:`readinto`.
-
-      .. versionadded:: 3.5
 
 .. class:: BufferedReader(raw, buffer_size=DEFAULT_BUFFER_SIZE)
 
@@ -830,13 +807,11 @@ Text I/O
    exception if there is an encoding error (the default of ``None`` has the same
    effect), or pass ``'ignore'`` to ignore errors.  (Note that ignoring encoding
    errors can lead to data loss.)  ``'replace'`` causes a replacement marker
-   (such as ``'?'``) to be inserted where there is malformed data.
-   ``'backslashreplace'`` causes malformed data to be replaced by a
-   backslashed escape sequence.  When writing, ``'xmlcharrefreplace'``
-   (replace with the appropriate XML character reference)  or ``'namereplace'``
-   (replace with ``\N{...}`` escape sequences) can be used.  Any other error
-   handling name that has been registered with
-   :func:`codecs.register_error` is also valid.
+   (such as ``'?'``) to be inserted where there is malformed data.  When
+   writing, ``'xmlcharrefreplace'`` (replace with the appropriate XML character
+   reference) or ``'backslashreplace'`` (replace with backslashed escape
+   sequences) can be used.  Any other error handling name that has been
+   registered with :func:`codecs.register_error` is also valid.
 
    .. index::
       single: universal newlines; io.TextIOWrapper class

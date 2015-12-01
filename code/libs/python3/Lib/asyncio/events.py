@@ -17,11 +17,12 @@ import sys
 import threading
 import traceback
 
-from asyncio import compat
+
+_PY34 = sys.version_info >= (3, 4)
 
 
 def _get_function_source(func):
-    if compat.PY34:
+    if _PY34:
         func = inspect.unwrap(func)
     elif hasattr(func, '__wrapped__'):
         func = func.__wrapped__
@@ -30,7 +31,7 @@ def _get_function_source(func):
         return (code.co_filename, code.co_firstlineno)
     if isinstance(func, functools.partial):
         return _get_function_source(func.func)
-    if compat.PY34 and isinstance(func, functools.partialmethod):
+    if _PY34 and isinstance(func, functools.partialmethod):
         return _get_function_source(func.func)
     return None
 
@@ -53,21 +54,15 @@ def _format_callback(func, args, suffix=''):
             suffix = _format_args(args) + suffix
         return _format_callback(func.func, func.args, suffix)
 
-    if hasattr(func, '__qualname__'):
-        func_repr = getattr(func, '__qualname__')
-    elif hasattr(func, '__name__'):
-        func_repr = getattr(func, '__name__')
-    else:
+    func_repr = getattr(func, '__qualname__', None)
+    if not func_repr:
         func_repr = repr(func)
 
     if args is not None:
         func_repr += _format_args(args)
     if suffix:
         func_repr += suffix
-    return func_repr
 
-def _format_callback_source(func, args):
-    func_repr = _format_callback(func, args)
     source = _get_function_source(func)
     if source:
         func_repr += ' at %s:%s' % source
@@ -97,7 +92,7 @@ class Handle:
         if self._cancelled:
             info.append('cancelled')
         if self._callback is not None:
-            info.append(_format_callback_source(self._callback, self._args))
+            info.append(_format_callback(self._callback, self._args))
         if self._source_traceback:
             frame = self._source_traceback[-1]
             info.append('created at %s:%s' % (frame[0], frame[1]))
@@ -124,7 +119,7 @@ class Handle:
         try:
             self._callback(*self._args)
         except Exception as exc:
-            cb = _format_callback_source(self._callback, self._args)
+            cb = _format_callback(self._callback, self._args)
             msg = 'Exception in callback {}'.format(cb)
             context = {
                 'message': msg,
@@ -276,7 +271,7 @@ class AbstractEventLoop:
     def call_soon_threadsafe(self, callback, *args):
         raise NotImplementedError
 
-    def run_in_executor(self, executor, func, *args):
+    def run_in_executor(self, executor, callback, *args):
         raise NotImplementedError
 
     def set_default_executor(self, executor):
@@ -435,14 +430,6 @@ class AbstractEventLoop:
         raise NotImplementedError
 
     def remove_signal_handler(self, sig):
-        raise NotImplementedError
-
-    # Task factory.
-
-    def set_task_factory(self, factory):
-        raise NotImplementedError
-
-    def get_task_factory(self):
         raise NotImplementedError
 
     # Error handlers.

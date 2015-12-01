@@ -223,35 +223,6 @@ lanczos_sum(double x)
     return num/den;
 }
 
-/* Constant for +infinity, generated in the same way as float('inf'). */
-
-static double
-m_inf(void)
-{
-#ifndef PY_NO_SHORT_FLOAT_REPR
-    return _Py_dg_infinity(0);
-#else
-    return Py_HUGE_VAL;
-#endif
-}
-
-/* Constant nan value, generated in the same way as float('nan'). */
-/* We don't currently assume that Py_NAN is defined everywhere. */
-
-#if !defined(PY_NO_SHORT_FLOAT_REPR) || defined(Py_NAN)
-
-static double
-m_nan(void)
-{
-#ifndef PY_NO_SHORT_FLOAT_REPR
-    return _Py_dg_stdnan(0);
-#else
-    return Py_NAN;
-#endif
-}
-
-#endif
-
 static double
 m_tgamma(double x)
 {
@@ -685,33 +656,6 @@ m_log10(double x)
 }
 
 
-static PyObject *
-math_gcd(PyObject *self, PyObject *args)
-{
-    PyObject *a, *b, *g;
-
-    if (!PyArg_ParseTuple(args, "OO:gcd", &a, &b))
-        return NULL;
-
-    a = PyNumber_Index(a);
-    if (a == NULL)
-        return NULL;
-    b = PyNumber_Index(b);
-    if (b == NULL) {
-        Py_DECREF(a);
-        return NULL;
-    }
-    g = _PyLong_GCD(a, b);
-    Py_DECREF(a);
-    Py_DECREF(b);
-    return g;
-}
-
-PyDoc_STRVAR(math_gcd_doc,
-"gcd(x, y) -> int\n\
-greatest common divisor of x and y");
-
-
 /* Call is_error when errno != 0, and where x is the result libm
  * returned.  is_error will usually set up an exception and return
  * true (1), but may return false (0) without setting up an exception.
@@ -1048,7 +992,7 @@ FUNC1(tanh, tanh, 0,
    Note 4: A similar implementation is in Modules/cmathmodule.c.
    Be sure to update both when making changes.
 
-   Note 5: The signature of math.fsum() differs from builtins.sum()
+   Note 5: The signature of math.fsum() differs from __builtin__.sum()
    because the start argument doesn't make sense in the context of
    accurate summation.  Since the partials table is collapsed before
    returning a result, sum(seq2, start=sum(seq1)) may not equal the
@@ -1066,7 +1010,7 @@ _fsum_realloc(double **p_ptr, Py_ssize_t  n,
     Py_ssize_t m = *m_ptr;
 
     m += m;  /* double */
-    if (n < m && (size_t)m < ((size_t)PY_SSIZE_T_MAX / sizeof(double))) {
+    if (n < m && m < (PY_SSIZE_T_MAX / sizeof(double))) {
         double *p = *p_ptr;
         if (p == ps) {
             v = PyMem_Malloc(sizeof(double) * m);
@@ -1464,7 +1408,6 @@ static PyObject *
 math_factorial(PyObject *self, PyObject *arg)
 {
     long x;
-    int overflow;
     PyObject *result, *odd_part, *two_valuation;
 
     if (PyFloat_Check(arg)) {
@@ -1478,22 +1421,15 @@ math_factorial(PyObject *self, PyObject *arg)
         lx = PyLong_FromDouble(dx);
         if (lx == NULL)
             return NULL;
-        x = PyLong_AsLongAndOverflow(lx, &overflow);
+        x = PyLong_AsLong(lx);
         Py_DECREF(lx);
     }
     else
-        x = PyLong_AsLongAndOverflow(arg, &overflow);
+        x = PyLong_AsLong(arg);
 
-    if (x == -1 && PyErr_Occurred()) {
+    if (x == -1 && PyErr_Occurred())
         return NULL;
-    }
-    else if (overflow == 1) {
-        PyErr_Format(PyExc_OverflowError,
-                     "factorial() argument should not exceed %ld",
-                     LONG_MAX);
-        return NULL;
-    }
-    else if (overflow == -1 || x < 0) {
+    if (x < 0) {
         PyErr_SetString(PyExc_ValueError,
                         "factorial() not defined for negative values");
         return NULL;
@@ -1990,83 +1926,6 @@ PyDoc_STRVAR(math_isinf_doc,
 "isinf(x) -> bool\n\n\
 Return True if x is a positive or negative infinity, and False otherwise.");
 
-static PyObject *
-math_isclose(PyObject *self, PyObject *args, PyObject *kwargs)
-{
-    double a, b;
-    double rel_tol = 1e-9;
-    double abs_tol = 0.0;
-    double diff = 0.0;
-    long result = 0;
-
-    static char *keywords[] = {"a", "b", "rel_tol", "abs_tol", NULL};
-
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "dd|$dd:isclose",
-                                     keywords,
-                                     &a, &b, &rel_tol, &abs_tol
-                                     ))
-        return NULL;
-
-    /* sanity check on the inputs */
-    if (rel_tol < 0.0 || abs_tol < 0.0 ) {
-        PyErr_SetString(PyExc_ValueError,
-                        "tolerances must be non-negative");
-        return NULL;
-    }
-
-    if ( a == b ) {
-        /* short circuit exact equality -- needed to catch two infinities of
-           the same sign. And perhaps speeds things up a bit sometimes.
-        */
-        Py_RETURN_TRUE;
-    }
-
-    /* This catches the case of two infinities of opposite sign, or
-       one infinity and one finite number. Two infinities of opposite
-       sign would otherwise have an infinite relative tolerance.
-       Two infinities of the same sign are caught by the equality check
-       above.
-    */
-
-    if (Py_IS_INFINITY(a) || Py_IS_INFINITY(b)) {
-        Py_RETURN_FALSE;
-    }
-
-    /* now do the regular computation
-       this is essentially the "weak" test from the Boost library
-    */
-
-    diff = fabs(b - a);
-
-    result = (((diff <= fabs(rel_tol * b)) ||
-               (diff <= fabs(rel_tol * a))) ||
-              (diff <= abs_tol));
-
-    return PyBool_FromLong(result);
-}
-
-PyDoc_STRVAR(math_isclose_doc,
-"is_close(a, b, *, rel_tol=1e-09, abs_tol=0.0) -> bool\n"
-"\n"
-"Determine whether two floating point numbers are close in value.\n"
-"\n"
-"   rel_tol\n"
-"       maximum difference for being considered \"close\", relative to the\n"
-"       magnitude of the input values\n"
-"    abs_tol\n"
-"       maximum difference for being considered \"close\", regardless of the\n"
-"       magnitude of the input values\n"
-"\n"
-"Return True if a is close in value to b, and False otherwise.\n"
-"\n"
-"For the values to be considered close, the difference between them\n"
-"must be smaller than at least one of the tolerances.\n"
-"\n"
-"-inf, inf and NaN behave similarly to the IEEE 754 Standard.  That\n"
-"is, NaN is not close to anything, even itself.  inf and -inf are\n"
-"only close to themselves.");
-
 static PyMethodDef math_methods[] = {
     {"acos",            math_acos,      METH_O,         math_acos_doc},
     {"acosh",           math_acosh,     METH_O,         math_acosh_doc},
@@ -2091,10 +1950,7 @@ static PyMethodDef math_methods[] = {
     {"frexp",           math_frexp,     METH_O,         math_frexp_doc},
     {"fsum",            math_fsum,      METH_O,         math_fsum_doc},
     {"gamma",           math_gamma,     METH_O,         math_gamma_doc},
-    {"gcd",             math_gcd,       METH_VARARGS,   math_gcd_doc},
     {"hypot",           math_hypot,     METH_VARARGS,   math_hypot_doc},
-    {"isclose", (PyCFunction) math_isclose, METH_VARARGS | METH_KEYWORDS,
-    math_isclose_doc},
     {"isfinite",        math_isfinite,  METH_O,         math_isfinite_doc},
     {"isinf",           math_isinf,     METH_O,         math_isinf_doc},
     {"isnan",           math_isnan,     METH_O,         math_isnan_doc},
@@ -2145,11 +2001,7 @@ PyInit_math(void)
 
     PyModule_AddObject(m, "pi", PyFloat_FromDouble(Py_MATH_PI));
     PyModule_AddObject(m, "e", PyFloat_FromDouble(Py_MATH_E));
-    PyModule_AddObject(m, "inf", PyFloat_FromDouble(m_inf()));
-#if !defined(PY_NO_SHORT_FLOAT_REPR) || defined(Py_NAN)
-    PyModule_AddObject(m, "nan", PyFloat_FromDouble(m_nan()));
-#endif
 
-  finally:
+    finally:
     return m;
 }

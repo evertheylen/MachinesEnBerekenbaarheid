@@ -1,6 +1,5 @@
 # Test iterators.
 
-import sys
 import unittest
 from test.support import run_unittest, TESTFN, unlink, cpython_only
 import pickle
@@ -48,10 +47,6 @@ class SequenceClass:
             return i
         else:
             raise IndexError
-
-class UnlimitedSequenceClass:
-    def __getitem__(self, i):
-        return i
 
 # Main test suite
 
@@ -923,26 +918,6 @@ class TestCase(unittest.TestCase):
             lst.pop(0)
         lst.extend(gen())
         self.assertEqual(len(lst), 760)
-
-    @cpython_only
-    def test_iter_overflow(self):
-        # Test for the issue 22939
-        it = iter(UnlimitedSequenceClass())
-        # Manually set `it_index` to PY_SSIZE_T_MAX-2 without a loop
-        it.__setstate__(sys.maxsize - 2)
-        self.assertEqual(next(it), sys.maxsize - 2)
-        self.assertEqual(next(it), sys.maxsize - 1)
-        with self.assertRaises(OverflowError):
-            next(it)
-        # Check that Overflow error is always raised
-        with self.assertRaises(OverflowError):
-            next(it)
-
-    def test_iter_neg_setstate(self):
-        it = iter(UnlimitedSequenceClass())
-        it.__setstate__(-42)
-        self.assertEqual(next(it), 0)
-        self.assertEqual(next(it), 1)
 
 
 def test_main():

@@ -246,5 +246,8 @@ def _have_soundcard():
     return __have_soundcard_cache
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_main():
+    support.run_unittest(BeepTest, MessageBeepTest, PlaySoundTest)
+
+if __name__=="__main__":
+    test_main()

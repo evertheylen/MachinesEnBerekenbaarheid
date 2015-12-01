@@ -69,7 +69,6 @@ spami(truth            , PyObject_IsTrue)
 spam2(op_add           , PyNumber_Add)
 spam2(op_sub           , PyNumber_Subtract)
 spam2(op_mul           , PyNumber_Multiply)
-spam2(op_matmul        , PyNumber_MatrixMultiply)
 spam2(op_floordiv      , PyNumber_FloorDivide)
 spam2(op_truediv       , PyNumber_TrueDivide)
 spam2(op_mod           , PyNumber_Remainder)
@@ -87,7 +86,6 @@ spam2(op_or_           , PyNumber_Or)
 spam2(op_iadd          , PyNumber_InPlaceAdd)
 spam2(op_isub          , PyNumber_InPlaceSubtract)
 spam2(op_imul          , PyNumber_InPlaceMultiply)
-spam2(op_imatmul       , PyNumber_InPlaceMatrixMultiply)
 spam2(op_ifloordiv     , PyNumber_InPlaceFloorDivide)
 spam2(op_itruediv      , PyNumber_InPlaceTrueDivide)
 spam2(op_imod          , PyNumber_InPlaceRemainder)
@@ -241,7 +239,7 @@ PyDoc_STRVAR(compare_digest__doc__,
 "Return 'a == b'.  This function uses an approach designed to prevent\n"
 "timing analysis, making it appropriate for cryptography.\n"
 "a and b must both be of the same type: either str (ASCII only),\n"
-"or any bytes-like object.\n"
+"or any type that supports the buffer protocol (e.g. bytes).\n"
 "\n"
 "Note: If a and b are of different lengths, or if an error occurs,\n"
 "a timing attack could theoretically reveal information about the\n"
@@ -345,7 +343,6 @@ spam2o(index, "index(a) -- Same as a.__index__()")
 spam2(add, "add(a, b) -- Same as a + b.")
 spam2(sub, "sub(a, b) -- Same as a - b.")
 spam2(mul, "mul(a, b) -- Same as a * b.")
-spam2(matmul, "matmul(a, b) -- Same as a @ b.")
 spam2(floordiv, "floordiv(a, b) -- Same as a // b.")
 spam2(truediv, "truediv(a, b) -- Same as a / b.")
 spam2(mod, "mod(a, b) -- Same as a % b.")
@@ -363,7 +360,6 @@ spam2(or_, "or_(a, b) -- Same as a | b.")
 spam2(iadd, "a = iadd(a, b) -- Same as a += b.")
 spam2(isub, "a = isub(a, b) -- Same as a -= b.")
 spam2(imul, "a = imul(a, b) -- Same as a *= b.")
-spam2(imatmul, "a = imatmul(a, b) -- Same as a @= b.")
 spam2(ifloordiv, "a = ifloordiv(a, b) -- Same as a //= b.")
 spam2(itruediv, "a = itruediv(a, b) -- Same as a /= b")
 spam2(imod, "a = imod(a, b) -- Same as a %= b.")
@@ -485,41 +481,6 @@ itemgetter_call(itemgetterobject *ig, PyObject *args, PyObject *kw)
     return result;
 }
 
-static PyObject *
-itemgetter_repr(itemgetterobject *ig)
-{
-    PyObject *repr;
-    const char *reprfmt;
-
-    int status = Py_ReprEnter((PyObject *)ig);
-    if (status != 0) {
-        if (status < 0)
-            return NULL;
-        return PyUnicode_FromFormat("%s(...)", Py_TYPE(ig)->tp_name);
-    }
-
-    reprfmt = ig->nitems == 1 ? "%s(%R)" : "%s%R";
-    repr = PyUnicode_FromFormat(reprfmt, Py_TYPE(ig)->tp_name, ig->item);
-    Py_ReprLeave((PyObject *)ig);
-    return repr;
-}
-
-static PyObject *
-itemgetter_reduce(itemgetterobject *ig)
-{
-    if (ig->nitems == 1)
-        return Py_BuildValue("O(O)", Py_TYPE(ig), ig->item);
-    return PyTuple_Pack(2, Py_TYPE(ig), ig->item);
-}
-
-PyDoc_STRVAR(reduce_doc, "Return state information for pickling");
-
-static PyMethodDef itemgetter_methods[] = {
-    {"__reduce__", (PyCFunction)itemgetter_reduce, METH_NOARGS,
-     reduce_doc},
-    {NULL}
-};
-
 PyDoc_STRVAR(itemgetter_doc,
 "itemgetter(item, ...) --> itemgetter object\n\
 \n\
@@ -538,7 +499,7 @@ static PyTypeObject itemgetter_type = {
     0,                                  /* tp_getattr */
     0,                                  /* tp_setattr */
     0,                                  /* tp_reserved */
-    (reprfunc)itemgetter_repr,          /* tp_repr */
+    0,                                  /* tp_repr */
     0,                                  /* tp_as_number */
     0,                                  /* tp_as_sequence */
     0,                                  /* tp_as_mapping */
@@ -556,7 +517,7 @@ static PyTypeObject itemgetter_type = {
     0,                                  /* tp_weaklistoffset */
     0,                                  /* tp_iter */
     0,                                  /* tp_iternext */
-    itemgetter_methods,                 /* tp_methods */
+    0,                                  /* tp_methods */
     0,                                  /* tp_members */
     0,                                  /* tp_getset */
     0,                                  /* tp_base */
@@ -772,93 +733,6 @@ attrgetter_call(attrgetterobject *ag, PyObject *args, PyObject *kw)
     return result;
 }
 
-static PyObject *
-dotjoinattr(PyObject *attr, PyObject **attrsep)
-{
-    if (PyTuple_CheckExact(attr)) {
-        if (*attrsep == NULL) {
-            *attrsep = PyUnicode_FromString(".");
-            if (*attrsep == NULL)
-                return NULL;
-        }
-        return PyUnicode_Join(*attrsep, attr);
-    } else {
-        Py_INCREF(attr);
-        return attr;
-    }
-}
-
-static PyObject *
-attrgetter_args(attrgetterobject *ag)
-{
-    Py_ssize_t i;
-    PyObject *attrsep = NULL;
-    PyObject *attrstrings = PyTuple_New(ag->nattrs);
-    if (attrstrings == NULL)
-        return NULL;
-
-    for (i = 0; i < ag->nattrs; ++i) {
-        PyObject *attr = PyTuple_GET_ITEM(ag->attr, i);
-        PyObject *attrstr = dotjoinattr(attr, &attrsep);
-        if (attrstr == NULL) {
-            Py_XDECREF(attrsep);
-            Py_DECREF(attrstrings);
-            return NULL;
-        }
-        PyTuple_SET_ITEM(attrstrings, i, attrstr);
-    }
-    Py_XDECREF(attrsep);
-    return attrstrings;
-}
-
-static PyObject *
-attrgetter_repr(attrgetterobject *ag)
-{
-    PyObject *repr = NULL;
-    int status = Py_ReprEnter((PyObject *)ag);
-    if (status != 0) {
-        if (status < 0)
-            return NULL;
-        return PyUnicode_FromFormat("%s(...)", Py_TYPE(ag)->tp_name);
-    }
-
-    if (ag->nattrs == 1) {
-        PyObject *attrsep = NULL;
-        PyObject *attr = dotjoinattr(PyTuple_GET_ITEM(ag->attr, 0), &attrsep);
-        if (attr != NULL) {
-            repr = PyUnicode_FromFormat("%s(%R)", Py_TYPE(ag)->tp_name, attr);
-            Py_DECREF(attr);
-        }
-        Py_XDECREF(attrsep);
-    }
-    else {
-        PyObject *attrstrings = attrgetter_args(ag);
-        if (attrstrings != NULL) {
-            repr = PyUnicode_FromFormat("%s%R",
-                                        Py_TYPE(ag)->tp_name, attrstrings);
-            Py_DECREF(attrstrings);
-        }
-    }
-    Py_ReprLeave((PyObject *)ag);
-    return repr;
-}
-
-static PyObject *
-attrgetter_reduce(attrgetterobject *ag)
-{
-    PyObject *attrstrings = attrgetter_args(ag);
-    if (attrstrings == NULL)
-        return NULL;
-
-    return Py_BuildValue("ON", Py_TYPE(ag), attrstrings);
-}
-
-static PyMethodDef attrgetter_methods[] = {
-    {"__reduce__", (PyCFunction)attrgetter_reduce, METH_NOARGS,
-     reduce_doc},
-    {NULL}
-};
-
 PyDoc_STRVAR(attrgetter_doc,
 "attrgetter(attr, ...) --> attrgetter object\n\
 \n\
@@ -879,7 +753,7 @@ static PyTypeObject attrgetter_type = {
     0,                                  /* tp_getattr */
     0,                                  /* tp_setattr */
     0,                                  /* tp_reserved */
-    (reprfunc)attrgetter_repr,          /* tp_repr */
+    0,                                  /* tp_repr */
     0,                                  /* tp_as_number */
     0,                                  /* tp_as_sequence */
     0,                                  /* tp_as_mapping */
@@ -897,7 +771,7 @@ static PyTypeObject attrgetter_type = {
     0,                                  /* tp_weaklistoffset */
     0,                                  /* tp_iter */
     0,                                  /* tp_iternext */
-    attrgetter_methods,                 /* tp_methods */
+    0,                                  /* tp_methods */
     0,                                  /* tp_members */
     0,                                  /* tp_getset */
     0,                                  /* tp_base */
@@ -935,13 +809,6 @@ methodcaller_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
         return NULL;
     }
 
-    name = PyTuple_GET_ITEM(args, 0);
-    if (!PyUnicode_Check(name)) {
-        PyErr_SetString(PyExc_TypeError,
-                        "method name must be a string");
-        return NULL;
-    }
-
     /* create methodcallerobject structure */
     mc = PyObject_GC_New(methodcallerobject, &methodcaller_type);
     if (mc == NULL)
@@ -954,8 +821,8 @@ methodcaller_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
     }
     mc->args = newargs;
 
+    name = PyTuple_GET_ITEM(args, 0);
     Py_INCREF(name);
-    PyUnicode_InternInPlace(&name);
     mc->name = name;
 
     Py_XINCREF(kwds);
@@ -998,142 +865,6 @@ methodcaller_call(methodcallerobject *mc, PyObject *args, PyObject *kw)
     return result;
 }
 
-static PyObject *
-methodcaller_repr(methodcallerobject *mc)
-{
-    PyObject *argreprs, *repr = NULL, *sep, *joinedargreprs;
-    Py_ssize_t numtotalargs, numposargs, numkwdargs, i;
-    int status = Py_ReprEnter((PyObject *)mc);
-    if (status != 0) {
-        if (status < 0)
-            return NULL;
-        return PyUnicode_FromFormat("%s(...)", Py_TYPE(mc)->tp_name);
-    }
-
-    if (mc->kwds != NULL) {
-        numkwdargs = PyDict_Size(mc->kwds);
-        if (numkwdargs < 0) {
-            Py_ReprLeave((PyObject *)mc);
-            return NULL;
-        }
-    } else {
-        numkwdargs = 0;
-    }
-
-    numposargs = PyTuple_GET_SIZE(mc->args);
-    numtotalargs = numposargs + numkwdargs;
-
-    if (numtotalargs == 0) {
-        repr = PyUnicode_FromFormat("%s(%R)", Py_TYPE(mc)->tp_name, mc->name);
-        Py_ReprLeave((PyObject *)mc);
-        return repr;
-    }
-
-    argreprs = PyTuple_New(numtotalargs);
-    if (argreprs == NULL) {
-        Py_ReprLeave((PyObject *)mc);
-        return NULL;
-    }
-
-    for (i = 0; i < numposargs; ++i) {
-        PyObject *onerepr = PyObject_Repr(PyTuple_GET_ITEM(mc->args, i));
-        if (onerepr == NULL)
-            goto done;
-        PyTuple_SET_ITEM(argreprs, i, onerepr);
-    }
-
-    if (numkwdargs != 0) {
-        PyObject *key, *value;
-        Py_ssize_t pos = 0;
-        while (PyDict_Next(mc->kwds, &pos, &key, &value)) {
-            PyObject *onerepr = PyUnicode_FromFormat("%U=%R", key, value);
-            if (onerepr == NULL)
-                goto done;
-            if (i >= numtotalargs) {
-                i = -1;
-                break;
-            }
-            PyTuple_SET_ITEM(argreprs, i, onerepr);
-            ++i;
-        }
-        if (i != numtotalargs) {
-            PyErr_SetString(PyExc_RuntimeError,
-                            "keywords dict changed size during iteration");
-            goto done;
-        }
-    }
-
-    sep = PyUnicode_FromString(", ");
-    if (sep == NULL)
-        goto done;
-
-    joinedargreprs = PyUnicode_Join(sep, argreprs);
-    Py_DECREF(sep);
-    if (joinedargreprs == NULL)
-        goto done;
-
-    repr = PyUnicode_FromFormat("%s(%R, %U)", Py_TYPE(mc)->tp_name,
-                                mc->name, joinedargreprs);
-    Py_DECREF(joinedargreprs);
-
-done:
-    Py_DECREF(argreprs);
-    Py_ReprLeave((PyObject *)mc);
-    return repr;
-}
-
-static PyObject *
-methodcaller_reduce(methodcallerobject *mc)
-{
-    PyObject *newargs;
-    if (!mc->kwds || PyDict_Size(mc->kwds) == 0) {
-        Py_ssize_t i;
-        Py_ssize_t callargcount = PyTuple_GET_SIZE(mc->args);
-        newargs = PyTuple_New(1 + callargcount);
-        if (newargs == NULL)
-            return NULL;
-        Py_INCREF(mc->name);
-        PyTuple_SET_ITEM(newargs, 0, mc->name);
-        for (i = 0; i < callargcount; ++i) {
-            PyObject *arg = PyTuple_GET_ITEM(mc->args, i);
-            Py_INCREF(arg);
-            PyTuple_SET_ITEM(newargs, i + 1, arg);
-        }
-        return Py_BuildValue("ON", Py_TYPE(mc), newargs);
-    }
-    else {
-        PyObject *functools;
-        PyObject *partial;
-        PyObject *constructor;
-        _Py_IDENTIFIER(partial);
-        functools = PyImport_ImportModule("functools");
-        if (!functools)
-            return NULL;
-        partial = _PyObject_GetAttrId(functools, &PyId_partial);
-        Py_DECREF(functools);
-        if (!partial)
-            return NULL;
-        newargs = PyTuple_New(2);
-        if (newargs == NULL) {
-            Py_DECREF(partial);
-            return NULL;
-        }
-        Py_INCREF(Py_TYPE(mc));
-        PyTuple_SET_ITEM(newargs, 0, (PyObject *)Py_TYPE(mc));
-        Py_INCREF(mc->name);
-        PyTuple_SET_ITEM(newargs, 1, mc->name);
-        constructor = PyObject_Call(partial, newargs, mc->kwds);
-        Py_DECREF(newargs);
-        Py_DECREF(partial);
-        return Py_BuildValue("NO", constructor, mc->args);
-    }
-}
-
-static PyMethodDef methodcaller_methods[] = {
-    {"__reduce__", (PyCFunction)methodcaller_reduce, METH_NOARGS,
-     reduce_doc},
-    {NULL}
-};
 PyDoc_STRVAR(methodcaller_doc,
 "methodcaller(name, ...) --> methodcaller object\n\
 \n\
@@ -1153,7 +884,7 @@ static PyTypeObject methodcaller_type = {
     0,                                  /* tp_getattr */
     0,                                  /* tp_setattr */
     0,                                  /* tp_reserved */
-    (reprfunc)methodcaller_repr,        /* tp_repr */
+    0,                                  /* tp_repr */
     0,                                  /* tp_as_number */
     0,                                  /* tp_as_sequence */
     0,                                  /* tp_as_mapping */
@@ -1171,7 +902,7 @@ static PyTypeObject methodcaller_type = {
     0,                                  /* tp_weaklistoffset */
     0,                                  /* tp_iter */
     0,                                  /* tp_iternext */
-    methodcaller_methods,               /* tp_methods */
+    0,                                  /* tp_methods */
     0,                                  /* tp_members */
     0,                                  /* tp_getset */
     0,                                  /* tp_base */

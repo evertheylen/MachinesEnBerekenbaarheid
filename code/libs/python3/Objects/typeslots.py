@@ -12,8 +12,6 @@ for line in sys.stdin:
     member = m.group(1)
     if member.startswith("tp_"):
         member = "ht_type."+member
-    elif member.startswith("am_"):
-        member = "as_async."+member
     elif member.startswith("nb_"):
         member = "as_number."+member
     elif member.startswith("mp_"):

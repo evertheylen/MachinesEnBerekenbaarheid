@@ -10,6 +10,7 @@ import collections
 import errno
 import functools
 import socket
+import sys
 import warnings
 try:
     import ssl
@@ -17,7 +18,6 @@ except ImportError:  # pragma: no cover
     ssl = None
 
 from . import base_events
-from . import compat
 from . import constants
 from . import events
 from . import futures
@@ -408,12 +408,14 @@ class BaseSelectorEventLoop(base_events.BaseEventLoop):
     def _sock_connect(self, fut, sock, address):
         fd = sock.fileno()
         try:
-            sock.connect(address)
-        except (BlockingIOError, InterruptedError):
-            # Issue #23618: When the C function connect() fails with EINTR, the
-            # connection runs in background. We have to wait until the socket
-            # becomes writable to be notified when the connection succeed or
-            # fails.
+            while True:
+                try:
+                    sock.connect(address)
+                except InterruptedError:
+                    continue
+                else:
+                    break
+        except BlockingIOError:
             fut.add_done_callback(functools.partial(self._sock_connect_done,
                                                     fd))
             self.add_writer(fd, self._sock_connect_cb, fut, sock, address)
@@ -533,7 +535,7 @@ class _SelectorTransport(transports._FlowControlMixin,
             info.append('closing')
         info.append('fd=%s' % self._sock_fd)
         # test if the transport was closed
-        if self._loop is not None and not self._loop.is_closed():
+        if self._loop is not None:
             polling = _test_selector_event(self._loop._selector,
                                            self._sock_fd, selectors.EVENT_READ)
             if polling:
@@ -568,7 +570,7 @@ class _SelectorTransport(transports._FlowControlMixin,
     # On Python 3.3 and older, objects with a destructor part of a reference
     # cycle are never destroyed. It's not more the case on Python 3.4 thanks
     # to the PEP 442.
-    if compat.PY34:
+    if sys.version_info >= (3, 4):
         def __del__(self):
             if self._sock is not None:
                 warnings.warn("unclosed transport %r" % self, ResourceWarning)

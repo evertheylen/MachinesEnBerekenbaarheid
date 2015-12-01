@@ -1,12 +1,11 @@
 from .. import util
+from . import util as import_util
 
 importlib = util.import_importlib('importlib')
 machinery = util.import_importlib('importlib.machinery')
 
-import errno
 import os
 import sys
-import tempfile
 from types import ModuleType
 import unittest
 import warnings
@@ -59,7 +58,7 @@ class FinderTests:
         module = '<test module>'
         path = '<test path>'
         importer = util.mock_spec(module)
-        hook = util.mock_path_hook(path, importer=importer)
+        hook = import_util.mock_path_hook(path, importer=importer)
         with util.import_state(path_hooks=[hook]):
             loader = self.machinery.PathFinder.find_module(module, [path])
             self.assertIs(loader, importer)
@@ -84,7 +83,7 @@ class FinderTests:
         path = ''
         module = '<test module>'
         importer = util.mock_spec(module)
-        hook = util.mock_path_hook(os.getcwd(), importer=importer)
+        hook = import_util.mock_path_hook(os.getcwd(), importer=importer)
         with util.import_state(path=[path], path_hooks=[hook]):
             loader = self.machinery.PathFinder.find_module(module)
             self.assertIs(loader, importer)
@@ -99,7 +98,7 @@ class FinderTests:
         new_path_importer_cache.pop(None, None)
         new_path_hooks = [zipimport.zipimporter,
                           self.machinery.FileFinder.path_hook(
-                              *self.importlib._bootstrap_external._get_supported_file_loaders())]
+                              *self.importlib._bootstrap._get_supported_file_loaders())]
         missing = object()
         email = sys.modules.pop('email', missing)
         try:
@@ -113,74 +112,8 @@ class FinderTests:
             if email is not missing:
                 sys.modules['email'] = email
 
-    def test_finder_with_find_module(self):
-        class TestFinder:
-            def find_module(self, fullname):
-                return self.to_return
-        failing_finder = TestFinder()
-        failing_finder.to_return = None
-        path = 'testing path'
-        with util.import_state(path_importer_cache={path: failing_finder}):
-            self.assertIsNone(
-                    self.machinery.PathFinder.find_spec('whatever', [path]))
-        success_finder = TestFinder()
-        success_finder.to_return = __loader__
-        with util.import_state(path_importer_cache={path: success_finder}):
-            spec = self.machinery.PathFinder.find_spec('whatever', [path])
-        self.assertEqual(spec.loader, __loader__)
-
-    def test_finder_with_find_loader(self):
-        class TestFinder:
-            loader = None
-            portions = []
-            def find_loader(self, fullname):
-                return self.loader, self.portions
-        path = 'testing path'
-        with util.import_state(path_importer_cache={path: TestFinder()}):
-            self.assertIsNone(
-                    self.machinery.PathFinder.find_spec('whatever', [path]))
-        success_finder = TestFinder()
-        success_finder.loader = __loader__
-        with util.import_state(path_importer_cache={path: success_finder}):
-            spec = self.machinery.PathFinder.find_spec('whatever', [path])
-        self.assertEqual(spec.loader, __loader__)
-
-    def test_finder_with_find_spec(self):
-        class TestFinder:
-            spec = None
-            def find_spec(self, fullname, target=None):
-                return self.spec
-        path = 'testing path'
-        with util.import_state(path_importer_cache={path: TestFinder()}):
-            self.assertIsNone(
-                    self.machinery.PathFinder.find_spec('whatever', [path]))
-        success_finder = TestFinder()
-        success_finder.spec = self.machinery.ModuleSpec('whatever', __loader__)
-        with util.import_state(path_importer_cache={path: success_finder}):
-            got = self.machinery.PathFinder.find_spec('whatever', [path])
-        self.assertEqual(got, success_finder.spec)
-
-    @unittest.skipIf(sys.platform == 'win32', "cwd can't not exist on Windows")
-    def test_deleted_cwd(self):
-        # Issue #22834
-        self.addCleanup(os.chdir, os.getcwd())
-        try:
-            with tempfile.TemporaryDirectory() as path:
-                os.chdir(path)
-        except OSError as exc:
-            if exc.errno == errno.EINVAL:
-                self.skipTest("platform does not allow the deletion of the cwd")
-            raise
-        with util.import_state(path=['']):
-            # Do not want FileNotFoundError raised.
-            self.assertIsNone(self.machinery.PathFinder.find_spec('whatever'))
-
-
-
-
-(Frozen_FinderTests,
- Source_FinderTests
- ) = util.test_both(FinderTests, importlib=importlib, machinery=machinery)
+Frozen_FinderTests, Source_FinderTests = util.test_both(
+        FinderTests, importlib=importlib, machinery=machinery)
 
 
 class PathEntryFinderTests:
@@ -203,10 +136,8 @@ class PathEntryFinderTests:
                                path_hooks=[Finder]):
             self.machinery.PathFinder.find_spec('importlib')
 
-
-(Frozen_PEFTests,
- Source_PEFTests
- ) = util.test_both(PathEntryFinderTests, machinery=machinery)
+Frozen_PEFTests, Source_PEFTests = util.test_both(
+        PathEntryFinderTests, machinery=machinery)
 
 
 if __name__ == '__main__':

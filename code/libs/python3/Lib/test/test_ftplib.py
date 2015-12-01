@@ -73,7 +73,7 @@ class DummyDTPHandler(asynchat.async_chat):
         super(DummyDTPHandler, self).push(what.encode('ascii'))
 
     def handle_error(self):
-        raise Exception
+        raise
 
 
 class DummyFTPHandler(asynchat.async_chat):
@@ -118,7 +118,7 @@ class DummyFTPHandler(asynchat.async_chat):
             self.push('550 command "%s" not understood.' %cmd)
 
     def handle_error(self):
-        raise Exception
+        raise
 
     def push(self, data):
         asynchat.async_chat.push(self, data.encode('ascii') + b'\r\n')
@@ -134,7 +134,7 @@ class DummyFTPHandler(asynchat.async_chat):
     def cmd_pasv(self, arg):
         with socket.socket() as sock:
             sock.bind((self.socket.getsockname()[0], 0))
-            sock.listen()
+            sock.listen(5)
             sock.settimeout(TIMEOUT)
             ip, port = sock.getsockname()[:2]
             ip = ip.replace('.', ','); p1 = port / 256; p2 = port % 256
@@ -152,7 +152,7 @@ class DummyFTPHandler(asynchat.async_chat):
     def cmd_epsv(self, arg):
         with socket.socket(socket.AF_INET6) as sock:
             sock.bind((self.socket.getsockname()[0], 0))
-            sock.listen()
+            sock.listen(5)
             sock.settimeout(TIMEOUT)
             port = sock.getsockname()[1]
             self.push('229 entering extended passive mode (|||%d|)' %port)
@@ -296,7 +296,7 @@ class DummyFTPServer(asyncore.dispatcher, threading.Thread):
         return 0
 
     def handle_error(self):
-        raise Exception
+        raise
 
 
 if ssl is not None:
@@ -394,7 +394,7 @@ if ssl is not None:
                 raise
 
         def handle_error(self):
-            raise Exception
+            raise
 
         def close(self):
             if (isinstance(self.socket, ssl.SSLSocket) and
@@ -670,7 +670,7 @@ class TestFTPClass(TestCase):
         self.assertRaises(StopIteration, next, self.client.mlsd())
         set_data('')
         for x in self.client.mlsd():
-            self.fail("unexpected data %s" % x)
+            self.fail("unexpected data %s" % data)
 
     def test_makeport(self):
         with self.client.makeport():
@@ -979,7 +979,7 @@ class TestTimeouts(TestCase):
         #  1) when the connection is ready to be accepted.
         #  2) when it is safe for the caller to close the connection
         #  3) when we have closed the socket
-        self.sock.listen()
+        self.sock.listen(5)
         # (1) Signal the caller that we are ready to accept the connection.
         self.evt.set()
         try:
@@ -1049,8 +1049,19 @@ class TestTimeouts(TestCase):
         ftp.close()
 
 
+class TestNetrcDeprecation(TestCase):
+
+    def test_deprecation(self):
+        with support.temp_cwd(), support.EnvironmentVarGuard() as env:
+            env['HOME'] = os.getcwd()
+            open('.netrc', 'w').close()
+            with self.assertWarns(DeprecationWarning):
+                ftplib.Netrc()
+
+
+
 def test_main():
-    tests = [TestFTPClass, TestTimeouts,
+    tests = [TestFTPClass, TestTimeouts, TestNetrcDeprecation,
              TestIPv6Environment,
              TestTLS_FTPClassMixin, TestTLS_FTPClass]
 

@@ -30,24 +30,14 @@ class Test_OpenGL_libs(unittest.TestCase):
 
         cls.gl = cls.glu = cls.gle = None
         if lib_gl:
-            try:
-                cls.gl = CDLL(lib_gl, mode=RTLD_GLOBAL)
-            except OSError:
-                pass
+            cls.gl = CDLL(lib_gl, mode=RTLD_GLOBAL)
         if lib_glu:
-            try:
-                cls.glu = CDLL(lib_glu, RTLD_GLOBAL)
-            except OSError:
-                pass
+            cls.glu = CDLL(lib_glu, RTLD_GLOBAL)
         if lib_gle:
             try:
                 cls.gle = CDLL(lib_gle)
             except OSError:
                 pass
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.gl = cls.glu = cls.gle = None
 
     def test_gl(self):
         if self.gl is None:

@@ -11,7 +11,7 @@ threading = support.import_module('threading')
 HOST = support.HOST
 
 def server(evt, serv):
-    serv.listen()
+    serv.listen(5)
     evt.set()
     try:
         conn, addr = serv.accept()
@@ -393,5 +393,9 @@ class ExpectTests(ExpectAndReadTestCase):
         self.assertEqual(data, b''.join(want[:-1]))
 
 
+def test_main(verbose=None):
+    support.run_unittest(GeneralTests, ReadTests, WriteTests, OptionTests,
+                         ExpectTests)
+
 if __name__ == '__main__':
-    unittest.main()
+    test_main()
