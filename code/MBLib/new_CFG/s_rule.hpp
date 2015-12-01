@@ -4,7 +4,6 @@
 dependencies["headers"] = [
 	"libs/tinyxml>>headers",
 	"MBLib/common>>headers",
-	"MBLib/new_CFG>>headers",
 ]
 
 [stop baking]
