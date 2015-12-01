@@ -27,8 +27,8 @@ MODLIBS=        _MODLIBS_
 VERSION=	3.4
 srcdir=		.
 
-abs_srcdir=	/home/stijn/Documents/2Ba Informatica/MachinesEnBerekenbaarheid/code/libs/python3
-abs_builddir=	/home/stijn/Documents/2Ba Informatica/MachinesEnBerekenbaarheid/code/libs/python3
+abs_srcdir=	/Bestanden/Copy/root/Bestanden/School/MB/MachinesEnBerekenbaarheid/code/libs/python3
+abs_builddir=	/Bestanden/Copy/root/Bestanden/School/MB/MachinesEnBerekenbaarheid/code/libs/python3
 
 
 CC=		gcc -pthread
@@ -62,7 +62,7 @@ INSTALL_DATA=	${INSTALL} -m 644
 # Also, making them read-only seems to be a good idea...
 INSTALL_SHARED= ${INSTALL} -m 555
 
-MKDIR_P=	/bin/mkdir -p
+MKDIR_P=	/usr/bin/mkdir -p
 
 MAKESETUP=      $(srcdir)/Modules/makesetup
 
@@ -103,7 +103,7 @@ PY_CORE_CFLAGS=	$(PY_CFLAGS) $(PY_CFLAGS_NODIST) $(PY_CPPFLAGS) $(CFLAGSFORSHARE
 MACHDEP=	linux
 
 # Multiarch directory (may be empty)
-MULTIARCH=	x86_64-linux-gnu
+MULTIARCH=	
 
 # Install prefix for architecture-independent files
 prefix=		/usr/local
@@ -338,7 +338,7 @@ AST_ASDL=	$(srcdir)/Parser/Python.asdl
 ASDLGEN_FILES=	$(srcdir)/Parser/asdl.py $(srcdir)/Parser/asdl_c.py
 # Note that a build now requires Python to exist before the build starts.
 # Use "hg touch" to fix up screwed up file mtimes in a checkout.
-ASDLGEN=	python3.4 $(srcdir)/Parser/asdl_c.py
+ASDLGEN=	python3 $(srcdir)/Parser/asdl_c.py
 
 ##########################################################################
 # Python
