@@ -1,13 +1,4 @@
 
-/* [bake me]
-
-dependencies["headers"] = [
-	"MBLib/new_CFG>>headers",
-	"NGLib/common>>headers",
-]
-
-[stop baking] */
-
 #pragma once
 
 #include <string>
@@ -30,7 +21,7 @@ public:
 		std::uniform_int_distribution<int> dist(0, 99);
 		int picked_rule = dist(mt);
 		double prev_chance = 0;
-		for (Rule_Type rule: cfg.rules(var).second) {
+		for (Rule_Type rule: cfg.rules(var)) {
 			double chance = rule.get_chance();
 			if (picked_rule - prev_chance < chance*100) {
 				return rule;

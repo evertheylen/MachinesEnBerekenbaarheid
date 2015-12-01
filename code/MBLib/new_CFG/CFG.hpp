@@ -55,6 +55,30 @@ public:
 	std::vector<ID_T> body;
 };
 
+
+template <typename RuleT>
+class RuleIterator {
+public:
+	using ID_T = typename RuleT::ID_Type;
+	using MapT = typename std::multimap<ID_T, RuleT>;
+	
+	RuleIterator(const ID_T& _var, const MapT& _P):
+			var(_var), P(_P) {}
+	
+	typename MapT::const_iterator begin() {
+		return P.find(var);
+	}
+	
+	typename MapT::const_iterator end() {
+		return P.end();
+	}
+	
+private:
+	const ID_T& var;
+	const MapT& P;
+};
+
+
 // Description of what RuleT should offer:
 //   - ID_Type type declaration
 //   - String type declaration
@@ -96,11 +120,8 @@ public:
         return P.find(var) != P.end();
 	}
 	
-	typename std::multimap<ID_T, RuleT>::const_iterator rules(const ID_T& var) const {
-		assert(is_variable(var));
-		auto m = P.find(var);
-		// experimental range-based for loop support?
-		return P.find(var);
+	RuleIterator<RuleT> rules(const ID_T& var) const {
+		return RuleIterator<RuleT>(var, P);
 	}
 	
 	void add_rule(const RuleT& rule) {

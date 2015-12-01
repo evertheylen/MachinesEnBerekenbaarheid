@@ -9,5 +9,8 @@ TEST(CFG, Init) {
 	TiXmlDocument doc("CFG.xml");
 	doc.LoadFile();
 	s_CFG G(doc);
+	for (auto r: G.rules(std::string("S"))) {
+		ASSERT_EQ(true, true);
+	}
 	ASSERT_EQ(G.V, std::set<std::string>({"S", "T", "U", "V"}));
 }

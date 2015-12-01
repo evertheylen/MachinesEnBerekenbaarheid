@@ -32,7 +32,7 @@ public:
 	using StringT = std::vector<ID_T>;
 	
 	StochasticRule(const ID_T& _head, const std::vector<ID_T>& _body, double _chance):
-		SimpleRule(_head, _body), chance(_chance) {}
+		SimpleRule<ID_T>(_head, _body), chance(_chance) {}
 	
 	double get_chance() const {
 	    return chance;
