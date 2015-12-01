@@ -9,10 +9,11 @@ extensions =  [".cpp", ".cc", ".hpp", ".hh", ".h", ".test"]
 scanned_files =  ["*.cpp", "*.cc", "*.hpp", "*.hh", "*.h", "*.test"]
 
 gcc_config = ConfigDict({
-    "compiler": "clang++",
+    "compiler": "g++",
     "mode": "g3",
     "std": "c++11",
-    "extra": "-Wall",
+    "pre_extra": "-Wall",
+    "post_extra": "",
     "input": ["*.cpp", "*.cc", "*.hpp", "*.h", "*.hh"]
 })
 
@@ -39,4 +40,3 @@ int main(int argc, char **argv) {{
 
 """
 })
-    

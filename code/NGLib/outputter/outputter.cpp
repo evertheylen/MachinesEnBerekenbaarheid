@@ -2,17 +2,17 @@
 #include "outputter.hpp"
 
 
-FileOutPutter::FileOutPutter(std::string _filename):
+FileOutputter::FileOutputter(std::string _filename):
 		filename(_filename) {}
 	
-void FileOutPutter::init() {
+void FileOutputter::init() {
 	file.open(filename);
 }
 
-void FileOutPutter::output(std::string s) {
+void FileOutputter::output(std::string s) {
 	file << s;
 }
 
-void FileOutPutter::close() {
+void FileOutputter::close() {
 	file.close();
 }

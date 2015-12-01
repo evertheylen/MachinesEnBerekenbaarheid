@@ -2,8 +2,8 @@
 #include <string>
 #include <iostream>
 
-#include <boost/python.hpp>
-#include <Python.h>
+#include "boost/python.hpp"
+#include "Python.h"
 
 using namespace boost::python;
 

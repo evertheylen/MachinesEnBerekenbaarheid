@@ -20,9 +20,9 @@ public:
 };
 
 
-class FileOutPutter: public Outputter {
+class FileOutputter: public Outputter {
 public:
-	FileOutPutter(std::string _filename);
+	FileOutputter(std::string _filename);
 	
 	void init();
 	
