@@ -1,0 +1,11 @@
+graph g {
+    P0 [label ="P"];
+    state1 [label="0"];
+    P1 [label ="P"];
+    state2 [label="0"];
+    state3 [label="1"];
+    P0 -- state1;
+    P0 -- P1;
+    P0 -- state2;
+    P1 -- state3;
+}

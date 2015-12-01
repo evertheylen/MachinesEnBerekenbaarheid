@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<CFG>
+	<Variables>
+				A
+				B
+				C
+        <StartSymbol>A</StartSymbol>
+	</Variables>
+	<Terminals>
+	  	x
+			y
+			z
+	</Terminals>
+	<Productions>
+        <Rule LHS="A" RHS= "CxA"/>
+				<Rule LHS="B" RHS= "xCy|xC"/>
+				<Rule LHS="C" RHS= "xBx|z"/>
+	</Productions>
+</CFG>
