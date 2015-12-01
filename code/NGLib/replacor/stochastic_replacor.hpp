@@ -21,10 +21,10 @@ public:
 		std::uniform_int_distribution<int> dist(0, 99);
 		int picked_rule = dist(mt);
 		double prev_chance = 0;
-		for (Rule_Type rule: cfg.rules(var)) {
-			double chance = rule.get_chance();
+		for (auto it: cfg.rules(var)) {
+			double chance = it.second.get_chance();
 			if (picked_rule - prev_chance < chance*100) {
-				return rule;
+				return it.second;
 			} else {
 				prev_chance += chance*100;
 			}
