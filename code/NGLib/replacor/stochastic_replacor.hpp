@@ -30,8 +30,7 @@ public:
 		std::uniform_int_distribution<int> dist(0, 99);
 		int picked_rule = dist(mt);
 		double prev_chance = 0;
-		while(true) {
-			Rule_Type rule = cfg.rules(var).second; 	//TODO This should iterate over the rules somehow
+		for (Rule_Type rule: cfg.rules(var).second) {
 			double chance = rule.get_chance();
 			if (picked_rule - prev_chance < chance*100) {
 				return rule;
