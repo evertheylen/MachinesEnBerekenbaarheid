@@ -27,8 +27,8 @@ MODLIBS=        _MODLIBS_
 VERSION=	3.5
 srcdir=		.
 
-abs_srcdir=	/Bestanden/School/MB/MachinesEnBerekenbaarheid/code/libs/python3
-abs_builddir=	/Bestanden/School/MB/MachinesEnBerekenbaarheid/code/libs/python3
+abs_srcdir=	/Bestanden/Copy/root/Bestanden/School/MB/MachinesEnBerekenbaarheid/code/libs/python3
+abs_builddir=	/Bestanden/Copy/root/Bestanden/School/MB/MachinesEnBerekenbaarheid/code/libs/python3
 
 
 CC=		gcc -pthread
