@@ -14,7 +14,7 @@ dependencies["build_exec"] = [
 # #BakerCanHandleIt
 gcc_config = {
 	"pre_extra": "-Wno-deprecated -Ilibs/python3/Include -Ilibs/boost/b2stuff/include/",
-	"post_extra": "-pthread -Wl,-Bdynamic -lutil -ldl -lm -Wl,-Bstatic -Llibs/python3 -lpython3.4m -Llibs/boost/b2stuff/lib/ -lboost_python3 -Wl,-Bdynamic"
+	"post_extra": "-pthread -Wl,-Bstatic -Llibs/python3 -lpython3.4m -Llibs/boost/b2stuff/lib/ -lboost_python3 -Wl,-Bdynamic -lutil -ldl -lm"
 }
 
 executable = "core"
