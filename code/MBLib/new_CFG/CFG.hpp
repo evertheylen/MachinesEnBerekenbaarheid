@@ -230,10 +230,10 @@ public:
 		return name;
 	}
 
-	void to_xml(std::string filename) {
+	TiXmlElement* to_xml(/*std::string filename*/) {
 		assert(this->check_rule_correctness());
-		TiXmlDocument doc;
-		TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "", "");
+		//TiXmlDocument doc;
+		//TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "", "");
 		TiXmlElement* root = new TiXmlElement("CFG");
 		
 		TiXmlElement* vars = new TiXmlElement("Variables");
@@ -270,8 +270,8 @@ public:
 		
 		doc.LinkEndChild(decl);
 		doc.LinkEndChild(root);
-		
-		doc.SaveFile(filename);
+		return root;
+		//doc.SaveFile(filename);
 	}
 
 };

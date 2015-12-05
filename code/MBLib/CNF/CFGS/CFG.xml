@@ -1,16 +1,9 @@
 <?xml version="1.0" ?>
-<CFG>
-	<Variables>
-        STUV
-        <StartSymbol>S</StartSymbol>
-	</Variables>
-	<Terminals>
-	    abcdefg
-	</Terminals>
-	<Productions>
-        <Rule LHS="S" RHS= "aSb|baaa|defg|"/>
-		<Rule LHS="T" RHS= "aSb|baaa|defg|V"/>
-		<Rule LHS="U" RHS= "aSb|baaa|defg|"/>
-		<Rule LHS="V" RHS= "SU|ba|a"/>
-	</Productions>
-</CFG>
+<GENERATOR>
+	<NORMAL_REPLACOR>
+		<CFG>
+        <!-- CFG Input-->
+	    </CFG>
+	</NORMAL_REPLACOR>
+	<PYTHON_OUTPUTTER/>
+</GENERATOR>
