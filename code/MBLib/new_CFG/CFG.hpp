@@ -39,6 +39,10 @@ public:
 	using ID_Type = ID_T;
 	using StringT = std::vector<ID_T>;
 	
+	SimpleRule(TiXmlElement* root) {
+		head = std::string(root->Attribute("LHS"));
+		body = std::string(root->Attribute("RHS"));
+	}
 	
 	SimpleRule(const ID_T& _head, const std::vector<ID_T>& _body):
 		head(_head), body(_body) {}
@@ -187,10 +191,7 @@ public:
 	xml_CFG(std::set<ID_T> _V, std::set<ID_T> _T, ID_T _S):
 			Parent(_V, _T, _S) {}
 
-	xml_CFG(TiXmlDocument& doc) {
-		TiXmlElement* root = doc.RootElement();
-		assert(root != nullptr);
-		
+	xml_CFG(TiXmlElement* root) {
 		auto vars_el = root->FirstChildElement("Variables");
 		assert(vars_el != nullptr);
 		for (auto s: split(std::string(vars_el->GetText()))) {
