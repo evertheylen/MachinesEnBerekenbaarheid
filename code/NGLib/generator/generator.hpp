@@ -27,7 +27,7 @@ dependencies["headers"] = [
 #include "MBLib/new_CFG/CFG.hpp"
 #include "NGLib/outputter/outputter.hpp"
 #include "NGLib/python_out/python_outputter.hpp"
-#include "NGLib/replacor/replacor.hpp"
+#include "NGLib/replacor/stochastic_replacor.hpp"
 #include "NGLib/replacor/normal_replacor.hpp"
 #include "NGLib/exceptions/exceptions.hpp"
 
