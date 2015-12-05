@@ -47,6 +47,9 @@ public:
 	
 	TiXmlElement* to_xml() {
 		TiXmlElement* elem = new TiXmlElement*("STOCHASTIC_REPLACOR");
+		TiXmlElement* cfg_elem = cfg.to_xml();
+		elem->LinkEndChild(cfg_elem);
+		return elem;
 		return elem;
 	}
 	
