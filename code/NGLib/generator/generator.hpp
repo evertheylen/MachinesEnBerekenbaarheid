@@ -16,10 +16,10 @@ dependencies["headers"] = [
 #include <list>
 #include <vector>
 #include <string>
-#include <fstream>
 #include <iostream>
 
 #include <exception>
+#include <stdexcept>
 
 #include "libs/tinyxml/tinyxml.h"
 
@@ -29,14 +29,17 @@ dependencies["headers"] = [
 
 class exceptionXML: public std::exception {
 public:
-	virtual std::string syntacticError() const throw() {
+	virtual std::string syntacticError() const {
 		return "The inputXML contains syntactic errors\n";
 	}
-	virtual std::string semanticError(std::string fault, std::string correct) const throw() {
-		std::string error = "The inputXML contains syntactic errors: " + fault + " instead of " + correct + ".\n";
+	virtual std::string noValidFilename() const {
+		return "The filename is not valid\n";
+	}
+	virtual std::string semanticError(std::string fault, std::string correct) const {
+		std::string error = "The inputXML contains semantic errors: " + fault + " instead of " + correct + ".\n";
 		return error;
 	}
-};
+} myex;
 
 
 template <typename ReplacorT>
@@ -59,9 +62,8 @@ public:
 
 	// this function will load a specified XML file
 	void loadXML(std::string inputfile) {
-		exceptionXML myex;
-		if (inputfile == "") {
-			std::cout << "There is no file specified.\n";
+		if (!inputfile.compare("")) {
+			std::cerr << "Exception caught: " << myex.noValidFilename() << std::endl;
 			return;
 		}
 		TiXmlDocument file;
@@ -115,29 +117,36 @@ public:
 	}
 
 	// this function will save to an XML file
-	void saveXML(std::string savefile) {
-		std::ofstream output(savefile);
-		if (output.is_open()) {
-			output << "<?xml version=" << '"' << "1.0" << '"' << "?>\n";
-			output << "<Generator>\n";
-
-			output << "	<Outputter type=" << '"' << "PythonOutputter" << '"' << ">\n";
-			output << "		Information about PythonOutputter here\n";
-			output << "	</Outputter>\n";
-
-			output << "	<Replacor type=" << '"' << "CfgReplacor" << '"' << ">\n";
-			output << "		Information about CfgReplacor here\n";
-			output << "	</Replacor>\n";
-
-			output << "	<extra_setting>\n";
-			output << "		Information about extra settings here\n";
-			output << "	</extra_setting>\n";
-
-			output << "</Generator>";
-			output.close();
-		} else {
-			std::cout << "There was no valid XML save file created\n";
+	void saveXML(std::string filename) {
+		if (!filename.compare("")){
+			std::cerr << "Exception caught: " << myex.noValidFilename() << std::endl;
+			return;
 		}
+		TiXmlDocument doc;
+		TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "", "");
+		TiXmlElement* root = new TiXmlElement("Generator");
+		
+		//Outputter
+		TiXmlElement* outputter = new TiXmlElement("Outputter");
+		outputter->SetAttribute("type", "PythonOutputter");
+			//Information about PythonOutputter here
+		root->LinkEndChild(outputter);
+		
+		//CFG replacor
+		TiXmlElement* replacor = new TiXmlElement("Replacor");
+		replacor->SetAttribute("type", "CfgReplacor");
+			//Information about CfgReplacor here
+		root->LinkEndChild(replacor);
+		
+		//Extra setting
+		TiXmlElement* extra_setting = new TiXmlElement("extra_setting");
+		root->LinkEndChild(extra_setting);
+			//Information about extra settings here
+		
+		doc.LinkEndChild(decl);
+		doc.LinkEndChild(root);
+		
+		doc.SaveFile(filename);
 	}
 
 private:

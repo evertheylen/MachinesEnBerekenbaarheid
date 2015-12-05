@@ -14,5 +14,5 @@ int main() {
 	Generator<DumbReplacor> g(fo.get(), dr.get());
 	g.generate({"A", "BC"}, 10);
 	//g.loadXML("loadXML.xml");
-	//g.saveXML("saveXML.xml");
+	//g.saveXML("");
 }
