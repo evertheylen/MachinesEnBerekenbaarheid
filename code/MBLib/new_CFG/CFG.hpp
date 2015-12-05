@@ -41,7 +41,7 @@ public:
 	
 	SimpleRule(TiXmlElement* root) {
 		head = std::string(root->Attribute("LHS"));
-		body = std::string(root->Attribute("RHS"));
+		body = split(std::string(root->Attribute("RHS")));
 	}
 	
 	SimpleRule(const ID_T& _head, const std::vector<ID_T>& _body):
