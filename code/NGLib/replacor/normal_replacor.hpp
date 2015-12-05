@@ -21,7 +21,9 @@ public:
 	NormalReplacor() {};
 	
 	NormalReplacor(TiXmlElement* elem, std::random_device::result_type seed):
-			mt(seed), cfg(new xml_CFG<Rule_Type>(elem)) {}
+			mt(seed) {
+		cfg = std::unique_ptr<xml_CFG<Rule_Type>>(new xml_CFG<Rule_Type>(elem->FirstChildElement()));
+	}
 	
 	Rule_Type replace(std::string var, std::list<SimpleRule<std::string>>& context) {
 		std::uniform_int_distribution<int> dist(0, 99);

@@ -13,8 +13,8 @@ dependencies["build_exec"] = [
 if platform.system() != 'Darwin':
     print("I'm not a Mac, yay!")
     dependencies["build_exec"] += [
-        "libs/boost>make>build",
-        "libs/python3>make>all"
+       # "libs/boost>make>build",
+       # "libs/python3>make>all"
     ]
 
     # extra config just for this unit

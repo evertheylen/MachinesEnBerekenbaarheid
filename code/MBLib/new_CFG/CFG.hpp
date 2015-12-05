@@ -6,6 +6,7 @@
 dependencies["headers"] = [
 	"libs/tinyxml>>headers",
 	"MBLib/common>>headers",
+	"NGLib/exceptions>>headers"
 ]
 
 # BUG in Baker :'(
@@ -32,6 +33,7 @@ dependencies["build_test_exec"] = [
 
 #include "libs/tinyxml/tinyxml.h"
 #include "MBLib/common/common.hpp"
+#include "NGLib/exceptions/exceptions.hpp"
 
 template <typename ID_T>
 class SimpleRule {
@@ -204,20 +206,20 @@ public:
 
 	xml_CFG(TiXmlElement* root) {
 		auto vars_el = root->FirstChildElement("Variables");
-		assert(vars_el != nullptr);
+		if (vars_el == nullptr) throw syntacticError();
 		for (auto s: split(std::string(vars_el->GetText()))) {
 			this->V.insert(s);
 		}
 		this->S = std::string(vars_el->FirstChildElement("StartSymbol")->GetText());
 		
 		auto term_el = root->FirstChildElement("Terminals");
-		assert(term_el != nullptr);
+		if (term_el == nullptr) throw syntacticError();
 		for (auto s: split(std::string(term_el->GetText()))) {
 			this->T.insert(s);
 		}
 		
 		auto prod_el = root->FirstChildElement("Productions");
-		assert(prod_el != nullptr);
+		if (prod_el == nullptr) throw syntacticError();
 		for (TiXmlElement* rule_el = prod_el->FirstChildElement("Rule");
 				rule_el != nullptr;
 				rule_el = rule_el->NextSiblingElement("Rule")) {

@@ -3,6 +3,8 @@
 
 #ifndef __APPLE__
 
+#include <iostream>
+
 using namespace boost::python;
 
 PythonOutputter::PythonOutputter(std::string _filename):
@@ -14,12 +16,19 @@ void PythonOutputter::init() {
 	// forgive its ugliness
 	Py_Initialize();
 	
+// 	std::cout << "Initialized Python\n";
+	
 	// Boost.Python does a great job hiding all that though
 	main_module = import("__main__");
 	main_namespace = main_module.attr("__dict__");
 	
+// 	std::cout << "Initialized main stuff\n";
+// 	std::cout << "filename = " << filename << "\n";
+	
 	exec_file(filename.c_str(), main_namespace);
 	exec("MyOutputter = Outputter()", main_namespace);
+	
+// 	std::cout << "Init MyOutputter\n";
 	
 	object has_close_obj = eval("hasattr(MyOutputter, 'close')", main_namespace);
 	has_close = extract<bool>(has_close_obj);
@@ -27,6 +36,7 @@ void PythonOutputter::init() {
 
 
 void PythonOutputter::output(std::string s) {
+// 	std::cout << "Outputting " << s << "\n";
 	object func = eval("MyOutputter.output", main_namespace);
 	object my_outp = eval("MyOutputter", main_namespace);
 	func(str(s.c_str()));

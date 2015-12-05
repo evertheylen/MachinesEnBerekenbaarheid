@@ -1,6 +1,5 @@
 
-#ifndef _GENERATOR_H
-#define _GENERATOR_H
+#pragma once
 
 /* [bake me]
 
@@ -21,6 +20,7 @@ dependencies["headers"] = [
 #include <exception>
 #include <stdexcept>
 #include <random>
+#include <memory>
 
 #include "libs/tinyxml/tinyxml.h"
 
@@ -32,13 +32,25 @@ dependencies["headers"] = [
 #include "NGLib/exceptions/exceptions.hpp"
 
 
+class GeneratorInterface {
+public:
+	virtual void generate(std::vector<std::string> start, int max_repl = -1) = 0;
+	virtual void saveXML(std::string filename) = 0;
+	
+	virtual void setOutputter(Outputter* out) = 0;
+	
+	virtual ~GeneratorInterface() {};
+};
+
 
 template <typename ReplacorT>
-class Generator {
+class Generator: public GeneratorInterface {
 public:
 
-	Generator(Outputter* _out, ReplacorT* _repl):
-		out(_out), repl(_repl) {}
+	Generator() {}
+	
+	Generator(ReplacorT* _repl):
+		repl(_repl) {}
 
 
 	// if max_repl == -1 ==> Infinite
@@ -51,46 +63,9 @@ public:
 		out->close();
 	}
 
-	// this function will load a specified XML file
-	void loadXML(std::string inputfile) {
-		if (!inputfile.compare("")) {
-			throw noValidFilename();
-		}
-		std::random_device rd;
-		TiXmlDocument file;
-		file.LoadFile(inputfile);
-		TiXmlElement* root = file.FirstChildElement();
-		if (root == NULL or root->FirstChildElement() == NULL) {
-			throw syntacticError();
-		}
-		std::string rootValue = root->Value();
-		if (rootValue.compare("GENERATOR") == 0) {
-			for (TiXmlElement* nextchild = root->FirstChildElement(); nextchild != NULL; nextchild = nextchild->NextSiblingElement()) {
-				std::string nextchildValue = nextchild->GetText();
-				if (nextchildValue.compare("PYTHON_OUTPUTTER") == 0 or nextchildValue.compare("NORMAL_REPLACOR") == 0) {
-					if (nextchildValue.compare("PYTHON_OUTPUTTER") == 0) {
-						out = PythonOutputter("output1");
-						out->init();
-						continue;
-					}
-					if (nextchildValue.compare("NORMAL_REPLACOR") == 0) {
-						repl = NormalReplacor(nextchild, rd());
-						continue;
-					} else {
-						throw syntacticError();
-					}
-				} else {
-					throw semanticError(nextchildValue , "Outputter/Replacor");
-				}
-			}
-		} else {
-			throw semanticError(rootValue , "GENERATOR");
-		}
-	}
-
 	// this function will save to an XML file
 	void saveXML(std::string filename) {
-		if (!filename.compare("")){
+		if (!filename.compare("")) {
 			throw noValidFilename();
 		}
 		TiXmlDocument doc;
@@ -110,7 +85,11 @@ public:
 		
 		doc.SaveFile(filename);
 	}
-
+	
+	void setOutputter(Outputter* _out) {
+		out = std::unique_ptr<Outputter>(_out);
+	}
+	
 private:
 	void rec_generate(std::string s, std::list<typename ReplacorT::Rule_Type>& context, int max_repl) {
 		if (max_repl > 0 && context.size() >= max_repl) {
@@ -130,11 +109,10 @@ private:
 		}
 	}
 
-	Outputter* out;
+	std::unique_ptr<Outputter> out;
 
 	// templated
-	ReplacorT* repl;
+	std::unique_ptr<ReplacorT> repl;
 };
 
-
-#endif
+GeneratorInterface* loadXML(std::string inputfile);
