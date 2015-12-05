@@ -27,7 +27,7 @@ dependencies["headers"] = [
 #include "MBLib/new_CFG/CFG.hpp"
 #include "NGLib/outputter/outputter.hpp"
 #include "NGLib/python_out/python_outputter.hpp"
-#include "NGLib/replacor/replacor.hpp"
+#include "NGLib/replacor/stochastic_replacor.hpp"
 #include "NGLib/replacor/normal_replacor.hpp"
 #include "NGLib/exceptions/exceptions.hpp"
 
@@ -69,8 +69,17 @@ public:
 				std::string nextchildValue = nextchild->GetText();
 				if (nextchildValue.compare("PYTHON_OUTPUTTER") == 0 or nextchildValue.compare("NORMAL_REPLACOR") == 0) {
 					if (nextchildValue.compare("PYTHON_OUTPUTTER") == 0) {
-						out = PythonOutputter("output1");
+						out = FileOutputter("outputFile");
 						out->init();
+						continue;
+					}
+					if (nextchildValue.compare("FILE_OUTPUTTER") == 0) {
+						out = PythonOutputter("outputPython");
+						out->init();
+						continue;
+					}
+					if (nextchildValue.compare("STOCHASTIC_REPLACOR") == 0) {
+						repl = StochasticReplacor(nextchild, rd());
 						continue;
 					}
 					if (nextchildValue.compare("NORMAL_REPLACOR") == 0) {
@@ -80,7 +89,7 @@ public:
 						throw syntacticError();
 					}
 				} else {
-					throw semanticError(nextchildValue , "Outputter/Replacor");
+					throw semanticError(nextchildValue , "OUTPUTTER/NORMAL_REPLACOR");
 				}
 			}
 		} else {
