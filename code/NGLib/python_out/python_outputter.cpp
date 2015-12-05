@@ -27,8 +27,11 @@ void PythonOutputter::init() {
 
 
 void PythonOutputter::output(std::string s) {
-	std::string call = std::string("MyOutputter.output('''") + s + "''')";
-	exec(call.c_str(), main_namespace);
+	object func = eval("MyOutputter.output", main_namespace);
+	object my_outp = eval("MyOutputter", main_namespace);
+	func(str(s.c_str()));
+	//std::string call = std::string("MyOutputter.output('''") + s + "''')";
+	//exec(call.c_str(), main_namespace);
 }
 
 
