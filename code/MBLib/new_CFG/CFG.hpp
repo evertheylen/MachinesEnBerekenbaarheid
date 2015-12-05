@@ -261,7 +261,7 @@ public:
 		
 		TiXmlElement* productions = new TiXmlElement("Productions");
 		for (auto rule: this->P) {
-			TiXmlElement* rule_el = rule.to_xml();
+			TiXmlElement* rule_el = rule.second.to_xml();
 			productions->LinkEndChild(rule_el);
 		}
 		
