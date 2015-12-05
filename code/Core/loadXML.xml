@@ -25,5 +25,5 @@
 			</Productions>
 		</CFG>
 	</NORMAL_REPLACOR>
-	<PYTHON_OUTPUTTER/>
+	<PYTHON_OUTPUTTER filename="output.py"/>
 </GENERATOR>
