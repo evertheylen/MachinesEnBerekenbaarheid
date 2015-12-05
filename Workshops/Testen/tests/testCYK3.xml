@@ -1,0 +1,19 @@
+<CFG><Variables>
+SABCDEFGHIJ
+<StartSymbol>S</StartSymbol>
+</Variables>
+<Terminals>!@#$%^&*()</Terminals>
+<Productions>
+    <Rule LHS="S" RHS="AB|AC|AD|AE|AF|AG|AH|AI|AJ"/>
+    <Rule LHS="A" RHS="!"/>
+    <Rule LHS="B" RHS="BB|@"/>
+    <Rule LHS="C" RHS="CC|#"/>
+    <Rule LHS="D" RHS="DD|$"/>
+    <Rule LHS="E" RHS="EE|%"/>
+    <Rule LHS="F" RHS="FF|^"/>
+    <Rule LHS="G" RHS="GG|&"/>
+    <Rule LHS="H" RHS="HH|*"/>
+    <Rule LHS="I" RHS="II|("/>
+    <Rule LHS="J" RHS="JJ|)"/>
+</Productions>
+</CFG>

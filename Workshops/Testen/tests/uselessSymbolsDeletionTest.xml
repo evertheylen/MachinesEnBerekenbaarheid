@@ -1,0 +1,12 @@
+<CFG><Variables>
+        SAB
+        <StartSymbol>S</StartSymbol>
+</Variables>
+<Terminals>
+	    ab
+</Terminals>
+<Productions>
+<Rule LHS="S" RHS="AB|a"/>
+<Rule LHS="A" RHS="b"/>
+</Productions>
+</CFG>

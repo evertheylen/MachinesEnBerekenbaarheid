@@ -1,0 +1,13 @@
+<CFG><Variables>
+        ABC
+        <StartSymbol>A</StartSymbol>
+</Variables>
+<Terminals>
+	    abc
+</Terminals>
+<Productions>
+<Rule LHS="A" RHS="a|B"/>
+<Rule LHS="B" RHS="b|C"/>
+<Rule LHS="C" RHS="c|A"/>
+</Productions>
+</CFG>

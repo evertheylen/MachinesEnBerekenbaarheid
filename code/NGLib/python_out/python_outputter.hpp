@@ -1,6 +1,8 @@
 
 #pragma once
 
+#ifndef __APPLE__
+
 #include <string>
 
 #include "boost/python.hpp"
@@ -8,7 +10,8 @@
 
 #include "NGLib/outputter/outputter.hpp"
 
-#ifndef __APPLE__
+#include "../../libs/tinyxml/tinyxml.h"
+
 
 class PythonOutputter: public Outputter {
 public:
@@ -19,6 +22,8 @@ public:
 	void output(std::string s);
 	
 	void close();
+	
+	TiXmlElement* to_xml();
 	
 private:
 	std::string filename;

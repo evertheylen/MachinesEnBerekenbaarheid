@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<CFG>
+	<Variables>
+        S
+        <StartSymbol>SABCDEFGH</StartSymbol>
+	</Variables>
+	<Terminals>
+	    !@#$%^&*()
+	</Terminals>
+	<Productions>
+        <Rule LHS="S" RHS= "!A|!B|!C|!D|!E|!F|!G|!H"/>
+        <Rule LHS="A" RHS= "@|A@"/>
+        <Rule LHS="B" RHS= "#|B#"/>
+        <Rule LHS="C" RHS= "$|C$"/>
+        <Rule LHS="D" RHS= "%|D%"/>
+        <Rule LHS="E" RHS= "^|E^"/>
+        <Rule LHS="F" RHS= "&|F&"/>
+        <Rule LHS="G" RHS= "*|G*"/>
+        <Rule LHS="H" RHS= "(|H("/>
+        <Rule LHS="I" RHS= ")|I)"/>
+	</Productions>
+</CFG>

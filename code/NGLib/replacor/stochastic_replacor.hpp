@@ -9,6 +9,7 @@
 #include "MBLib/new_CFG/CFG.hpp"
 #include "MBLib/new_CFG/s_rule.hpp"
 #include "NGLib/replacor/replacor.hpp"
+#include "../../libs/tinyxml/tinyxml.h"
 
 // Stochastic replacor
 class StochasticReplacor: public Replacor<StochasticRule<std::string>> {
@@ -33,6 +34,11 @@ public:
 
 	bool replaceable(std::string symb) {
 		return cfg.has_rules(symb);
+	}
+	
+	TiXmlElement* to_xml() {
+		TiXmlElement* elem = new TiXmlElement*("STOCHASTIC_REPLACOR");
+		return elem;
 	}
 	
 private:

@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<CFG>
+	<Variables>
+        SABIE
+        <StartSymbol>S</StartSymbol>
+	</Variables>
+	<Terminals>
+	   leftrigh()*[] 
+	</Terminals>
+	<Productions>
+        <Rule LHS="S" RHS= "ASB|AB"/>
+        <Rule LHS="A" RHS= "lEft|(|[S]*"/>
+        <Rule LHS="B" RHS= "rIght|)|*[S]"/>
+        <Rule LHS="I" RHS= "Ii|i"/>
+        <Rule LHS="E" RHS= "Ee|e"/>
+	</Productions>
+</CFG>
