@@ -25,7 +25,7 @@ public:
 		std::uniform_int_distribution<int> dist(0, 99);
 		int picked_rule = dist(mt);
 		double prev_chance = 0;
-		for (auto it: cfg.rules(var)) {
+		for (auto it: cfg->rules(var)) {
 			double chance = it.second.get_chance();
 			if (picked_rule - prev_chance < chance*100) {
 				return it.second;
@@ -36,12 +36,12 @@ public:
 	}
 
 	bool replaceable(std::string symb) {
-		return cfg.has_rules(symb);
+		return cfg->has_rules(symb);
 	}
 	
 	TiXmlElement* to_xml() {
 		TiXmlElement* elem = new TiXmlElement*("STOCHASTIC_REPLACOR");
-		TiXmlElement* cfg_elem = cfg.to_xml();
+		TiXmlElement* cfg_elem = cfg->to_xml();
 		elem->LinkEndChild(cfg_elem);
 		return elem;
 		return elem;

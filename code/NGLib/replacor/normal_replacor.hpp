@@ -26,7 +26,7 @@ public:
 		int picked_rule = dist(mt);
 		double prev_chance = 0;
 		int total_possibilities = cfg.rules(var).size();
-		for (auto it: cfg.rules(var)) {
+		for (auto it: cfg->rules(var)) {
 			double chance = prev_chance + (100/total_possibilities);
 			if (picked_rule - prev_chance < chance) {
 				return it.second;
@@ -37,12 +37,12 @@ public:
 	}
 
 	bool replaceable(std::string symb) {
-		return cfg.has_rules(symb);
+		return cfg->has_rules(symb);
 	}
 	
 	TiXmlElement* to_xml() {
 		TiXmlElement* elem = new TiXmlElement*("NORMAL_REPLACOR");
-		TiXmlElement* cfg_elem = cfg.to_xml();
+		TiXmlElement* cfg_elem = cfg->to_xml();
 		elem->LinkEndChild(cfg_elem);
 		return elem;
 	}
