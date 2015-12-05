@@ -58,7 +58,7 @@ public:
 	TiXmlElement* to_xml() {
 		TiXmlElement* rule_el = new TiXmlElement("Rule");
 		rule_el->SetAttribute("LHS", head);
-		rule_el->SetAttribute("RHS", body);
+		rule_el->SetAttribute("RHS", to_string(body));
 		return rule_el;
 	}
 	
