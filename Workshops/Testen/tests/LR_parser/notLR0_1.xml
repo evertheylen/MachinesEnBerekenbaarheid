@@ -1,0 +1,18 @@
+<CFG>
+  <Variables>
+    BRONS
+    <StartSymbol>
+      S
+    </StartSymbol>
+  </Variables>
+  <Terminals>
+    1234567890+-*/
+  </Terminals>
+  <Productions>
+    <Rule LHS="S" RHS="B"/>
+    <Rule LHS="B" RHS="RON|"/>
+    <Rule LHS="R" RHS="RON|N"/>
+    <Rule LHS="N" RHS="1|2|3|4|5|6|7|8|9|0"/>
+    <Rule LHS="O" RHS="+|-|/|*"/>
+  </Productions>
+</CFG>

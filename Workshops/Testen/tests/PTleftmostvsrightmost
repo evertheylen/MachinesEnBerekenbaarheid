@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CFG>
+	<Variables>
+        SBC
+        <StartSymbol>S</StartSymbol>
+	</Variables>
+	<Terminals>
+	    ab
+	</Terminals>
+	<Productions>
+        	<Rule LHS="S" RHS="aBC"/>
+		<Rule LHS="B" RHS="bB|b"/>
+		<Rule LHS="C" RHS="bC|b"/>
+	</Productions>
+</CFG>

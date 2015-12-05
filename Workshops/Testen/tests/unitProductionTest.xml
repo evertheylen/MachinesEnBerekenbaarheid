@@ -1,0 +1,14 @@
+<CFG><Variables>
+        ETFI
+        <StartSymbol>E</StartSymbol>
+</Variables>
+<Terminals>
+	    ab01*+()
+</Terminals>
+<Productions>
+<Rule LHS="E" RHS="T|E+T"/>
+<Rule LHS="T" RHS="F|T*F"/>
+<Rule LHS="F" RHS="I|(E)"/>
+<Rule LHS="I" RHS="a|b|Ia|Ib|I0|I1"/>
+</Productions>
+</CFG>

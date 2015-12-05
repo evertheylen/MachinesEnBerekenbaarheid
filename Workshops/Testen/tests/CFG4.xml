@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<CFG>
+	<Variables>
+        SABCDE
+        <StartSymbol>S</StartSymbol>
+	</Variables>
+	<Terminals>
+	    abc
+	</Terminals>
+	<Productions>
+        <Rule LHS="S" RHS= "AB|CD"/>
+        <Rule LHS="A" RHS= "aA|"/>
+        <Rule LHS="B" RHS= "bBc|E|cD"/>
+        <Rule LHS="C" RHS= "aCb|E|aA"/>
+        <Rule LHS="D" RHS= "cD|"/>
+        <Rule LHS="E" RHS= "bE|b"/>
+	</Productions>
+</CFG>

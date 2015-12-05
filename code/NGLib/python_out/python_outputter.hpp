@@ -7,7 +7,7 @@
 #include "Python.h"
 
 #include "NGLib/outputter/outputter.hpp"
-
+#include "../../libs/tinyxml/tinyxml.h"
 
 class PythonOutputter: public Outputter {
 public:
@@ -18,6 +18,8 @@ public:
 	void output(std::string s);
 	
 	void close();
+	
+	TiXmlElement* to_xml();
 	
 private:
 	std::string filename;

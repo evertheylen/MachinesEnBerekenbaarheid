@@ -1,0 +1,19 @@
+<CFG><Variables>
+SABCDEFGHIJ
+<StartSymbol>S</StartSymbol>
+</Variables>
+<Terminals>abc</Terminals>
+<Productions>
+    <Rule LHS="S" RHS="AB|CD|FA|FJ|GE|GI|HD|a|b|c"/>
+    <Rule LHS="A" RHS="FA|a"/>
+    <Rule LHS="B" RHS="GI|GE|HD|b|c"/>
+    <Rule LHS="C" RHS="FA|FJ|GE|a|b"/>
+    <Rule LHS="D" RHS="HD|c"/>
+    <Rule LHS="E" RHS="GE|b"/>
+    <Rule LHS="F" RHS="a"/>
+    <Rule LHS="G" RHS="b"/>
+    <Rule LHS="H" RHS="c"/>
+    <Rule LHS="I" RHS="BH"/>
+    <Rule LHS="J" RHS="CG"/>
+</Productions>
+</CFG>

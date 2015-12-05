@@ -1,0 +1,34 @@
+<CFG><Variables>
+SABCDEFGHIJKLMNOPQRTUVWXYZ
+<StartSymbol>S</StartSymbol>
+</Variables>
+<Terminals>*()[]efghiltr</Terminals>
+<Productions>
+    <Rule LHS="S" RHS="AB|AP"/>
+    <Rule LHS="A" RHS="(|DR|MV"/>
+    <Rule LHS="B" RHS=")|CT|NU"/>
+    <Rule LHS="C" RHS="*"/>
+    <Rule LHS="D" RHS="["/>
+    <Rule LHS="E" RHS="EG|e"/>
+    <Rule LHS="F" RHS="]"/>
+    <Rule LHS="G" RHS="e"/>
+    <Rule LHS="H" RHS="f"/>
+    <Rule LHS="I" RHS="IL|i"/>
+    <Rule LHS="J" RHS="g"/>
+    <Rule LHS="K" RHS="h"/>
+    <Rule LHS="L" RHS="i"/>
+    <Rule LHS="M" RHS="l"/>
+    <Rule LHS="N" RHS="r"/>
+    <Rule LHS="O" RHS="t"/>
+    <Rule LHS="P" RHS="SB"/>
+    <Rule LHS="Q" RHS="KO"/>
+    <Rule LHS="R" RHS="SW"/>
+    <Rule LHS="T" RHS="DX"/>
+    <Rule LHS="U" RHS="IY"/>
+    <Rule LHS="V" RHS="EZ"/>
+    <Rule LHS="W" RHS="FC"/>
+    <Rule LHS="X" RHS="SF"/>
+    <Rule LHS="Y" RHS="JQ"/>
+    <Rule LHS="Z" RHS="HO"/>
+</Productions>
+</CFG>

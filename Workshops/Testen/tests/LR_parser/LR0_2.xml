@@ -1,0 +1,16 @@
+<CFG>
+  <Variables>
+    SBC
+    <StartSymbol>
+      S
+    </StartSymbol>
+  </Variables>
+  <Terminals>
+    abc
+  </Terminals>
+  <Productions>
+    <Rule LHS="S" RHS="B|C"/>
+    <Rule LHS="B" RHS="aBb|"/>
+    <Rule LHS="C" RHS="aBc|"/>
+  </Productions>
+</CFG>

@@ -1,0 +1,123 @@
+### test1 #####################################################################
+ACCEPTS: a^nb^n met n > 0
+
+example: aaabbb
+| S|
+|  | T|
+|  | S|  |
+|  |  | T|  |
+|  |  | S|  |  |
+| A| A| A| B| B| B|
+| a| a| a| b| b| b|
+
+
+
+### test2 #####################################################################
+ACCEPTS: balanced strings of: on the left side: 
+( OR le+ft OR [string from our language]*
+on the right: ) OR ri+ght OR *[string from our language]
+
+example:
+leeft(left)riight*[()]
+|   S|
+|    |    |
+|    |    |    |
+|    |    |    |    |
+|    |    |    |    |    |
+|    |    |    |    |    |   P|
+|    |    |    |    |    |    |    |
+|    |    |    |    |    |    |    |    |
+|    |    |    |    |    |    |    |    |    |
+|    |    |    |    |    |    |    |    |    |    |
+|    |    |    |    |    |   S|    |    |    |    |    |
+|    |    |    |    |    |    |   P|    |    |    |    |    |
+|    |    |    |    |    |    |    |    |    |    |    |    |    |
+|    |    |    |    |    |    |    |    |    |    |    |    |    |    |
+|    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |
+|    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |
+|    |    |    |    |    |    |    |    |    |    |    |   B|    |    |    |    |    |
+|   A|    |    |    |    |    |   S|    |    |    |    |    |   U|    |    |    |    |   B|
+|    |   V|    |    |    |    |   A|    |    |    |    |    |    |   U|    |    |    |    |   T|
+|    |    |   V|    |    |    |    |   V|    |    |    |    |    |    |   Y|    |    |    |    |   X|
+|    |   E|    |   Z|    |    |    |    |   Z|    |    |    |   I|    |    |   Q|    |    |    |   S|    |
+|   M| E,G| E,G|   H|   O|   A|   M| E,G|   H|   O|   B|   N| I,L| I,L|   J|   K|   O|   C|   D|   A|   B|   F|
+|   l|   e|   e|   f|   t|   (|   l|   e|   f|   t|   )|   r|   i|   i|   g|   h|   t|   *|   [|   (|   )|   ]|
+
+
+### test3 #####################################################################
+ACCEPTS any string starting with '!' followed by any number of one symbol from:
+@#$%^&*()
+or as a regex: \!(@+|#+|\$+|\%+|\^+|&*|\*+|\(+|\)+)
+
+example: !*****
+| S|
+| S| H|
+| S| H| H|
+| S| H| H| H|
+| S| H| H| H| H|
+| A| H| H| H| H| H|
+| !| *| *| *| *| *|
+
+
+### test 4 ####################################################################
+ACCEPT: {a^ib^jc^k | i!=j OR j!=k}
+
+example: aaabbccc
+|         S|
+|         S|         S|
+|         S|          |         S|
+|     C,J,S|         S|         S|       B,S|
+|     C,J,S|       J,S|         S|       I,S|     B,I,S|
+|     A,C,S|     C,J,S|       C,S|     B,I,S|       B,S|   B,D,I,S|
+|     A,C,S|     A,C,S|       J,S| B,C,E,J,S|       I,S|   B,D,I,S|   B,D,I,S|
+|   A,C,F,S|   A,C,F,S|   A,C,F,S| B,C,E,G,S| B,C,E,G,S|   B,D,H,S|   B,D,H,S|   B,D,H,S|
+|         a|         a|         a|         b|         b|         c|         c|         c|
+
+example: abca
+|          |
+|          |          |
+|       J,S|       I,S|          |
+|   A,C,F,S| B,C,E,G,S|   B,D,H,S|   A,C,F,S|
+|         a|         b|         c|         a|
+
+
+### test 5 ####################################################################
+ACCEPTS: strings with equal number of a's and b's
+
+example: babaababbbaa
+|     S|
+|   E,H| C,D,G|
+|      |     S|     S|
+| E,F,H|     F|   E,H|   C,D|
+|     S|     S|      |     S|     S|
+|   D,G|   C,G|   E,F|     F|     H|   E,H|
+|     S|      |     S|     S|      |      |     S|
+|     D|   C,G|   D,G|     C|     F|      |     H|     E|
+|     S|      |     S|      |     S|      |      |      |     S|
+|   E,F|   C,D|     D|     C|   C,D|   E,F|     F|      |     E|     D|
+|     S|     S|     S|      |     S|     S|     S|      |      |     S|      |
+|     B|     A|     B|     A|     A|     B|     A|     B|     B|     B|     A|     A|
+|     b|     a|     b|     a|     a|     b|     a|     b|     b|     b|     a|     a|
+
+example: bbbbbaaaaaabbbbbaaaa
+|   S|
+| E,H| D,G|
+|    |   S|    |
+|    | E,H| D,G|    |
+|    |    |   S|    |    |
+|    |    | E,H| D,G|    |    |
+|    |    |    |   S|    |    |    |
+| E,F| E,F| E,F| E,F| D,G|    |    |    |
+|   S|   S|   S|   S|   S|    |    |    |    |
+|   D|   G|   G|   G|   G|   C| C,D| C,D| C,D| C,D|
+|   S|    |    |    |    |    |   S|   S|   S|   S|   S|
+|   E|   D|    |    |    |    |   C|   F|   H|   H|   H|   E|
+|    |   S|    |    |    |    |    |   S|    |    |    |    |   S|
+|    |   E|   D|    |    |    |    |   C|   F|    |    |    |   E|   D|
+|    |    |   S|    |    |    |    |    |   S|    |    |    |    |   S|    |
+|    |    |   E|   D|    |    |    |    |   C|   F|    |    |    |   E|   D|    |
+|    |    |    |   S|    |    |    |    |    |   S|    |    |    |    |   S|    |    |
+|    |    |    |   E|   D|    |    |    |    |   C|   F|    |    |    |   E|   D|    |    |
+|    |    |    |    |   S|    |    |    |    |    |   S|    |    |    |    |   S|    |    |    |
+|   B|   B|   B|   B|   B|   A|   A|   A|   A|   A|   A|   B|   B|   B|   B|   B|   A|   A|   A|   A|
+|   b|   b|   b|   b|   b|   a|   a|   a|   a|   a|   a|   b|   b|   b|   b|   b|   a|   a|   a|   a|

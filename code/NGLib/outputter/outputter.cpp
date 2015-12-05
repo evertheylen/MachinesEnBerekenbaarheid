@@ -16,3 +16,8 @@ void FileOutputter::output(std::string s) {
 void FileOutputter::close() {
 	file.close();
 }
+
+TiXmlElement* FileOutputter::to_xml() {
+	TiXmlElement* elem = new TiXmlElement("FILEOUTPUTTER");
+	return elem;
+}

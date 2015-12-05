@@ -37,3 +37,8 @@ void PythonOutputter::close() {
 	
 	// exit PyInterpreter?
 }
+
+TiXmlElement *PythonOutputter::to_xml() {
+	TiXmlElement* elem = new TiXmlElement("PYTHON_OUTPUTTER");
+	return elem;
+}

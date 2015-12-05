@@ -14,6 +14,7 @@ dependencies["headers"] = [
 #include <list>
 
 #include "MBLib/new_CFG/CFG.hpp"
+#include "../../libs/tinyxml/tinyxml.h"
 
 template <typename RuleT>
 class Replacor {
@@ -28,6 +29,7 @@ public:
 	// in a CFG bounded class, this would be `return is_var(var)`
 	// this function decides whether a symbol will be replaced or outputted
 	
+	virtual TiXmlElement* to_xml() = 0;
 };
 
 // Dummy replacor
@@ -45,6 +47,10 @@ public:
 		}
 		return true;
 	}
-
+	
+	TiXmlElement* to_xml() {
+		TiXmlElement* elem = new TiXmlElement("DUMB_REPLACOR");
+		return elem;
+	}
 };
 

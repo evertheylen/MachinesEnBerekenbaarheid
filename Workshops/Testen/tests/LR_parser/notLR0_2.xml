@@ -1,0 +1,16 @@
+<CFG>
+  <Variables>
+    ABC
+    <StartSymbol>
+      A
+    </StartSymbol>
+  </Variables>
+  <Terminals>
+    xyz
+  </Terminals>
+  <Productions>
+    <Rule LHS="A" RHS="CxA|"/>
+    <Rule LHS="B" RHS="xCy|xC"/>
+    <Rule LHS="C" RHS="xBx|z"/>
+  </Productions>
+</CFG>
