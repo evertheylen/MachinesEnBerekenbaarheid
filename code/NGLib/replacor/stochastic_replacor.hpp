@@ -5,6 +5,8 @@
 #include <vector>
 #include <list>
 #include <random>
+#include <memory>
+#include <exception>
 
 #include "MBLib/new_CFG/CFG.hpp"
 #include "MBLib/new_CFG/s_rule.hpp"
@@ -16,7 +18,14 @@ class StochasticReplacor: public Replacor<StochasticRule<std::string>> {
 public:
 	using Rule_Type = StochasticRule<std::string>;
 	
-	StochasticReplacor(CFG<Rule_Type> _cfg, std::random_device::result_type seed): cfg(_cfg), mt(seed) {}
+	StochasticReplacor(){};
+	StochasticReplacor(std::string cfg_file, std::random_device::result_type seed): mt(seed) {
+		TiXmlDocument doc;
+		if (!doc.LoadFile(cfg_file)) {
+			throw std::invalid_argument("Not existing filepath: " + cfg_file);
+		}
+		cfg(doc);
+	}
 	
 	Rule_Type replace(std::string var, std::list<SimpleRule<std::string>>& context) {
 		std::uniform_int_distribution<int> dist(0, 99);
@@ -42,7 +51,7 @@ public:
 	}
 	
 private:
-	CFG<Rule_Type> cfg;
 	std::mt19937 mt;
+	std::unique_ptr<xml_CFG<Rule_Type>> cfg;
 };
 
