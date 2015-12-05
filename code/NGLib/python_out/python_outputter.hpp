@@ -8,6 +8,7 @@
 
 #include "NGLib/outputter/outputter.hpp"
 
+#ifndef __APPLE__
 
 class PythonOutputter: public Outputter {
 public:
@@ -26,3 +27,11 @@ private:
 	
 	bool has_close = false;
 };
+
+#else
+
+#include "NGLib/outputter/outputter.hpp"
+
+using PythonOutputter = FileOutputter;
+
+#endif

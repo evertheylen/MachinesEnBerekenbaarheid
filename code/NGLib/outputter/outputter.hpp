@@ -22,7 +22,7 @@ public:
 
 class FileOutputter: public Outputter {
 public:
-	FileOutputter(std::string _filename);
+	FileOutputter(std::string _filename="test");
 	
 	void init();
 	
