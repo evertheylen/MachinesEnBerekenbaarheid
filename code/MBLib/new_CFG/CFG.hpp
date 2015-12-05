@@ -55,6 +55,13 @@ public:
 		return body;
 	}
 	
+	TiXmlElement* to_xml() {
+		TiXmlElement* rule_el = new TiXmlElement("Rule");
+		rule_el->SetAttribute("LHS", head);
+		rule_el->SetAttribute("RHS", body);
+		return rule_el;
+	}
+	
 	ID_T head;
 	std::vector<ID_T> body;
 };
@@ -210,18 +217,7 @@ public:
 		for (TiXmlElement* rule_el = prod_el->FirstChildElement("Rule");
 				rule_el != nullptr;
 				rule_el = rule_el->NextSiblingElement("Rule")) {
-			std::string head = std::string(rule_el->Attribute("LHS"));
-			std::string bodies = std::string(rule_el->Attribute("RHS"));
-			std::string buf;
-			for (char c: bodies) {
-				if (c == '|') {
-					this->P.insert(std::make_pair(head, RuleT(head,split(buf))));
-					buf.clear();
-				} else {
-					buf += c;
-				}
-			}
-			this->P.insert(std::make_pair(head, RuleT(head,split(buf))));
+			this->P.insert(std::make_pair(head, RuleT(rule_el)));
 		}
 	}
 
@@ -260,17 +256,13 @@ public:
 		
 		TiXmlElement* productions = new TiXmlElement("Productions");
 		for (auto rule: this->P) {
-			std::string head = rule.get_head();
-			TiXmlElement* rule_el = new TiXmlElement("Rule");
-			rule_el->SetAttribute("LHS", head);
-			rule_el->SetAttribute("RHS", to_string(rule.get_body()));
+			TiXmlElement* rule_el = rule.to_xml();
 			productions->LinkEndChild(rule_el);
 		}
 		
 		root->LinkEndChild(productions);
 		
 		return root;
-		//doc.SaveFile(filename);
 	}
 
 };
