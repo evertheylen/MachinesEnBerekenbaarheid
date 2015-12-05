@@ -15,15 +15,17 @@
 
 
 int main() {
+#ifndef __APPLE__
 	try {
+#endif
 		std::unique_ptr<GeneratorInterface> g(loadXML("loadXML.xml"));
 		g->generate({"A", "BC"}, 10);
 #ifndef __APPLE__
 	} catch (boost::python::error_already_set e) {
 		std::cout << "Core crashed with Python Exception:\n";
 		PyErr_Print();
-#endif
 	} 
+#endif
 // 	catch (std::exception& e) {
 // 		std::cout << "Core crashed with std::exception.\n";
 // 		std::cout << e.what();
