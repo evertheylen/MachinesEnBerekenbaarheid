@@ -4,7 +4,9 @@
 #include <memory>
 #include <exception>
 
+#ifndef __APPLE__
 #include "boost/python.hpp"
+#endif
 
 #include "NGLib/generator/generator.hpp"
 #include "NGLib/outputter/outputter.hpp"
