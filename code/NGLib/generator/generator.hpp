@@ -83,11 +83,10 @@ public:
 								//Process input through CfgReplacor
 								continue;
 							} else {
-								semanticError(nextchildAttribute , "CfgReplacor");
+								throw semanticError(nextchildAttribute , "CfgReplacor");
 							}
 						} else {
 							throw syntacticError();
-							return;
 						}
 					}
 				} else {
