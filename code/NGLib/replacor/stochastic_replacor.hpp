@@ -24,7 +24,7 @@ public:
 		cfg = std::unique_ptr<xml_CFG<Rule_Type>>(new xml_CFG<Rule_Type>(elem->FirstChildElement()));
 	}
 	
-	Rule_Type replace(std::string var, std::list<SimpleRule<std::string>>& context) {
+	Rule_Type replace(std::string var, std::list<StochasticRule<std::string>>& context) {
 		std::uniform_int_distribution<int> dist(0, 99);
 		int picked_rule = dist(mt);
 		double prev_chance = 0;
@@ -37,7 +37,7 @@ public:
 			}
 		}
 	}
-
+	
 	bool replaceable(std::string symb) {
 		return cfg->has_rules(symb);
 	}
