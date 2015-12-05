@@ -84,6 +84,10 @@ public:
 		return P.end();
 	}
 	
+	unsigned int size() {
+		return P.count(var);
+	}
+	
 private:
 	const ID_T& var;
 	const MapT& P;
