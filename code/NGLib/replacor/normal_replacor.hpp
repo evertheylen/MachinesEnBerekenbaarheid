@@ -18,8 +18,10 @@ class NormalReplacor: public Replacor<SimpleRule<std::string>> {
 public:
 	using Rule_Type = SimpleRule<std::string>;
 	
-	NormalReplacor(){};
-	NormalReplacor(TiXmlElement* elem, std::random_device::result_type seed): mt(seed), cfg(elem) {}
+	NormalReplacor() {};
+	
+	NormalReplacor(TiXmlElement* elem, std::random_device::result_type seed):
+			mt(seed), cfg(new xml_CFG<Rule_Type>(elem)) {}
 	
 	Rule_Type replace(std::string var, std::list<SimpleRule<std::string>>& context) {
 		std::uniform_int_distribution<int> dist(0, 99);
@@ -41,7 +43,7 @@ public:
 	}
 	
 	TiXmlElement* to_xml() {
-		TiXmlElement* elem = new TiXmlElement*("NORMAL_REPLACOR");
+		TiXmlElement* elem = new TiXmlElement("NORMAL_REPLACOR");
 		TiXmlElement* cfg_elem = cfg->to_xml();
 		elem->LinkEndChild(cfg_elem);
 		return elem;
