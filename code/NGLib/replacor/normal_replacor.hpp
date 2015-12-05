@@ -25,7 +25,7 @@ public:
 		std::uniform_int_distribution<int> dist(0, 99);
 		int picked_rule = dist(mt);
 		double prev_chance = 0;
-		int total_possibilities = cfg.rules(var).size();
+		int total_possibilities = cfg->rules(var).size();
 		for (auto it: cfg->rules(var)) {
 			double chance = prev_chance + (100/total_possibilities);
 			if (picked_rule - prev_chance < chance) {
