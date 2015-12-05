@@ -268,8 +268,6 @@ public:
 		
 		root->LinkEndChild(productions);
 		
-		doc.LinkEndChild(decl);
-		doc.LinkEndChild(root);
 		return root;
 		//doc.SaveFile(filename);
 	}
