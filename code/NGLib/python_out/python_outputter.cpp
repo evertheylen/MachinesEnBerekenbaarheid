@@ -1,6 +1,8 @@
 
 #include "python_outputter.hpp"
 
+#ifndef __APPLE__
+
 using namespace boost::python;
 
 PythonOutputter::PythonOutputter(std::string _filename):
@@ -42,3 +44,5 @@ TiXmlElement *PythonOutputter::to_xml() {
 	TiXmlElement* elem = new TiXmlElement("PYTHON_OUTPUTTER");
 	return elem;
 }
+
+#endif
