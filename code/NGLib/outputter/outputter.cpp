@@ -4,7 +4,12 @@
 
 FileOutputter::FileOutputter(std::string _filename):
 		filename(_filename) {}
-	
+
+FileOutputter::FileOutputter(TiXmlElement* root) {
+	filename = root->Attribute("filename");
+}
+
+
 void FileOutputter::init() {
 	file.open(filename);
 }
@@ -18,6 +23,7 @@ void FileOutputter::close() {
 }
 
 TiXmlElement* FileOutputter::to_xml() {
-	TiXmlElement* elem = new TiXmlElement("FILEOUTPUTTER");
+	TiXmlElement* elem = new TiXmlElement("FILE_OUTPUTTER");
+	elem->SetAttribute("filename", filename);
 	return elem;
 }

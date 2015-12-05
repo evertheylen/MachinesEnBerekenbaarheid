@@ -10,6 +10,10 @@ using namespace boost::python;
 PythonOutputter::PythonOutputter(std::string _filename):
 		filename(_filename) {}
 
+PythonOutputter::PythonOutputter(TiXmlElement* root) {
+	filename = root->Attribute("filename");
+}
+
 
 void PythonOutputter::init() {
 	// note that Python is written in C
@@ -55,6 +59,7 @@ void PythonOutputter::close() {
 
 TiXmlElement *PythonOutputter::to_xml() {
 	TiXmlElement* elem = new TiXmlElement("PYTHON_OUTPUTTER");
+	elem->SetAttribute("filename", filename);
 	return elem;
 }
 

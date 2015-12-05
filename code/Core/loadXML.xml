@@ -1,29 +1,29 @@
 <?xml version="1.0" ?>
 <GENERATOR>
-	<NORMAL_REPLACOR>
-		<CFG>
-			<Variables>S[C_0][C_1][C_2][C_3][C_4][_A][_B][_D][_E][_F][_G]
-				<StartSymbol>S</StartSymbol>
-			</Variables>
-			<Terminals>abdefg</Terminals>
-			<Productions>
-				<Rule LHS="S" RHS="[_A][C_0]" />
-				<Rule LHS="S" RHS="[_A][_B]" />
-				<Rule LHS="S" RHS="[_B][C_1]" />
-				<Rule LHS="S" RHS="[_D][C_3]" />
-				<Rule LHS="[C_0]" RHS="S[_B]" />
-				<Rule LHS="[C_1]" RHS="[_A][C_2]" />
-				<Rule LHS="[C_2]" RHS="[_A][_A]" />
-				<Rule LHS="[C_3]" RHS="[_E][C_4]" />
-				<Rule LHS="[C_4]" RHS="[_F][_G]" />
-				<Rule LHS="[_A]" RHS="a" />
-				<Rule LHS="[_B]" RHS="b" />
-				<Rule LHS="[_D]" RHS="d" />
-				<Rule LHS="[_E]" RHS="e" />
-				<Rule LHS="[_F]" RHS="f" />
-				<Rule LHS="[_G]" RHS="g" />
-			</Productions>
-		</CFG>
-	</NORMAL_REPLACOR>
-	<PYTHON_OUTPUTTER filename="output.py"/>
+    <STOCHASTIC_REPLACOR>
+        <CFG>
+            <Variables>S[C_0][C_1][C_2][C_3][C_4][_A][_B][_D][_E][_F][_G]
+                <StartSymbol>S</StartSymbol>
+            </Variables>
+            <Terminals>abdefg</Terminals>
+            <Productions>
+                <Rule LHS="S" RHS="[_A][C_0]" chance="0.100000" />
+                <Rule LHS="S" RHS="[_A][_B]" chance="0.200000" />
+                <Rule LHS="S" RHS="[_B][C_1]" chance="0.200000" />
+                <Rule LHS="S" RHS="[_D][C_3]" chance="0.500000" />
+                <Rule LHS="[C_0]" RHS="S[_B]" chance="1.000000" />
+                <Rule LHS="[C_1]" RHS="[_A][C_2]" chance="1.000000" />
+                <Rule LHS="[C_2]" RHS="[_A][_A]" chance="1.000000" />
+                <Rule LHS="[C_3]" RHS="[_E][C_4]" chance="1.000000" />
+                <Rule LHS="[C_4]" RHS="[_F][_G]" chance="1.000000" />
+                <Rule LHS="[_A]" RHS="a" chance="1.000000" />
+                <Rule LHS="[_B]" RHS="b" chance="1.000000" />
+                <Rule LHS="[_D]" RHS="d" chance="1.000000" />
+                <Rule LHS="[_E]" RHS="e" chance="1.000000" />
+                <Rule LHS="[_F]" RHS="f" chance="1.000000" />
+                <Rule LHS="[_G]" RHS="g" chance="1.000000" />
+            </Productions>
+        </CFG>
+    </STOCHASTIC_REPLACOR>
+    <FILE_OUTPUTTER filename="test" />
 </GENERATOR>

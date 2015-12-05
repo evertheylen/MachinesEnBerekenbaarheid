@@ -41,6 +41,7 @@ public:
 	TiXmlElement* to_xml() {
 		TiXmlElement* root = SimpleRule<ID_T>::to_xml();
 		root->SetAttribute("chance", std::to_string(chance));
+		return root;
 	}
 	
 	double get_chance() const {

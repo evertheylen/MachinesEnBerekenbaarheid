@@ -17,6 +17,8 @@ class PythonOutputter: public Outputter {
 public:
 	PythonOutputter(std::string _filename="output.py");
 	
+	PythonOutputter(TiXmlElement* root);
+	
 	void init();
 	
 	void output(std::string s);

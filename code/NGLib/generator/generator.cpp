@@ -25,14 +25,12 @@ GeneratorInterface* loadXML(std::string inputfile) {
 			if (nextchildValue.compare("PYTHON_OUTPUTTER") == 0 or nextchildValue.compare("FILE_OUTPUTTER") == 0 or nextchildValue.compare("STOCHASTIC_REPLACOR") == 0 or nextchildValue.compare("NORMAL_REPLACOR") == 0) {
 				if (nextchildValue.compare("PYTHON_OUTPUTTER") == 0) {
 					delete out;
-					out = new PythonOutputter;
-					out->init();
+					out = new PythonOutputter(nextchild);
 					continue;
 				}
 				if (nextchildValue.compare("FILE_OUTPUTTER") == 0) {
 					delete out;
-					out = new FileOutputter;
-					out->init();
+					out = new FileOutputter(nextchild);
 					continue;
 				}
 				if (nextchildValue.compare("STOCHASTIC_REPLACOR") == 0) {

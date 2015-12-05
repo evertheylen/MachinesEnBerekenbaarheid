@@ -27,6 +27,8 @@ class FileOutputter: public Outputter {
 public:
 	FileOutputter(std::string _filename="test");
 	
+	FileOutputter(TiXmlElement* root);
+	
 	void init();
 	
 	void output(std::string s);

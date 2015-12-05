@@ -19,6 +19,7 @@ public:
 	using Rule_Type = StochasticRule<std::string>;
 	
 	StochasticReplacor(){};
+	
 	StochasticReplacor(TiXmlElement* elem, std::random_device::result_type seed): 
 			mt(seed) {
 		cfg = std::unique_ptr<xml_CFG<Rule_Type>>(new xml_CFG<Rule_Type>(elem->FirstChildElement()));
