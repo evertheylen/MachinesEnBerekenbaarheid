@@ -8,7 +8,8 @@ dependencies["headers"] = [
 	"libs/tinyxml>>headers",
 	"MBLib/new_CFG>>headers",
 	"NGLib/outputter>>headers",
-	"NGLib/replacor>>headers"
+	"NGLib/replacor>>headers",
+	"NGLib/exceptions>>headers",
 ]
 
 [stop baking] */
@@ -26,20 +27,8 @@ dependencies["headers"] = [
 #include "MBLib/new_CFG/CFG.hpp"
 #include "NGLib/outputter/outputter.hpp"
 #include "NGLib/replacor/replacor.hpp"
+#include "NGLib/exceptions/exceptions.hpp"
 
-class exceptionXML: public std::exception {
-public:
-	virtual std::string syntacticError() const {
-		return "The inputXML contains syntactic errors\n";
-	}
-	virtual std::string noValidFilename() const {
-		return "The filename is not valid\n";
-	}
-	virtual std::string semanticError(std::string fault, std::string correct) const {
-		std::string error = "The inputXML contains semantic errors: " + fault + " instead of " + correct + ".\n";
-		return error;
-	}
-} myex;
 
 
 template <typename ReplacorT>
@@ -63,15 +52,13 @@ public:
 	// this function will load a specified XML file
 	void loadXML(std::string inputfile) {
 		if (!inputfile.compare("")) {
-			std::cerr << "Exception caught: " << myex.noValidFilename() << std::endl;
-			return;
+			throw noValidFilename();
 		}
 		TiXmlDocument file;
 		file.LoadFile(inputfile);
 		TiXmlElement* root = file.FirstChildElement();
 		if (root == NULL or root->FirstChildElement() == NULL) {
-			std::cerr << "Exception caught: " << myex.syntacticError() << std::endl;
-			return;
+			throw syntacticError();
 		}
 		std::string rootValue = root->Value();
 		if (rootValue.compare("Generator") == 0) {
@@ -87,8 +74,7 @@ public:
 								//Process input through PythonOutputter
 								continue;
 							} else {
-								std::cerr << "Exception caught: " << myex.semanticError(nextchildAttribute , "PythonOutputter") << std::endl;
-								return;
+								throw semanticError(nextchildAttribute, "PythonOutputter");
 							}
 						}
 						if (nextchildValue.compare("Replacor") == 0  and nextchild->Attribute("type") != NULL) {
@@ -97,30 +83,26 @@ public:
 								//Process input through CfgReplacor
 								continue;
 							} else {
-								std::cerr << "Exception caught: " << myex.semanticError(nextchildAttribute , "CfgReplacor") << std::endl;
-								return;
+								semanticError(nextchildAttribute , "CfgReplacor");
 							}
 						} else {
-							std::cerr << "Exception caught: " << myex.syntacticError() << std::endl;
+							throw syntacticError();
 							return;
 						}
 					}
 				} else {
-					std::cerr << "Exception caught: " << myex.semanticError(nextchildValue , "Outputter/Replacor/extra_setting") << std::endl;
-					return;
+					throw semanticError(nextchildValue , "Outputter/Replacor/extra_setting");
 				}
 			}
 		} else {
-			std::cerr << "Exception caught: " << myex.semanticError(rootValue , "Generator") << std::endl;
-			return;
+			throw semanticError(rootValue , "Generator");
 		}
 	}
 
 	// this function will save to an XML file
 	void saveXML(std::string filename) {
 		if (!filename.compare("")){
-			std::cerr << "Exception caught: " << myex.noValidFilename() << std::endl;
-			return;
+			throw noValidFilename();
 		}
 		TiXmlDocument doc;
 		TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "", "");
