@@ -31,12 +31,22 @@ public:
 	using ID_Type = ID_T;
 	using StringT = std::vector<ID_T>;
 	
+	StochasticRule(TiXmlElement* root): SimpleRule<ID_T>(root) {
+		chance = std::stod(std::string(root->Attribute("chance")));
+	}
+	
 	StochasticRule(const ID_T& _head, const std::vector<ID_T>& _body, double _chance):
 		SimpleRule<ID_T>(_head, _body), chance(_chance) {}
+	
+	TiXmlElement* to_xml() {
+		TiXmlElement* root = SimpleRule<ID_T>::to_xml();
+		root->SetAttribute("chance", std::to_string(chance));
+	}
 	
 	double get_chance() const {
 	    return chance;
 	}
+	
 	double chance;
 };
 

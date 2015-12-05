@@ -217,7 +217,8 @@ public:
 		for (TiXmlElement* rule_el = prod_el->FirstChildElement("Rule");
 				rule_el != nullptr;
 				rule_el = rule_el->NextSiblingElement("Rule")) {
-			this->P.insert(std::make_pair(head, RuleT(rule_el)));
+			RuleT r = RuleT(rule_el);
+			this->P.insert(std::make_pair(r.get_head(), r));
 		}
 	}
 
