@@ -48,6 +48,8 @@ public:
 	
 	TiXmlElement* to_xml() {
 		TiXmlElement* elem = new TiXmlElement*("NORMAL_REPLACOR");
+		TiXmlElement* cfg_elem = cfg.to_xml();
+		elem->LinkEndChild(cfg_elem);
 		return elem;
 	}
 	
