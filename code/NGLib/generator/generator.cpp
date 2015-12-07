@@ -1,8 +1,6 @@
 
 #include "generator.hpp"
 
-#include <cstdio>
-
 GeneratorInterface* loadXML(std::string inputfile) {
 	std::cout << "starting parsing\n";
 	GeneratorInterface* gen = nullptr;

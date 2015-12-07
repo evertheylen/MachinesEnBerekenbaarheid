@@ -55,9 +55,9 @@ public:
 
 	// if max_repl == -1 ==> Infinite
 	void generate(std::vector<std::string> start, int max_repl = -1) {
-		std::list<typename ReplacorT::Rule_Type> context;
+		std::list<typename ReplacorT::Rule_Type*> context;
 		out->init();
-		for (auto s : start) {
+		for (std::string& s: start) {
 			rec_generate(s, context, max_repl);
 		}
 		out->close();
@@ -91,15 +91,15 @@ public:
 	}
 	
 private:
-	void rec_generate(std::string s, std::list<typename ReplacorT::Rule_Type>& context, int max_repl) {
+	void rec_generate(std::string s, std::list<typename ReplacorT::Rule_Type*>& context, int max_repl) {
 		if (max_repl > 0 && context.size() >= max_repl) {
 			// we have reached the maximum depth, output this symbol (variable or not)
 			out->output(s);
 		} else if (repl->replaceable(s)) {
 			// replace and continue with recursive stuff
-			typename ReplacorT::Rule_Type r = repl->replace(s, context);
+			typename ReplacorT::Rule_Type* r = repl->replace(s, context);
 			context.push_back(r);
-			for (auto sub_s : r.get_body()) {
+			for (auto sub_s : r->get_body()) {
 				rec_generate(sub_s, context, max_repl - 1);
 			}
 			context.pop_back(); // reference!
@@ -108,9 +108,9 @@ private:
 			out->output(s);
 		}
 	}
-
+	
 	std::unique_ptr<Outputter> out;
-
+	
 	// templated
 	std::unique_ptr<ReplacorT> repl;
 };

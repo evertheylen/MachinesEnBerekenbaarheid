@@ -25,15 +25,15 @@ public:
 		cfg = std::unique_ptr<xml_CFG<Rule_Type>>(new xml_CFG<Rule_Type>(elem->FirstChildElement()));
 	}
 	
-	Rule_Type replace(std::string var, std::list<SimpleRule<std::string>>& context) {
+	Rule_Type* replace(std::string var, std::list<SimpleRule<std::string>*>& context) {
 		std::uniform_int_distribution<int> dist(0, 99);
 		int picked_rule = dist(mt);
 		double prev_chance = 0;
 		int total_possibilities = cfg->rules(var).size();
-		for (auto it: cfg->rules(var)) {
+		for (auto& it: cfg->rules(var)) {
 			double chance = prev_chance + (100/total_possibilities);
 			if (picked_rule - prev_chance < chance) {
-				return it.second;
+				return ((Rule_Type*) &(it.second));
 			} else {
 				prev_chance += chance;
 			}

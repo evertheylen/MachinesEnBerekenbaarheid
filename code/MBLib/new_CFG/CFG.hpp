@@ -28,6 +28,7 @@ dependencies["build_test_exec"] = [
 #include <string>
 #include <map>
 #include <vector>
+#include <memory>
 
 #include <cassert>
 
@@ -46,8 +47,8 @@ public:
 		body = split(std::string(root->Attribute("RHS")));
 	}
 	
-	SimpleRule(const ID_T& _head, const std::vector<ID_T>& _body):
-		head(_head), body(_body) {}
+	SimpleRule(const ID_T& _head, const std::vector<ID_T>& _body, unsigned int _num):
+		head(_head), body(_body), num(_num) {}
 	
 	const ID_T& get_head() const {
 		return head;
@@ -55,6 +56,10 @@ public:
 	
 	const std::vector<ID_T>& get_body() const {
 		return body;
+	}
+	
+	const unsigned int get_num() const {
+		return num;
 	}
 	
 	TiXmlElement* to_xml() {
@@ -66,6 +71,7 @@ public:
 	
 	ID_T head;
 	std::vector<ID_T> body;
+	unsigned int num; // actually the ID lol
 };
 
 
@@ -73,7 +79,7 @@ template <typename RuleT>
 class RuleIterator {
 public:
 	using ID_T = typename RuleT::ID_Type;
-	using MapT = typename std::multimap<ID_T, RuleT>;
+	using MapT = typename std::multimap<ID_T, std::unique_ptr<RuleT>>;
 	
 	RuleIterator(const ID_T& _var, const MapT& _P):
 			var(_var), P(_P) {}
@@ -111,7 +117,7 @@ public:
 	
 	std::set<ID_T> V;						// Variables
 	std::set<ID_T> T;  						// Terminals
-	std::multimap<ID_T, RuleT> P;			// Productions
+	std::multimap<ID_T, unique_ptr<RuleT>> P;			// Productions
 	ID_T S;									// Start symbol, \in V
 	
 	CFG() {}
@@ -137,7 +143,7 @@ public:
         return P.find(var) != P.end();
 	}
 	
-	RuleIterator<RuleT> rules(const ID_T& var) const {
+	RuleIterator<std::unique_ptr<RuleT>> rules(const ID_T& var) const {
 		return RuleIterator<RuleT>(var, P);
 	}
 	
@@ -211,7 +217,7 @@ public:
 			this->V.insert(s);
 		}
 		this->S = std::string(vars_el->FirstChildElement("StartSymbol")->GetText());
-		
+
 		auto term_el = root->FirstChildElement("Terminals");
 		if (term_el == nullptr) throw syntacticError();
 		for (auto s: split(std::string(term_el->GetText()))) {
@@ -223,8 +229,8 @@ public:
 		for (TiXmlElement* rule_el = prod_el->FirstChildElement("Rule");
 				rule_el != nullptr;
 				rule_el = rule_el->NextSiblingElement("Rule")) {
-			RuleT r = RuleT(rule_el);
-			this->P.insert(std::make_pair(r.get_head(), r));
+			std::unique_ptr<RuleT> r(new RuleT(rule_el));
+			this->P.insert({r->get_head(), r});
 		}
 	}
 
@@ -263,7 +269,7 @@ public:
 		
 		TiXmlElement* productions = new TiXmlElement("Productions");
 		for (auto rule: this->P) {
-			TiXmlElement* rule_el = rule.second.to_xml();
+			TiXmlElement* rule_el = rule.second->to_xml();
 			productions->LinkEndChild(rule_el);
 		}
 		

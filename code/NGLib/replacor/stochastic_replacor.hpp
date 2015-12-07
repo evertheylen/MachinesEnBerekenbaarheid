@@ -25,14 +25,14 @@ public:
 		cfg = std::unique_ptr<xml_CFG<Rule_Type>>(new xml_CFG<Rule_Type>(elem->FirstChildElement()));
 	}
 	
-	Rule_Type replace(std::string var, std::list<StochasticRule<std::string>>& context) {
+	Rule_Type* replace(std::string var, std::list<StochasticRule<std::string>*>& context) {
 		std::uniform_int_distribution<int> dist(0, 99);
 		int picked_rule = dist(mt);
 		double prev_chance = 0;
-		for (auto it: cfg->rules(var)) {
+		for (auto& it: cfg->rules(var)) {
 			double chance = it.second.get_chance();
 			if (picked_rule - prev_chance < chance*100) {
-				return it.second;
+				return ((Rule_Type*) &(it.second));
 			} else {
 				prev_chance += chance*100;
 			}
@@ -47,7 +47,6 @@ public:
 		TiXmlElement* elem = new TiXmlElement("STOCHASTIC_REPLACOR");
 		TiXmlElement* cfg_elem = cfg->to_xml();
 		elem->LinkEndChild(cfg_elem);
-		return elem;
 		return elem;
 	}
 	
