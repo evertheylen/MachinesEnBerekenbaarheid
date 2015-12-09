@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
 #endif
 		std::unique_ptr<GeneratorInterface> g(loadXML(args.size() < 1 ? "loadXML.xml" : args.at(0)));
 		g->generate({"A", "BC"}, 10);
-		g->saveXML("saveXML.xml");
+		//g->saveXML("saveXML.xml");
 #ifndef __APPLE__
 	} catch (boost::python::error_already_set e) {
 		std::cout << "Core crashed with Python Exception:\n";

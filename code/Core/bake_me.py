@@ -2,6 +2,7 @@
 # separate file because this might get complex
 
 import platform
+import os.path
 
 dependencies["build_exec"] = [
     "NGLib/replacor>>build_objects",
@@ -9,6 +10,8 @@ dependencies["build_exec"] = [
     "NGLib/outputter>>build_objects",
     "NGLib/python_out>>build_objects"
 ]
+
+
 
 if platform.system() != 'Darwin':
     print("I'm not a Mac, yay!")
@@ -20,8 +23,8 @@ if platform.system() != 'Darwin':
     # extra config just for this unit
     # #BakerCanHandleIt
     gcc_config = {
-        "pre_extra": "-Wno-deprecated -I/usr/include/python3.5m/ -Ilibs/boost/b2stuff/include/",
-        "post_extra": "-pthread -Wl,-Bstatic -Llibs/boost/b2stuff/lib/ -lboost_python3 -Wl,-Bdynamic -lpython3.5m -lutil -ldl -lm"
+        "pre_extra": "-Wno-deprecated -I/usr/include/%s/ -Ilibs/boost/b2stuff/include/"%project_config["python_lib"],
+        "post_extra": "-Wl,-Bstatic -Llibs/boost/b2stuff/lib/ -lboost_python3 -Wl,-Bdynamic -l%s -lutil -ldl -lm"%project_config["python_lib"]
     }
     
 else:

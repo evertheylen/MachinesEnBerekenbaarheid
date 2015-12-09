@@ -40,3 +40,23 @@ int main(int argc, char **argv) {{
 
 """
 })
+
+def find_first(l):
+    for f in l:
+        if os.path.isfile(f) or os.path.islink(f):
+            return f
+
+def libname(f):
+    f = os.path.basename(f)
+    if f.startswith("lib"):
+        f = f[3:]
+    if f.find(".a") != -1:
+        f = f[:f.find(".a")]
+    if f.find(".so") != -1:
+        f = f[:f.find(".so")]
+    return f
+
+python_locs = ["/usr/lib/libpython3.5m.so", "/usr/lib/libpython3.4m.so", "/usr/lib/x86_64-linux-gnu/libpython3.5m.so.1", "/usr/lib/x86_64-linux-gnu/libpython3.4m.so.1"]
+
+python_lib = libname(find_first(python_locs))
+print("Found python in", python_lib)
