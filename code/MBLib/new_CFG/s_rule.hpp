@@ -30,13 +30,16 @@ class StochasticRule: public SimpleRule<ID_T> {
 public:
 	using ID_Type = ID_T;
 	using StringT = std::vector<ID_T>;
+	using NumT = unsigned int;
+	
+	StochasticRule() = default;
 	
 	StochasticRule(TiXmlElement* root): SimpleRule<ID_T>(root) {
 		chance = std::stod(std::string(root->Attribute("chance")));
 	}
 	
-	StochasticRule(const ID_T& _head, const std::vector<ID_T>& _body, double _chance):
-		SimpleRule<ID_T>(_head, _body), chance(_chance) {}
+	StochasticRule(const ID_T& _head, const std::vector<ID_T>& _body, NumT _num, double _chance):
+		SimpleRule<ID_T>(_head, _body, _num), chance(_chance) {}
 	
 	TiXmlElement* to_xml() {
 		TiXmlElement* root = SimpleRule<ID_T>::to_xml();

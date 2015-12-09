@@ -8,6 +8,6 @@ if [ ! -f $PYTHON_LIB/libpython3.4m.a ]; then
 fi
 
 # TODO Mac support?
-export PYTHONPATH=$PYTHON_LIB/Lib/:$PYTHON_LIB/Modules/:$PYTHON_LIB/build/lib.linux-x86_64-3.4/
+export PYTHONPATH=$PYTHON_LIB/Lib/:$PYTHON_LIB/Modules/:$PYTHON_LIB/build/lib.linux-x86_64-3.4/:$PYTHONPATH
 
 ./core $@

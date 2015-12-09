@@ -14,11 +14,16 @@
 #include "NGLib/replacor/replacor.hpp"
 
 
-int main() {
+int main(int argc, char** argv) {
+	std::vector<std::string> args;
+	for (int i=1; i<argc; i++) {
+		args.push_back(argv[i]);
+	}
+	
 #ifndef __APPLE__
 	try {
 #endif
-		std::unique_ptr<GeneratorInterface> g(loadXML("loadXML.xml"));
+		std::unique_ptr<GeneratorInterface> g(loadXML(args.size() < 1 ? "loadXML.xml" : args.at(0)));
 		g->generate({"A", "BC"}, 10);
 		g->saveXML("saveXML.xml");
 #ifndef __APPLE__

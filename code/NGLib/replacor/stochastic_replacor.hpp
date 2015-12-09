@@ -25,14 +25,15 @@ public:
 		cfg = std::unique_ptr<xml_CFG<Rule_Type>>(new xml_CFG<Rule_Type>(elem->FirstChildElement()));
 	}
 	
-	Rule_Type* replace(std::string var, std::list<StochasticRule<std::string>*>& context) {
+	std::vector<typename Rule_Type::ID_Type> replace(std::string var, std::list<typename Rule_Type::NumT>& context) {
 		std::uniform_int_distribution<int> dist(0, 99);
 		int picked_rule = dist(mt);
 		double prev_chance = 0;
 		for (auto& it: cfg->rules(var)) {
-			double chance = it.second.get_chance();
+			double chance = cfg->get_rule(it.second).get_chance();
 			if (picked_rule - prev_chance < chance*100) {
-				return ((Rule_Type*) &(it.second));
+				context.push_back(it.second);
+				return cfg->get_rule(it.second).get_body();
 			} else {
 				prev_chance += chance*100;
 			}

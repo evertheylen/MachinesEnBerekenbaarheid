@@ -23,7 +23,7 @@ public:
 	
 	// a list so popping and pushing is easy
 	// TODO: string refs look hackerish and error-prone
-	virtual RuleT* replace(std::string var, std::list<RuleT*>& context) = 0;
+	virtual std::vector<typename RuleT::ID_Type> replace(std::string var, std::list<typename RuleT::NumT>& context) = 0;
 	
 	virtual bool replaceable(std::string symb) = 0;
 	// in a CFG bounded class, this would be `return is_var(var)`

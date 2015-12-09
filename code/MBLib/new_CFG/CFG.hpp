@@ -29,7 +29,7 @@ dependencies["build_test_exec"] = [
 #include <map>
 #include <vector>
 #include <memory>
-
+#include <utility>
 #include <cassert>
 
 #include "libs/tinyxml/tinyxml.h"
@@ -41,13 +41,30 @@ class SimpleRule {
 public:
 	using ID_Type = ID_T;
 	using StringT = std::vector<ID_T>;
+	using NumT = unsigned int;
+	
+	SimpleRule() = default;
 	
 	SimpleRule(TiXmlElement* root) {
-		head = std::string(root->Attribute("LHS"));
-		body = split(std::string(root->Attribute("RHS")));
+// 		try {
+			std::cout << "value " << root->Value() << "\n";
+			std::cout << "LHS " << root->Attribute("LHS") << "\n";
+			std::cout << "ID attrobite " << root->Attribute("ID") << "\n";
+			std::string num_s = std::string(root->Attribute("ID"));
+			if (num_s == "") throw syntacticError();
+			head = std::string(root->Attribute("LHS"));
+			if (head == "") throw syntacticError();
+			std::string body_s = std::string(root->Attribute("RHS"));
+			if (body_s == "") throw syntacticError();
+			
+			body = split(body_s);
+			num = std::stoi(num_s);
+// 		} catch (std::exception& e) {
+// 			throw syntacticError();
+// 		}
 	}
 	
-	SimpleRule(const ID_T& _head, const std::vector<ID_T>& _body, unsigned int _num):
+	SimpleRule(const ID_T& _head, const std::vector<ID_T>& _body, NumT _num):
 		head(_head), body(_body), num(_num) {}
 	
 	const ID_T& get_head() const {
@@ -58,7 +75,7 @@ public:
 		return body;
 	}
 	
-	const unsigned int get_num() const {
+	NumT get_num() const {
 		return num;
 	}
 	
@@ -66,20 +83,23 @@ public:
 		TiXmlElement* rule_el = new TiXmlElement("Rule");
 		rule_el->SetAttribute("LHS", head);
 		rule_el->SetAttribute("RHS", to_string(body));
+		rule_el->SetAttribute("ID", to_string(num));
 		return rule_el;
 	}
 	
 	ID_T head;
 	std::vector<ID_T> body;
-	unsigned int num; // actually the ID lol
+	NumT num; // actually the ID lol
 };
+
+
 
 
 template <typename RuleT>
 class RuleIterator {
 public:
 	using ID_T = typename RuleT::ID_Type;
-	using MapT = typename std::multimap<ID_T, std::unique_ptr<RuleT>>;
+	using MapT = typename std::multimap<ID_T, typename RuleT::NumT>;
 	
 	RuleIterator(const ID_T& _var, const MapT& _P):
 			var(_var), P(_P) {}
@@ -106,7 +126,7 @@ private:
 //   - ID_Type type declaration
 //   - String type declaration
 //   - const ID_Type& get_head() method
-template <typename RuleT=SimpleRule<std::string>>
+template <typename RuleT>
 class CFG {
 public:
 	using Rule_Type = RuleT;
@@ -115,10 +135,11 @@ public:
 	using StringT = typename RuleT::StringT;
 	
 	
-	std::set<ID_T> V;						// Variables
-	std::set<ID_T> T;  						// Terminals
-	std::multimap<ID_T, unique_ptr<RuleT>> P;			// Productions
-	ID_T S;									// Start symbol, \in V
+	std::set<ID_T> V;								// Variables
+	std::set<ID_T> T;  								// Terminals
+	std::multimap<ID_T, typename RuleT::NumT> P;	// Productions
+	std::map<typename RuleT::NumT, RuleT> m_rules;	// store rules
+	ID_T S;											// Start symbol, \in V
 	
 	CFG() {}
 	
@@ -143,25 +164,41 @@ public:
         return P.find(var) != P.end();
 	}
 	
-	RuleIterator<std::unique_ptr<RuleT>> rules(const ID_T& var) const {
+	
+	RuleT& get_rule(const typename RuleT::NumT& num) {
+		assert(m_rules.find(num) != m_rules.end());
+		return m_rules.find(num)->second;
+	}
+	
+	const RuleT& get_rule_c(const typename RuleT::NumT& num) {
+		assert(m_rules.find(num) != m_rules.end());
+		return m_rules.find(num)->second;
+	}
+	
+	template <typename Whatever>
+	friend class RuleIterator;
+	
+	RuleIterator<RuleT> rules(const ID_T& var) const {
 		return RuleIterator<RuleT>(var, P);
 	}
 	
 	void add_rule(const RuleT& rule) {
 		assert(is_variable(rule.get_head()));
+		for (auto it: m_rules) std::cout << it.first << ": " << it.second.get_head() << "\n";
+		assert(m_rules.find(rule.get_num()) == m_rules.end());
 		auto m = P.find(rule.get_head());
-		if (m == P.end()) {
-			P[rule.get_head()] = {rule};
-		} else {
-			m->second.insert(rule);
-		}
+		
+		//P.insert(std::pair<Rule_Type::ID_T, Rule_Type::NumT>(rule.get_head(), rule.get_num()));
+		P.insert({rule.get_head(), rule.get_num()});
+		m_rules[rule.get_num()] = rule;
+		
 		assert(check_rule_correctness());
 	}
 	
 	// assert this as much as you want
 	bool check_rule_correctness() {
 		for (auto& i: P) {
-			if (i.first != i.second.get_head()) {
+			if (i.first != get_rule(i.second).get_head()) {
 				return false;
 			}
 		}
@@ -178,8 +215,8 @@ std::ostream& operator<< (std::ostream& out, CFG<ID_T>& G) {
 	
 	out << "Productions = {\n";
 	for (auto iter: G.P) {
-		for (auto rule: iter.second) {
-			out << "  " << to_string(iter.first) << " --> " << to_string(rule) << "\n";
+		for (auto n: iter.second) {
+			out << "  (" << n << "):  " << G.get_rule(n).get_head() << " --> " << to_string(G.get_rule(n).get_body()) << "\n";
 		}
 	}
 	
@@ -229,8 +266,8 @@ public:
 		for (TiXmlElement* rule_el = prod_el->FirstChildElement("Rule");
 				rule_el != nullptr;
 				rule_el = rule_el->NextSiblingElement("Rule")) {
-			std::unique_ptr<RuleT> r(new RuleT(rule_el));
-			this->P.insert({r->get_head(), r});
+			RuleT r(rule_el);
+			this->add_rule(r);
 		}
 	}
 
@@ -268,8 +305,8 @@ public:
 		root->LinkEndChild(terminals);
 		
 		TiXmlElement* productions = new TiXmlElement("Productions");
-		for (auto rule: this->P) {
-			TiXmlElement* rule_el = rule.second->to_xml();
+		for (auto iter: this->P) {
+			TiXmlElement* rule_el = this->get_rule(iter.second).to_xml();
 			productions->LinkEndChild(rule_el);
 		}
 		

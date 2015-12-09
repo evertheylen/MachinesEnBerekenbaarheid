@@ -25,8 +25,9 @@ public:
 		cfg = std::unique_ptr<xml_CFG<Rule_Type>>(new xml_CFG<Rule_Type>(elem->FirstChildElement()));
 	}
 	
-	Rule_Type* replace(std::string var, std::list<ContextRule<std::string>*>& context) {
-		return ((Rule_Type*) int(1564132));
+	std::vector<typename Rule_Type::ID_Type> replace(std::string var, std::list<typename Rule_Type::NumT>& context) {
+		context.push_back(0xDEADBEEF);
+		return {"C", "O", "N", "T", "E", "X", "T"};
 	}
 	
 	bool replaceable(std::string symb) {

@@ -13,20 +13,22 @@
 #include "MBLib/common/common.hpp"
 #include "MBLib/new_CFG/CFG.hpp"
 
-#warning Anthony zijn username is echt vaag
 
 template <typename ID_T>
 class ContextRule: public SimpleRule<ID_T> {
 public:
 	using ID_Type = ID_T;
 	using StringT = std::vector<ID_T>;
+	using NumT = unsigned int;
+	
+	ContextRule() = default;
 	
 	ContextRule(TiXmlElement* root): SimpleRule<ID_T>(root) {
 		
 	}
 	
-	ContextRule(const ID_T& _head, const std::vector<ID_T>& _body):
-			SimpleRule<ID_T>(_head, _body) {
+	ContextRule(const ID_T& _head, const std::vector<ID_T>& _body, NumT _num):
+			SimpleRule<ID_T>(_head, _body, _num) {
 		
 	}
 	

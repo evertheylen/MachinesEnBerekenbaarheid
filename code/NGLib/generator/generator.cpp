@@ -11,7 +11,7 @@ GeneratorInterface* loadXML(std::string inputfile) {
 	}
 	std::random_device rd;
 	TiXmlDocument file;
-	file.LoadFile(inputfile);
+	assert(file.LoadFile(inputfile));
 	TiXmlElement* root = file.FirstChildElement();
 	if (root == nullptr or root->FirstChildElement() == nullptr) {
 		throw syntacticError();
