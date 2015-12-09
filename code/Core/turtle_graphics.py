@@ -30,11 +30,11 @@ class Outputter:
 	def close(self):
 		self.window.mainloop()
 
-f = lambda r: r.replace("F", "F+F-F-F+F")
+#f = lambda r: r.replace("F", "F+F-F-F+F")
 
-o = Outputter()
-for symb in f(f(f(f(f("F"))))):
-	o.output(symb)
+#o = Outputter()
+#for symb in f(f(f(f(f("F"))))):
+#	o.output(symb)
 
-o.close()
+#o.close()
 

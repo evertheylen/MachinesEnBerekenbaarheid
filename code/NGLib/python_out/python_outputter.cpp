@@ -20,6 +20,9 @@ void PythonOutputter::init() {
 	// forgive its ugliness
 	Py_Initialize();
 	
+	wchar_t* argv[] = {L"NextGen"};
+	PySys_SetArgv(1, argv);
+	
 // 	std::cout << "Initialized Python\n";
 	
 	// Boost.Python does a great job hiding all that though
