@@ -24,7 +24,7 @@ if platform.system() != 'Darwin':
     # #BakerCanHandleIt
     gcc_config = {
         "pre_extra": "-Wno-deprecated -I/usr/include/%s/ -Ilibs/boost/b2stuff/include/"%project_config["python_lib"],
-        "post_extra": "-Wl,-Bstatic -Llibs/boost/b2stuff/lib/ -lboost_python3 -Wl,-Bdynamic -l%s -lutil -ldl -lm"%project_config["python_lib"]
+        "post_extra": "-Wl,-Bstatic -Llibs/boost/b2stuff/lib/ -lboost_python -Wl,-Bdynamic -l%s -lutil -ldl -lm"%project_config["python_lib"]
     }
     
 else:
