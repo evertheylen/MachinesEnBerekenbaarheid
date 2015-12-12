@@ -69,5 +69,5 @@ print("Found python in", python_lib_dir)
 
 
 python_include_dir = os.path.dirname(find_first(["/usr/include/%s/Python.h"%libname(python_lib_name),
-            "/Library/Frameworks/Python.framework/Versions/3.4/Include/python3.4/Python.h", "/Library/Frameworks/Python.framework/Versions/3.5/Include/Python.h"]))
+            "/Library/Frameworks/Python.framework/Versions/3.4/Headers/Python.h", "/Library/Frameworks/Python.framework/Versions/3.5/Headers/Python.h"]))
 
