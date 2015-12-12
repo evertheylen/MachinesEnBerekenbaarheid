@@ -47,9 +47,6 @@ public:
 	
 	SimpleRule(TiXmlElement* root) {
 // 		try {
-			std::cout << "value " << root->Value() << "\n";
-			std::cout << "LHS " << root->Attribute("LHS") << "\n";
-			std::cout << "ID attrobite " << root->Attribute("ID") << "\n";
 			std::string num_s = std::string(root->Attribute("ID"));
 			if (num_s == "") throw syntacticError();
 			head = std::string(root->Attribute("LHS"));
@@ -105,11 +102,11 @@ public:
 			var(_var), P(_P) {}
 	
 	typename MapT::const_iterator begin() {
-		return P.find(var);
+		return P.equal_range(var).first;
 	}
 	
 	typename MapT::const_iterator end() {
-		return P.end();
+		return P.equal_range(var).second;
 	}
 	
 	unsigned int size() {
@@ -184,7 +181,6 @@ public:
 	
 	void add_rule(const RuleT& rule) {
 		assert(is_variable(rule.get_head()));
-		for (auto it: m_rules) std::cout << it.first << ": " << it.second.get_head() << "\n";
 		assert(m_rules.find(rule.get_num()) == m_rules.end());
 		auto m = P.find(rule.get_head());
 		

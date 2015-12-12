@@ -24,13 +24,17 @@ public:
 	ContextRule() = default;
 	
 	ContextRule(TiXmlElement* root): SimpleRule<ID_T>(root) {
-		
+// 		std::cout << "entering parse\n";
+		for (TiXmlElement* el = root->FirstChildElement(); el != nullptr; el = el->NextSiblingElement()) {
+			NumT p_num = std::stoi(el->Attribute("ID"));
+			double chance = std::stod(el->Attribute("c"));
+			table[p_num] = chance;
+// 			std::cout << "setting chance of " << p_num << " to " << chance << "\n";
+		}
 	}
 	
 	ContextRule(const ID_T& _head, const std::vector<ID_T>& _body, NumT _num):
-			SimpleRule<ID_T>(_head, _body, _num) {
-		
-	}
+			SimpleRule<ID_T>(_head, _body, _num) {}
 	
 	TiXmlElement* to_xml() {
 		TiXmlElement* root = SimpleRule<ID_T>::to_xml();
@@ -38,6 +42,6 @@ public:
 		return root;
 	}
 	
-	
+	std::map<NumT, double> table;
 };
 

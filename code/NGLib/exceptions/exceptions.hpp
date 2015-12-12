@@ -29,6 +29,7 @@ public:
 		std::string error = "The inputXML contains semantic errors: " + fault + " instead of " + correct + ".\n";
 		return error.c_str();
 	}
+	
 private:
 	std::string fault;
 	std::string correct;

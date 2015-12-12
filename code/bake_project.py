@@ -1,7 +1,7 @@
 
 collections = ConfigDict({
     "@execs": ["MBExec", "Core"],
-    "@all": ["@MBLib", "MBExec", "@NGLib", "NextGen", "Core"]
+    "@all": ["@MBLib", "MBExec", "@NGLib", "NextGen", "Core", "libs/tinyxml"]
 })
 
 extensions =  [".cpp", ".cc", ".hpp", ".hh", ".h", ".test"]

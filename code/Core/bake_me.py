@@ -8,7 +8,8 @@ dependencies["build_exec"] = [
     "NGLib/replacor>>build_objects",
     "NGLib/generator>>build_objects",
     "NGLib/outputter>>build_objects",
-    "NGLib/python_out>>build_objects"
+    "NGLib/python_out>>build_objects",
+    "MBLib/common>>build_objects",
 ]
 
 

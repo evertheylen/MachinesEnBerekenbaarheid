@@ -4,15 +4,13 @@
 #include <memory>
 #include <exception>
 
-#ifndef __APPLE__
 #include "boost/python.hpp"
-#endif
 
 #include "NGLib/generator/generator.hpp"
 #include "NGLib/outputter/outputter.hpp"
 #include "NGLib/python_out/python_outputter.hpp"
 #include "NGLib/replacor/replacor.hpp"
-
+#include "MBLib/common/common.hpp"
 
 int main(int argc, char** argv) {
 	std::vector<std::string> args;
@@ -20,18 +18,24 @@ int main(int argc, char** argv) {
 		args.push_back(argv[i]);
 	}
 	
-#ifndef __APPLE__
+	if (args.size() < 2) {
+		std::cout << "core <filename>.xml <startstring> [max_depth]\n\n";
+		std::cout << "Please provide a filename and at least one start symbol.\n";
+		std::cout << "You can also provide a maximum recursion depth.\n";
+		return 1;
+	}
+	
 	try {
-#endif
-		std::unique_ptr<GeneratorInterface> g(loadXML(args.size() < 1 ? "loadXML.xml" : args.at(0)));
-		g->generate({"A", "BC"}, 10);
+		std::unique_ptr<GeneratorInterface> g(loadXML(args.at(0)));
+		std::vector<std::string> startstring = split(args.at(1));
+		int max_depth = args.size() == 3? std::stoi(args.at(2)) : -1;
+		g->generate(startstring, max_depth);
+		
 		//g->saveXML("saveXML.xml");
-#ifndef __APPLE__
 	} catch (boost::python::error_already_set e) {
 		std::cout << "Core crashed with Python Exception:\n";
 		PyErr_Print();
 	} 
-#endif
 // 	catch (std::exception& e) {
 // 		std::cout << "Core crashed with std::exception.\n";
 // 		std::cout << e.what();

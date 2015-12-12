@@ -60,7 +60,7 @@ void PythonOutputter::close() {
 	// exit PyInterpreter?
 }
 
-TiXmlElement *PythonOutputter::to_xml() {
+TiXmlElement* PythonOutputter::to_xml() {
 	TiXmlElement* elem = new TiXmlElement("PYTHON_OUTPUTTER");
 	elem->SetAttribute("filename", filename);
 	return elem;

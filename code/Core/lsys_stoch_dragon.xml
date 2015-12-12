@@ -1,0 +1,26 @@
+<?xml version="1.0" ?>
+<GENERATOR>
+	<STOCHASTIC_REPLACOR>
+		<CFG>
+			<Variables>FG
+				<StartSymbol>F</StartSymbol>
+			</Variables>
+			<Terminals>+-</Terminals>
+			<Productions>
+				
+				<!--
+				F(0.44) -> "FG-",
+				F(0.56) -> "F+G",
+				G(0.3) -> "-F-G",
+				G(0.7) -> "+F+G"
+				-->
+				
+				<Rule ID="1" LHS="F" RHS="FG-" chance="0.44"/>
+				<Rule ID="2" LHS="F" RHS="F+G" chance="0.56"/>
+				<Rule ID="3" LHS="G" RHS="-F-G" chance="0.3"/>
+				<Rule ID="4" LHS="G" RHS="+F+G" chance="0.7"/>
+			</Productions>
+		</CFG>
+	</STOCHASTIC_REPLACOR>
+	<PYTHON_OUTPUTTER filename="turtle_graphics.py" />
+</GENERATOR>

@@ -2,7 +2,6 @@
 #include "generator.hpp"
 
 GeneratorInterface* loadXML(std::string inputfile) {
-	std::cout << "starting parsing\n";
 	GeneratorInterface* gen = nullptr;
 	Outputter* out = nullptr;
 	
@@ -20,24 +19,25 @@ GeneratorInterface* loadXML(std::string inputfile) {
 	if (rootValue.compare("GENERATOR") == 0) {
 		for (TiXmlElement* nextchild = root->FirstChildElement(); nextchild != nullptr; nextchild = nextchild->NextSiblingElement()) {
 			std::string nextchildValue = nextchild->Value();
-			if (nextchildValue.compare("PYTHON_OUTPUTTER") == 0 or nextchildValue.compare("FILE_OUTPUTTER") == 0 or nextchildValue.compare("STOCHASTIC_REPLACOR") == 0 or nextchildValue.compare("NORMAL_REPLACOR") == 0) {
-				if (nextchildValue.compare("PYTHON_OUTPUTTER") == 0) {
+			if (nextchildValue == "PYTHON_OUTPUTTER" or nextchildValue == "FILE_OUTPUTTER" or nextchildValue == "STOCHASTIC_REPLACOR"
+					or nextchildValue == "NORMAL_REPLACOR" or nextchildValue == "CONTEXT_REPLACOR") {
+				if (nextchildValue == "PYTHON_OUTPUTTER") {
 					delete out;
 					out = new PythonOutputter(nextchild);
 					continue;
-				}
-				if (nextchildValue.compare("FILE_OUTPUTTER") == 0) {
+				} else if (nextchildValue == "FILE_OUTPUTTER") {
 					delete out;
 					out = new FileOutputter(nextchild);
 					continue;
-				}
-				if (nextchildValue.compare("STOCHASTIC_REPLACOR") == 0) {
+				} else if (nextchildValue == "STOCHASTIC_REPLACOR") {
 					delete gen;
 					// create generator with StochasticReplacor as ReplacorT
 					gen = new Generator<StochasticReplacor>(new StochasticReplacor(nextchild, rd()));
 					continue;
-				}
-				if (nextchildValue.compare("NORMAL_REPLACOR") == 0) {
+				} else if (nextchildValue == "CONTEXT_REPLACOR") {
+					delete gen;
+					gen = new Generator<ContextReplacor>(new ContextReplacor(nextchild, rd()));
+				} else if (nextchildValue == "NORMAL_REPLACOR") {
 					delete gen;
 					// create generator with NormalReplacor as ReplacorT
 					gen = new Generator<NormalReplacor>(new NormalReplacor(nextchild, rd()));
@@ -46,14 +46,14 @@ GeneratorInterface* loadXML(std::string inputfile) {
 					throw syntacticError();
 				}
 			} else {
-				throw semanticError(nextchildValue , "PYTHON_OUTPUTTER/FILE_OUTPUTTER/STOCHASTIC_REPLACOR/NORMAL_REPLACOR");
+				throw semanticError(nextchildValue , "PYTHON_OUTPUTTER/FILE_OUTPUTTER/STOCHASTIC_REPLACOR/NORMAL_REPLACOR/CONTEXT_REPLACOR");
 			}
 		}
 		assert(out != nullptr);
 		gen->setOutputter(out);
 		return gen;
 	} else {
-		throw semanticError(rootValue , "GENERATOR");
+		throw semanticError(rootValue, "GENERATOR");
 	}
 }
 

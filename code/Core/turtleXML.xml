@@ -1,15 +1,28 @@
 <?xml version="1.0" ?>
 <GENERATOR>
-    <NORMAL_REPLACOR>
-        <CFG>
-            <Variables>F
-                <StartSymbol>F</StartSymbol>
-            </Variables>
-            <Terminals>+-</Terminals>
-            <Productions>
-                <Rule ID="1" LHS="F" RHS="F+F-F-F+F"/>
-            </Productions>
-        </CFG>
-    </NORMAL_REPLACOR>
-    <PYTHON_OUTPUTTER filename="turtle_graphics.py" />
+	<CONTEXT_REPLACOR>
+		<CFG>
+			<Variables>BP
+				<StartSymbol>B</StartSymbol>
+			</Variables>
+			<Terminals>Z</Terminals>
+			<Productions>
+				<Rule ID="1" LHS="B" RHS="PPP">
+					<prob ID="3" c="0.1"/>
+					<prob ID="4" c="1"/>
+				</Rule>
+				<Rule ID="2" LHS="B" RHS="PPPPPP">
+					<prob ID="3" c="1"/>
+					<prob ID="4" c="0.1"/>
+				</Rule>
+				<Rule ID="3" LHS="P" RHS="ZZZ">
+					
+				</Rule>
+				<Rule ID="4" LHS="P" RHS="ZZZZZZ">
+					
+				</Rule>
+			</Productions>
+		</CFG>
+	</CONTEXT_REPLACOR>
+	<FILE_OUTPUTTER filename="debug_out" />
 </GENERATOR>

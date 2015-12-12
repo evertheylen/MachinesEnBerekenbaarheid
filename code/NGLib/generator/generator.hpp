@@ -29,6 +29,7 @@ dependencies["headers"] = [
 #include "NGLib/python_out/python_outputter.hpp"
 #include "NGLib/replacor/stochastic_replacor.hpp"
 #include "NGLib/replacor/normal_replacor.hpp"
+#include "NGLib/replacor/context_replacor.hpp"
 #include "NGLib/exceptions/exceptions.hpp"
 
 
@@ -93,19 +94,27 @@ public:
 	
 private:
 	void rec_generate(std::string s, std::list<typename ReplacorT::Rule_Type::NumT>& context, int max_repl) {
-		if (max_repl > 0 && context.size() >= max_repl) {
+		//std::cout << "generating for var " << s << ", with max_repl " << max_repl << " and context.size() " << context.size() << "\n";
+		for (int i=0; i<context.size(); i++) std::cout << "  ";
+		if ((max_repl != -1) and (context.size() == max_repl)) {
 			// we have reached the maximum depth, output this symbol (variable or not)
+			//std::cout << "   --> reached max depth because context.size() >= max_repl: " << context.size() << " >= " << max_repl << "\n";
 			out->output(s);
+			std::cout << "[" << s << "]\n";
 		} else if (repl->replaceable(s)) {
+			//std::cout << "   --> replacing!\n";
 			// replace and continue with recursive stuff
 			// also add to context
+			std::cout << s << ": \n";
 			for (auto sub_s : repl->replace(s, context)) {
-				rec_generate(sub_s, context, max_repl - 1);
+				rec_generate(sub_s, context, max_repl);
 			}
 			context.pop_back(); // reference!
 		} else {
 			// not replaceable, output
+			//std::cout << "   --> not replacable\n";
 			out->output(s);
+			std::cout << "[" << s << "]\n";
 		}
 	}
 	

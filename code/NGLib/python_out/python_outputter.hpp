@@ -1,8 +1,6 @@
 
 #pragma once
 
-#ifndef __APPLE__
-
 #include <string>
 
 #include "boost/python.hpp"
@@ -10,7 +8,7 @@
 
 #include "NGLib/outputter/outputter.hpp"
 
-#include "../../libs/tinyxml/tinyxml.h"
+#include "libs/tinyxml/tinyxml.h"
 
 
 class PythonOutputter: public Outputter {
@@ -35,10 +33,3 @@ private:
 	bool has_close = false;
 };
 
-#else
-
-#include "NGLib/outputter/outputter.hpp"
-
-using PythonOutputter = FileOutputter;
-
-#endif
