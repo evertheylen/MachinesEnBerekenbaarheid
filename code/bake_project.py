@@ -56,7 +56,7 @@ def libname(f):
         f = f[:f.find(".so")]
     return f
 
-python_locs = ["/usr/lib/libpython3.5m.so", "/usr/lib/libpython3.4m.so", "/usr/lib/x86_64-linux-gnu/libpython3.5m.so.1", "/usr/lib/x86_64-linux-gnu/libpython3.4m.so.1"]
+python_locs = ["/usr/lib/libpython3.5m.so", "/usr/lib/libpython3.4m.so", "/usr/lib/x86_64-linux-gnu/libpython3.5m.so.1", "/usr/lib/x86_64-linux-gnu/libpython3.4m.so.1","/Library/Frameworks/Python.framework/Versions/3.4/bin/python3"]
 
 python_lib = libname(find_first(python_locs))
 print("Found python in", python_lib)
