@@ -41,6 +41,8 @@ int main(int argc, char **argv) {{
 """
 })
 
+import platform
+
 def find_first(l):
     for f in l:
         if os.path.isfile(f) or os.path.islink(f):
@@ -54,9 +56,18 @@ def libname(f):
         f = f[:f.find(".a")]
     if f.find(".so") != -1:
         f = f[:f.find(".so")]
+    if f.find(".dylib") != -1:
+        f = f[:f.find(".dylib")]
     return f
 
-python_locs = ["/usr/lib/libpython3.5m.so", "/usr/lib/libpython3.4m.so", "/usr/lib/x86_64-linux-gnu/libpython3.5m.so.1", "/usr/lib/x86_64-linux-gnu/libpython3.4m.so.1","/Library/Frameworks/Python.framework/Versions/3.4/bin/python3"]
+python_lib_locs = ["/usr/lib/libpython3.5m.so", "/usr/lib/libpython3.4m.so", "/usr/lib/x86_64-linux-gnu/libpython3.5m.so.1", "/usr/lib/x86_64-linux-gnu/libpython3.4m.so.1",
+                   "/Library/Frameworks/Python.framework/Versions/3.4/lib/libpython3.4m.dylib", "/Library/Frameworks/Python.framework/Versions/3.5/lib/libpython3.5m.dylib"]
 
-python_lib = libname(find_first(python_locs))
-print("Found python in", python_lib)
+python_lib_dir = os.path.dirname(find_first(python_lib_locs))
+python_lib_name = libname(find_first(python_lib_locs))
+print("Found python in", python_lib_dir)
+
+
+python_include_dir = os.path.dirname(find_first(["/usr/include/%s/Python.h"%libname(python_lib_name),
+            "/Library/Frameworks/Python.framework/Versions/3.4/Include/python3.4/Python.h", "/Library/Frameworks/Python.framework/Versions/3.5/Include/Python.h"]))
+

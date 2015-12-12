@@ -13,22 +13,12 @@ dependencies["build_exec"] = [
 ]
 
 
+# extra config just for this unit
+# #BakerCanHandleIt
+gcc_config = {
+    "pre_extra": "-Wno-deprecated -I%s -Ilibs/boost/b2stuff/include/"%project_config["python_include_dir"],
+    "post_extra": "-Wl,-Bstatic -Llibs/boost/b2stuff/lib/ -lboost_python -Wl,-Bdynamic -L{python_lib_dir} -l{python_lib_name} -lutil -ldl -lm".format(**project_config)
+}
 
-if platform.system() != 'Darwin':
-    print("I'm not a Mac, yay!")
-    dependencies["build_exec"] += [
-       # "libs/boost>make>build",
-       # "libs/python3>make>all"
-    ]
-
-    # extra config just for this unit
-    # #BakerCanHandleIt
-    gcc_config = {
-        "pre_extra": "-Wno-deprecated -I/usr/include/%s/ -Ilibs/boost/b2stuff/include/"%project_config["python_lib"],
-        "post_extra": "-Wl,-Bstatic -Llibs/boost/b2stuff/lib/ -lboost_python -Wl,-Bdynamic -l%s -lutil -ldl -lm"%project_config["python_lib"]
-    }
-    
-else:
-    print("I'm a Mac :(")
     
 executable = "core"
