@@ -167,7 +167,7 @@ public:
 		return m_rules.find(num)->second;
 	}
 	
-	const RuleT& get_rule_c(const typename RuleT::NumT& num) {
+	const RuleT& get_rule_c(const typename RuleT::NumT& num) const {
 		assert(m_rules.find(num) != m_rules.end());
 		return m_rules.find(num)->second;
 	}

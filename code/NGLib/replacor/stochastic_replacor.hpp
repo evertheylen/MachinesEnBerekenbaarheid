@@ -21,19 +21,16 @@ public:
 	StochasticReplacor(){};
 	
 	StochasticReplacor(TiXmlElement* elem, std::random_device::result_type seed): 
-			mt(seed) {
-		cfg = std::unique_ptr<xml_CFG<Rule_Type>>(new xml_CFG<Rule_Type>(elem->FirstChildElement()));
-	}
+			Replacor(elem->FirstChildElement()), mt(seed) {}
 	
-	std::vector<typename Rule_Type::ID_Type> replace(std::string var, std::list<typename Rule_Type::NumT>& context) {
+	typename Rule_Type::NumT replace(std::string var, std::list<typename Rule_Type::NumT>& context) {
 		std::uniform_int_distribution<int> dist(0, 99);
 		int picked_rule = dist(mt);
 		double prev_chance = 0;
-		for (auto& it: cfg->rules(var)) {
-			double chance = cfg->get_rule(it.second).get_chance();
+		for (auto& it: cfg.rules(var)) {
+			double chance = cfg.get_rule(it.second).get_chance();
 			if (picked_rule - prev_chance < chance*100) {
-				context.push_back(it.second);
-				return cfg->get_rule(it.second).get_body();
+				return it.second;
 			} else {
 				prev_chance += chance*100;
 			}
@@ -41,18 +38,17 @@ public:
 	}
 	
 	bool replaceable(std::string symb) {
-		return cfg->has_rules(symb);
+		return cfg.has_rules(symb);
 	}
 	
 	TiXmlElement* to_xml() {
 		TiXmlElement* elem = new TiXmlElement("STOCHASTIC_REPLACOR");
-		TiXmlElement* cfg_elem = cfg->to_xml();
+		TiXmlElement* cfg_elem = cfg.to_xml();
 		elem->LinkEndChild(cfg_elem);
 		return elem;
 	}
 	
 private:
 	std::mt19937 mt;
-	std::unique_ptr<xml_CFG<Rule_Type>> cfg;
 };
 

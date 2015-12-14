@@ -106,7 +106,9 @@ private:
 			// replace and continue with recursive stuff
 			// also add to context
 			std::cout << s << ": \n";
-			for (auto sub_s : repl->replace(s, context)) {
+			auto num = repl->replace(s, context);
+			context.push_back(num);
+			for (auto sub_s: repl->get_body(num)) {
 				rec_generate(sub_s, context, max_repl);
 			}
 			context.pop_back(); // reference!

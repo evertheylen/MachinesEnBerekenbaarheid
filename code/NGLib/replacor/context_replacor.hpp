@@ -22,11 +22,9 @@ public:
 	ContextReplacor() = default;
 	
 	ContextReplacor(TiXmlElement* elem, std::random_device::result_type seed):
-			mt(seed) {
-		cfg = std::unique_ptr<xml_CFG<Rule_Type>>(new xml_CFG<Rule_Type>(elem->FirstChildElement()));
-	}
+			Replacor(elem->FirstChildElement()), mt(seed) {}
 	
-	std::vector<typename Rule_Type::ID_Type> replace(std::string var, std::list<typename Rule_Type::NumT>& context) {
+	typename Rule_Type::NumT replace(std::string var, std::list<typename Rule_Type::NumT>& context) {
 // 		std::cout << "    --> replacing " << var << " with context: ";
 // 		for (auto i: context) std::cout << i;
 // 		std::cout << "\n";
@@ -38,14 +36,14 @@ public:
 		std::map<NumT, double> C;
 		
 		// for q in pos_r
-		for (auto q: cfg->rules(var)) {
+		for (auto q: cfg.rules(var)) {
 			NumT& q_num = q.second;
 			C[q_num] = 1.0;
 			// C[q] = product of all the chances of all the rules in the context
 			for (auto u: context) {
 				//std::cout << "trying to find " << q_num << " in table of " << u << "\n";
-				assert(cfg->get_rule(u).table.find(q_num) != cfg->get_rule(u).table.end());
-				C[q_num] *= cfg->get_rule(u).table.find(q_num)->second;
+				assert(cfg.get_rule(u).table.find(q_num) != cfg.get_rule(u).table.end());
+				C[q_num] *= cfg.get_rule(u).table.find(q_num)->second;
 			}
 		}
 		
@@ -67,26 +65,22 @@ public:
 			}
 		}
 		
-		// modify context
-		context.push_back(picked_rule);
-		
 		// return stuff
-		return cfg->get_rule(picked_rule).get_body();
+		return picked_rule;
 	}
 	
 	bool replaceable(std::string symb) {
-		return cfg->has_rules(symb);
+		return cfg.has_rules(symb);
 	}
 	
 	TiXmlElement* to_xml() {
 		TiXmlElement* elem = new TiXmlElement("CONTEXT_REPLACOR");
-		TiXmlElement* cfg_elem = cfg->to_xml();
+		TiXmlElement* cfg_elem = cfg.to_xml();
 		elem->LinkEndChild(cfg_elem);
 		return elem;
 	}
 	
 private:
 	std::mt19937 mt;
-	std::unique_ptr<xml_CFG<Rule_Type>> cfg;
 };
 
