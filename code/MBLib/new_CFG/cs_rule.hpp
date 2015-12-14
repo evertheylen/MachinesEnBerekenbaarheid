@@ -41,7 +41,6 @@ public:
 		for (auto it: table) {
 			TiXmlElement* prob_el = new TiXmlElement("prob");
 			prob_el->SetAttribute("ID", it.first);
-			std::cout << to_string(it.second) << "\n";
 			prob_el->SetAttribute("c", to_string(it.second));
 			root->LinkEndChild(prob_el);
 		}

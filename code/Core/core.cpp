@@ -30,30 +30,28 @@ int main(int argc, char** argv) {
 	TiXmlDocument doc;
 	assert(doc.LoadFile(args[0]));
 	std::random_device rd;
-	ContextReplacor ctxrepl(doc.RootElement()->FirstChildElement("CONTEXT_REPLACOR"), rd());
+	ContextReplacor* ctxrepl = new ContextReplacor(doc.RootElement()->FirstChildElement("CONTEXT_REPLACOR"), rd());
 	Teacher t(ctxrepl);
 	auto tree = t.generate(args[1]);
 	std::unique_ptr<PythonOutputter> out(new PythonOutputter("output.py"));
 	out->init();
 	t.output(tree, out.get());
 	std::cout << tree << std::endl;
-	t.score(tree, 2.35);
-	t.output(tree, out.get());
-	std::cout << tree << std::endl;
-	
+	t.score(tree, 20.35);
 	TiXmlDocument save_doc;
 	TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "", "");
 	TiXmlElement* root = new TiXmlElement("GENERATOR");
 	
 	//CFG replacor
-	TiXmlElement* replacor = ctxrepl.to_xml();
+	TiXmlElement* replacor = ctxrepl->to_xml();
 	root->LinkEndChild(replacor);
 	
 	save_doc.LinkEndChild(decl);
 	save_doc.LinkEndChild(root);
 	
 	save_doc.SaveFile("Save_CTX_XML.xml");
-	
+
+	delete ctxrepl;
 	/*
 	
 	try {

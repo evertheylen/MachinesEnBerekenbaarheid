@@ -19,6 +19,7 @@ dependencies["headers"] = [
 #include "NGLib/replacor/context_replacor.hpp"
 #include "NGLib/tree/tree.hpp"
 #include "NGLib/outputter/outputter.hpp"
+#include <set>
 
 class Teacher {
 public:
@@ -28,7 +29,7 @@ public:
 	
 	Teacher() = default;
 	
-	Teacher(ContextReplacor _repl):
+	Teacher(ContextReplacor* _repl):
 		repl(_repl) {}
 
 
@@ -51,15 +52,24 @@ public:
 	}
 	
 	void score(Teacher3& tree, double score_amount) {
+		std::set<std::pair<ContextReplacor::Rule_Type::NumT, ContextReplacor::Rule_Type::NumT>> already_updated;
+		score_helper(tree, score_amount, already_updated);
+	}
+	
+	void score_helper(Teacher3& tree, double score_amount, std::set<std::pair<ContextReplacor::Rule_Type::NumT, ContextReplacor::Rule_Type::NumT>>& already_updated) {
 		// modify scores for all children of tree.
 		
 		for (Teacher3* child: tree.all_children()) {
-			repl.cfg.get_rule(tree.data.second).table[child->data.second] *= score_amount;
+			if (child->data.second == 0) continue;
+			if (already_updated.find({tree.data.second, child->data.second}) != already_updated.end()) continue; 
+			double result = repl->cfg.get_rule(tree.data.second).table[child->data.second] * score_amount;
+			repl->cfg.get_rule(tree.data.second).table[child->data.second] = result;
+			already_updated.insert({tree.data.second, child->data.second});
 		}
 		
 		// Call score recursively for all children
 		for (Teacher3* child: tree.children) {
-			score(*child, score_amount);
+			score_helper(*child, score_amount, already_updated);
 		}
 	}
 	
@@ -69,7 +79,7 @@ private:
 		//std::cout << "assert " << s << " == " << tree.get_tree_by_path(path)->data.first << "\n";
 		assert(s == tree.get_tree_by_path(path)->data.first);
 		// if we haven't reached maximum replacements and s is replacable (probably variable)
-		if ((not ((max_repl != -1) and path.size() >= max_repl)) and repl.replaceable(s)) {
+		if ((not ((max_repl != -1) and path.size() >= max_repl)) and repl->replaceable(s)) {
 			// replacable (probably variable)
 			
 			// build up context
@@ -78,13 +88,13 @@ private:
 			for (auto p: tree.get_list_by_path(path)) context.push_back(p.second);
 			context.pop_back();
 			
-			auto rule = repl.replace(s, context);
+			auto rule = repl->replace(s, context);
 			//std::cout << "replacing by " << rule << "\n";
 			Teacher3* subtree = tree.get_tree_by_path(path);
 			// set rule by which children are generated
 			subtree->data.second = rule;
 			int i = 0;
-			for (std::string sub_s: repl.get_body(rule)) {
+			for (std::string sub_s: repl->get_body(rule)) {
 				// std::cout << "sub_s == " << sub_s << "\n";
 				// set child
 				subtree->children.push_back(new Teacher3({sub_s, 0}));
@@ -99,5 +109,5 @@ private:
 	}
 	
 	// templated
-	ContextReplacor repl;
+	ContextReplacor* repl;
 };
