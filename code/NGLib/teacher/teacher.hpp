@@ -8,49 +8,86 @@ dependencies["headers"] = [
 	"NGLib/outputter>>headers",
 	"NGLib/replacor>>headers",
 	"NGLib/exceptions>>headers",
+	"NGLib/tree>>headers",
 ]
 
 [stop baking] */
 
+#include <utility>
+#include <iostream>
+
 #include "NGLib/replacor/context_replacor.hpp"
 #include "NGLib/tree/tree.hpp"
+#include "NGLib/outputter/outputter.hpp"
 
 class Teacher {
 public:
-	Teacher() {}
+	using Element3 = std::pair<std::string, ContextReplacor::Rule_Type::NumT>;
+	// second doesn't matter if it has no children in the tree
+	using Teacher3 = Tree<Element3>;
+	
+	Teacher() = default;
 	
 	Teacher(ContextReplacor _repl):
 		repl(_repl) {}
 
 
 	// if max_repl == -1 ==> Infinite
-	void generate(std::string start, int max_repl = -1) {
-		Tree<ContextReplacor::Rule_Type::NumT> tree;
-// 		out->init();
-		rec_generate(start, tree, max_repl);
-// 		out->close();
+	Teacher3 generate(std::string start, int max_repl = -1) {
+		Teacher3 tree({start, 0});
+		Teacher3::PathT path;
+		rec_generate(start, tree, path, max_repl);
+		return tree;
+	}
+	
+	void output(Teacher3& tree, Outputter* out) {  // TODO use Outputter
+		if (tree.children.empty()) {
+			out->output(tree.data.first);
+		} else {
+			for (Teacher3* subtree: tree.children) {
+				output(*subtree, out);
+			}
+		}
+	}
+	
+	void score(Teacher3& tree, double score) {
+		// modify scores
+		
 	}
 	
 	
-	
 private:
-	void rec_generate(std::string s, Tree<ContextReplacor::Rule_Type::NumT>& tree, int max_repl) {
-		for (int i=0; i<context.size(); i++) std::cout << "  ";
-		if ((max_repl != -1) and (context.size() == max_repl)) {
-// 			out->output(s);
-			std::cout << "[" << s << "]\n";
-		} else if (repl->replaceable(s)) {
-			std::cout << s << ": \n";
-			auto num = repl->replace(s, context);
-			context.push_back(num);
-			for (auto sub_s: repl->get_body(num)) {
-				rec_generate(sub_s, context, max_repl);
+	void rec_generate(std::string s, Teacher3& tree, typename Teacher3::PathT& path, int max_repl) {
+		//std::cout << "assert " << s << " == " << tree.get_tree_by_path(path)->data.first << "\n";
+		assert(s == tree.get_tree_by_path(path)->data.first);
+		// if we haven't reached maximum replacements and s is replacable (probably variable)
+		if ((not ((max_repl != -1) and path.size() >= max_repl)) and repl.replaceable(s)) {
+			// replacable (probably variable)
+			
+			// build up context
+			std::list<typename ContextReplacor::Rule_Type::NumT> context;
+			//std::cout << "path is " << path << "\n";
+			for (auto p: tree.get_list_by_path(path)) context.push_back(p.second);
+			context.pop_back();
+			
+			auto rule = repl.replace(s, context);
+			//std::cout << "replacing by " << rule << "\n";
+			Teacher3* subtree = tree.get_tree_by_path(path);
+			// set rule by which children are generated
+			subtree->data.second = rule;
+			int i = 0;
+			for (std::string sub_s: repl.get_body(rule)) {
+				// std::cout << "sub_s == " << sub_s << "\n";
+				// set child
+				subtree->children.push_back(new Teacher3({sub_s, 0}));
+				// make new path
+				auto new_path = path;
+				new_path.push_back(i);
+				rec_generate(sub_s, tree, new_path, max_repl);
+				i++;
 			}
-			context.pop_back(); // reference!
-		} else {
-// 			out->output(s);
-			std::cout << "[" << s << "]\n";
 		}
+		// other cases (max repl reached, terminal): do nothing
 	}
 	
 	// templated

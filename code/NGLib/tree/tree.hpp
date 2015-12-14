@@ -8,10 +8,35 @@
 #include <vector>
 #include <memory>
 #include <iostream>
+#include <list>
+
+template <typename T, typename U>
+std::ostream& operator<<(std::ostream& out, const std::pair<T, U>& p) {
+	out << "PAIR(" << p.first << ", " << p.second << ")";
+	return out;
+}
+
+#define container_ostream(Container) \
+template <typename T> \
+std::ostream& operator<<(std::ostream& out, const Container<T>& c) { \
+	out << "{"; \
+	for (auto el: c) { \
+		out << el << ", "; \
+	} \
+	out << "}"; \
+	return out; \
+} \
+
+container_ostream(std::list)
+
+
 
 template <typename T>
 class Tree {
 public:
+	
+	using PathT = std::vector<unsigned int>;
+	
 	Tree() = default;
 	
 	Tree(T _data): data(_data) {}
@@ -33,6 +58,25 @@ public:
 		}
 		return t;
 	}
+	
+	Tree<T>* get_tree_by_path(const PathT& path) {
+		Tree<T>* current_tree = this;
+		for (unsigned int i: path) {
+			current_tree = current_tree->children.at(i);
+		}
+		return current_tree;
+	}
+	
+	std::list<T> get_list_by_path(const PathT& path) {
+		std::list<T> l = {data};
+		Tree<T>* current_tree = this;
+		for (unsigned int i: path) {
+			current_tree = current_tree->children.at(i);
+			l.push_back(current_tree->data);
+		}
+		return l;
+	}
+	
 	
 	friend std::ostream& operator<<(std::ostream& out, const Tree& t) {
 		t.print(out);
