@@ -1,6 +1,6 @@
 
 collections = ConfigDict({
-    "@execs": ["MBExec", "Core"],
+    "@execs": ["MBExec", "Core", "Teach"],
     "@all": ["@MBLib", "MBExec", "@NGLib", "NextGen", "Core", "libs/tinyxml"]
 })
 
