@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include "boost/python.hpp"
 #include "Python.h"
+#include "boost/python.hpp"
 
 #include "NGLib/outputter/outputter.hpp"
 

@@ -38,7 +38,12 @@ public:
 	
 	TiXmlElement* to_xml() {
 		TiXmlElement* root = SimpleRule<ID_T>::to_xml();
-		
+		for (auto it: table) {
+			TiXmlElement* prob_el = new TiXmlElement("prob");
+			prob_el->SetAttribute("ID", it.first);
+			prob_el->SetAttribute("c", it.second);
+			root->LinkEndChild(prob_el);
+		}
 		return root;
 	}
 	
