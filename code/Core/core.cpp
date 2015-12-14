@@ -38,21 +38,21 @@ int main(int argc, char** argv) {
 	t.output(tree, out.get());
 	std::cout << tree << std::endl;
 	t.score(tree, 2.35);
-// 	t.output(tree, out.get());
-// 	std::cout << tree << std::endl;
+	t.output(tree, out.get());
+	std::cout << tree << std::endl;
 	
-// 	TiXmlDocument save_doc;
-// 	TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "", "");
-// 	TiXmlElement* root = new TiXmlElement("GENERATOR");
-// 	
-// 	//CFG replacor
-// 	TiXmlElement* replacor = ctxrepl.to_xml();
-// 	root->LinkEndChild(replacor);
-// 	
-// 	save_doc.LinkEndChild(decl);
-// 	save_doc.LinkEndChild(root);
-// 	
-// 	save_doc.SaveFile("Save_CTX_XML.xml");
+	TiXmlDocument save_doc;
+	TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "", "");
+	TiXmlElement* root = new TiXmlElement("GENERATOR");
+	
+	//CFG replacor
+	TiXmlElement* replacor = ctxrepl.to_xml();
+	root->LinkEndChild(replacor);
+	
+	save_doc.LinkEndChild(decl);
+	save_doc.LinkEndChild(root);
+	
+	save_doc.SaveFile("Save_CTX_XML.xml");
 	
 	/*
 	
