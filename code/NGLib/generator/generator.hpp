@@ -91,6 +91,13 @@ public:
 		out = std::unique_ptr<Outputter>(_out);
 	}
 	
+	ReplacorT* get_replacor() const {
+		return repl.get();
+	}
+	
+	void set_replacor(ReplacorT* _repl) {
+		repl = std::unique_ptr<ReplacorT>(_repl);
+	}
 	
 private:
 	void rec_generate(std::string s, std::list<typename ReplacorT::Rule_Type::NumT>& context, int max_repl) {

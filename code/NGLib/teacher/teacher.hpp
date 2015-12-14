@@ -73,6 +73,9 @@ public:
 		}
 	}
 	
+	ContextReplacor* get_replacor() const {
+		return repl;
+	}
 	
 private:
 	void rec_generate(std::string s, Teacher3& tree, typename Teacher3::PathT& path, int max_repl) {

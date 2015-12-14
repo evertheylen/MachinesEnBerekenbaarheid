@@ -13,6 +13,7 @@
 #include "NGLib/replacor/replacor.hpp"
 #include "MBLib/common/common.hpp"
 #include "NGLib/teacher/teacher.hpp"
+#include "libs/tinyxml/tinyxml.h"
 
 int main(int argc, char** argv) {
 	std::vector<std::string> args;
