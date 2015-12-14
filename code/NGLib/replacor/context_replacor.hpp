@@ -74,6 +74,7 @@ public:
 	}
 	
 	TiXmlElement* to_xml() {
+		std::cout << " Calling context to _xml\n";
 		TiXmlElement* elem = new TiXmlElement("CONTEXT_REPLACOR");
 		TiXmlElement* cfg_elem = cfg.to_xml();
 		elem->LinkEndChild(cfg_elem);
