@@ -36,6 +36,10 @@ int main(int argc, char** argv) {
 	std::unique_ptr<PythonOutputter> out(new PythonOutputter("output.py"));
 	out->init();
 	t.output(tree, out.get());
+	std::cout << tree << std::endl;
+	t.score(tree, 2.35);
+	t.output(tree, out.get());
+	std::cout << tree << std::endl;
 	
 	/*
 	

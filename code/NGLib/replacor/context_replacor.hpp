@@ -82,5 +82,7 @@ public:
 	
 private:
 	std::mt19937 mt;
+	friend class Teacher;
+	
 };
 

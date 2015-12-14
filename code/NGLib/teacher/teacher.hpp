@@ -50,9 +50,17 @@ public:
 		}
 	}
 	
-	void score(Teacher3& tree, double score) {
-		// modify scores
+	void score(Teacher3& tree, double score_amount) {
+		// modify scores for all children of tree.
 		
+		for (auto child: tree.all_children()) {
+			repl.cfg.get_rule(tree.data.second).table.find(child->data.second)->second *= score_amount;
+		}
+		
+		// Call score recursively for all children
+		for (auto child: tree.children) {
+			score(*child, score_amount);
+		}
 	}
 	
 	

@@ -91,6 +91,20 @@ public:
 		}
 	}
 	
+	std::vector<Tree<T>*> all_children() const {
+		std::vector<Tree<T>*> result;
+		for (auto child: children) {
+			if (!child->children.empty()) {
+				for (auto child_found: child->all_children()) {
+					result.push_back(child_found);
+				}
+			} else {
+				result.push_back(child);
+			}
+		}
+		return result;
+	}
+	
 	~Tree<T>() {
 		for (Tree<T>* c: children) {
 			delete c;
