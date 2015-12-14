@@ -1,28 +1,24 @@
 <?xml version="1.0" ?>
 <GENERATOR>
-	<CONTEXT_REPLACOR>
-		<CFG>
-			<Variables>BP
-				<StartSymbol>B</StartSymbol>
-			</Variables>
-			<Terminals>Z</Terminals>
-			<Productions>
-				<Rule ID="1" LHS="B" RHS="PPP">
-					<prob ID="3" c="0.1"/>
-					<prob ID="4" c="1"/>
-				</Rule>
-				<Rule ID="2" LHS="B" RHS="PPPPPP">
-					<prob ID="3" c="1"/>
-					<prob ID="4" c="0.1"/>
-				</Rule>
-				<Rule ID="3" LHS="P" RHS="ZZZ">
-					
-				</Rule>
-				<Rule ID="4" LHS="P" RHS="ZZZZZZ">
-					
-				</Rule>
-			</Productions>
-		</CFG>
-	</CONTEXT_REPLACOR>
-	<FILE_OUTPUTTER filename="debug_out" />
+    <CONTEXT_REPLACOR>
+        <CFG>
+            <Variables>BP
+                <StartSymbol>B</StartSymbol>
+            </Variables>
+            <Terminals>Z</Terminals>
+            <Productions>
+                <Rule LHS="B" RHS="PPP" ID="1">
+                    <prob ID="3" c="0.068000" />
+                    <prob ID="4" c="64052.605440" />
+                </Rule>
+                <Rule LHS="B" RHS="PPPPPP" ID="2">
+                    <prob ID="3" c="284.395413" />
+                    <prob ID="4" c="0.100000" />
+                </Rule>
+                <Rule LHS="P" RHS="ZZZ" ID="3" />
+                <Rule LHS="P" RHS="ZZZZZZ" ID="4" />
+            </Productions>
+        </CFG>
+    </CONTEXT_REPLACOR>
+    <FILE_OUTPUTTER filename="debug_out" />
 </GENERATOR>

@@ -72,7 +72,6 @@ public:
 		TiXmlDocument doc;
 		TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "", "");
 		TiXmlElement* root = new TiXmlElement("GENERATOR");
-		std::cout << "Replacor: " << repl.get() << std::endl;
 		//CFG replacor
 		TiXmlElement* replacor = repl->to_xml();
 		root->LinkEndChild(replacor);
@@ -93,10 +92,6 @@ public:
 	
 	ReplacorT* get_replacor() const {
 		return repl.get();
-	}
-	
-	void set_replacor(ReplacorT* _repl) {
-		repl = std::unique_ptr<ReplacorT>(_repl);
 	}
 	
 private:

@@ -78,14 +78,10 @@ int main(int argc, char** argv) {
 				break;
 			} else {
 				t.score(tree, std::stod(score));
-				std::cout << "score updated\n";
-				generator->set_replacor(t.get_replacor());
-				std::cout << "score set\n";
-				generator->saveXML(args[1]);
-				std::cout << "score saved\n";
+				generator->saveXML(args[0]);
 			}
 		}
-		std::cout << "Exiting...\n";		
+		std::cout << "Exiting and saving to " << args[0] << " ...\n";		
 	} catch (boost::python::error_already_set e) {
 		std::cout << "Core crashed with Python Exception:\n";
 		PyErr_Print();
