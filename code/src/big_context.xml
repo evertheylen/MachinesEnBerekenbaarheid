@@ -1,1695 +1,1777 @@
 <?xml version="1.0" ?>
 <GENERATOR>
-	<CONTEXT_REPLACOR>
-		<CFG>
-    <Variables>EFIT[C_0][C_1][C_2][_(][_)][_*][_+][_0][_1][_A][_B]
-        <StartSymbol>E</StartSymbol>
-    </Variables>
-    <Terminals>()*+01ab</Terminals>
-    <Productions>
-        <Rule LHS="E" RHS="E[C_0]" ID="0">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="E" RHS="I[_0]" ID="1">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="E" RHS="I[_1]" ID="2">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="E" RHS="I[_A]" ID="3">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="E" RHS="I[_B]" ID="4">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="E" RHS="T[C_1]" ID="5">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="E" RHS="[_(][C_2]" ID="6">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="E" RHS="a" ID="7">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="E" RHS="b" ID="8">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="F" RHS="I[_0]" ID="9">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="F" RHS="I[_1]" ID="10">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="F" RHS="I[_A]" ID="11">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="F" RHS="I[_B]" ID="12">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="F" RHS="[_(][C_2]" ID="13">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="F" RHS="a" ID="14">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="F" RHS="b" ID="15">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="I" RHS="I[_0]" ID="16">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="I" RHS="I[_1]" ID="17">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="I" RHS="I[_A]" ID="18">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="I" RHS="I[_B]" ID="19">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="I" RHS="a" ID="20">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="I" RHS="b" ID="21">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="T" RHS="I[_0]" ID="22">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="T" RHS="I[_1]" ID="23">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="T" RHS="I[_A]" ID="24">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="T" RHS="I[_B]" ID="25">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="T" RHS="T[C_1]" ID="26">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="T" RHS="[_(][C_2]" ID="27">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="T" RHS="a" ID="28">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="T" RHS="b" ID="29">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="[C_0]" RHS="[_+]T" ID="30">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="[C_1]" RHS="[_*]F" ID="31">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="[C_2]" RHS="E[_)]" ID="32">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="[_(]" RHS="(" ID="33">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="[_)]" RHS=")" ID="34">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="[_*]" RHS="*" ID="35">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="[_+]" RHS="+" ID="36">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="[_0]" RHS="0" ID="37">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="[_1]" RHS="1" ID="38">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="[_A]" RHS="a" ID="39">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-        <Rule LHS="[_B]" RHS="b" ID="40">		<prob ID="0" c="1"/>
-		<prob ID="1" c="1"/>
-		<prob ID="2" c="1"/>
-		<prob ID="3" c="1"/>
-		<prob ID="4" c="1"/>
-		<prob ID="5" c="1"/>
-		<prob ID="6" c="1"/>
-		<prob ID="7" c="1"/>
-		<prob ID="8" c="1"/>
-		<prob ID="9" c="1"/>
-		<prob ID="10" c="1"/>
-		<prob ID="11" c="1"/>
-		<prob ID="12" c="1"/>
-		<prob ID="13" c="1"/>
-		<prob ID="14" c="1"/>
-		<prob ID="15" c="1"/>
-		<prob ID="16" c="1"/>
-		<prob ID="17" c="1"/>
-		<prob ID="18" c="1"/>
-		<prob ID="19" c="1"/>
-		<prob ID="20" c="1"/>
-		<prob ID="21" c="1"/>
-		<prob ID="22" c="1"/>
-		<prob ID="23" c="1"/>
-		<prob ID="24" c="1"/>
-		<prob ID="25" c="1"/>
-		<prob ID="26" c="1"/>
-		<prob ID="27" c="1"/>
-		<prob ID="28" c="1"/>
-		<prob ID="29" c="1"/>
-		<prob ID="30" c="1"/>
-		<prob ID="31" c="1"/>
-		<prob ID="32" c="1"/>
-		<prob ID="33" c="1"/>
-		<prob ID="34" c="1"/>
-		<prob ID="35" c="1"/>
-		<prob ID="36" c="1"/>
-		<prob ID="37" c="1"/>
-		<prob ID="38" c="1"/>
-		<prob ID="39" c="1"/>
-		<prob ID="40" c="1"/></Rule>
-    </Productions>
-</CFG>
-	</CONTEXT_REPLACOR>
-	<FILE_OUTPUTTER filename="test"/>
+    <CONTEXT_REPLACOR>
+        <CFG>
+            <Variables>EFIT[C_0][C_1][C_2][_(][_)][_*][_+][_0][_1][_A][_B]
+                <StartSymbol>E</StartSymbol>
+            </Variables>
+            <Terminals>()*+01ab</Terminals>
+            <Productions>
+                <Rule LHS="E" RHS="E[C_0]" ID="0">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="4000000.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="4000000.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="4000000.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="500000.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="4000000.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="4000000.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="4000000.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="E" RHS="I[_0]" ID="1">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="0.005000" />
+                    <prob ID="17" c="0.500000" />
+                    <prob ID="18" c="0.010000" />
+                    <prob ID="19" c="0.500000" />
+                    <prob ID="20" c="0.000000" />
+                    <prob ID="21" c="0.005000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="0.000000" />
+                    <prob ID="38" c="0.500000" />
+                    <prob ID="39" c="0.010000" />
+                    <prob ID="40" c="0.500000" />
+                </Rule>
+                <Rule LHS="E" RHS="I[_1]" ID="2">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="0.100000" />
+                    <prob ID="18" c="0.100000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="0.100000" />
+                    <prob ID="21" c="0.010000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="0.001000" />
+                    <prob ID="39" c="0.100000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="E" RHS="I[_A]" ID="3">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.100000" />
+                    <prob ID="21" c="0.000110" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="0.000121" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="E" RHS="I[_B]" ID="4">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="0.100000" />
+                    <prob ID="17" c="0.500000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="0.050000" />
+                    <prob ID="21" c="7673603688000.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="0.100000" />
+                    <prob ID="38" c="0.500000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="383680184400.000000" />
+                </Rule>
+                <Rule LHS="E" RHS="T[C_1]" ID="5">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="0.500000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="0.500000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="50.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="0.500000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="0.500000" />
+                    <prob ID="18" c="500.000000" />
+                    <prob ID="19" c="500.000000" />
+                    <prob ID="20" c="0.500000" />
+                    <prob ID="21" c="50.000000" />
+                    <prob ID="22" c="0.500000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="50.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="25.000000" />
+                    <prob ID="32" c="0.500000" />
+                    <prob ID="33" c="0.500000" />
+                    <prob ID="34" c="0.500000" />
+                    <prob ID="35" c="25.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="0.500000" />
+                    <prob ID="38" c="0.500000" />
+                    <prob ID="39" c="50.000000" />
+                    <prob ID="40" c="500.000000" />
+                </Rule>
+                <Rule LHS="E" RHS="[_(][C_2]" ID="6">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="0.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="0.000110" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.100000" />
+                    <prob ID="8" c="0.550000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="0.000000" />
+                    <prob ID="21" c="0.000110" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="0.000000" />
+                    <prob ID="33" c="0.000000" />
+                    <prob ID="34" c="0.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="0.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="0.000110" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="E" RHS="a" ID="7">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="E" RHS="b" ID="8">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="F" RHS="I[_0]" ID="9">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="F" RHS="I[_1]" ID="10">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="F" RHS="I[_A]" ID="11">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="500.000000" />
+                    <prob ID="19" c="500.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="50.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="50.000000" />
+                    <prob ID="40" c="500.000000" />
+                </Rule>
+                <Rule LHS="F" RHS="I[_B]" ID="12">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="F" RHS="[_(][C_2]" ID="13">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="0.500000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="0.500000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="0.500000" />
+                    <prob ID="33" c="0.500000" />
+                    <prob ID="34" c="0.500000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="F" RHS="a" ID="14">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="F" RHS="b" ID="15">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="I" RHS="I[_0]" ID="16">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="0.010000" />
+                    <prob ID="19" c="0.500000" />
+                    <prob ID="20" c="0.100000" />
+                    <prob ID="21" c="0.005000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="0.000500" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="0.010000" />
+                    <prob ID="40" c="0.500000" />
+                </Rule>
+                <Rule LHS="I" RHS="I[_1]" ID="17">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="0.500000" />
+                    <prob ID="17" c="0.500000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="0.500000" />
+                    <prob ID="20" c="0.250000" />
+                    <prob ID="21" c="0.050000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="0.500000" />
+                    <prob ID="38" c="0.012500" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="0.500000" />
+                </Rule>
+                <Rule LHS="I" RHS="I[_A]" ID="18">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="5.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="0.500000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="0.500000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="I" RHS="I[_B]" ID="19">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="500.000000" />
+                    <prob ID="19" c="0.500000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="250.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="500.000000" />
+                    <prob ID="40" c="250.000000" />
+                </Rule>
+                <Rule LHS="I" RHS="a" ID="20">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="I" RHS="b" ID="21">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="T" RHS="I[_0]" ID="22">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="0.500000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="0.500000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="0.500000" />
+                    <prob ID="38" c="0.500000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="T" RHS="I[_1]" ID="23">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="4000000.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="4000000.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="T" RHS="I[_A]" ID="24">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="T" RHS="I[_B]" ID="25">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="T" RHS="T[C_1]" ID="26">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="T" RHS="[_(][C_2]" ID="27">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="T" RHS="a" ID="28">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="T" RHS="b" ID="29">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="[C_0]" RHS="[_+]T" ID="30">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="4000000.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="4000000.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="500000.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="4000000.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="4000000.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="[C_1]" RHS="[_*]F" ID="31">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="0.500000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="0.500000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="50.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="0.500000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="500.000000" />
+                    <prob ID="19" c="500.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="50.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="0.500000" />
+                    <prob ID="33" c="0.500000" />
+                    <prob ID="34" c="0.500000" />
+                    <prob ID="35" c="25.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="50.000000" />
+                    <prob ID="40" c="500.000000" />
+                </Rule>
+                <Rule LHS="[C_2]" RHS="E[_)]" ID="32">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="0.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="0.000110" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="0.500000" />
+                    <prob ID="7" c="1.100000" />
+                    <prob ID="8" c="0.550000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="0.000000" />
+                    <prob ID="21" c="0.000110" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="0.500000" />
+                    <prob ID="33" c="0.500000" />
+                    <prob ID="34" c="0.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="0.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="0.000110" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="[_(]" RHS="(" ID="33">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="[_)]" RHS=")" ID="34">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="[_*]" RHS="*" ID="35">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="[_+]" RHS="+" ID="36">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="[_0]" RHS="0" ID="37">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="[_1]" RHS="1" ID="38">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="[_A]" RHS="a" ID="39">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+                <Rule LHS="[_B]" RHS="b" ID="40">
+                    <prob ID="0" c="1.000000" />
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                    <prob ID="4" c="1.000000" />
+                    <prob ID="5" c="1.000000" />
+                    <prob ID="6" c="1.000000" />
+                    <prob ID="7" c="1.000000" />
+                    <prob ID="8" c="1.000000" />
+                    <prob ID="9" c="1.000000" />
+                    <prob ID="10" c="1.000000" />
+                    <prob ID="11" c="1.000000" />
+                    <prob ID="12" c="1.000000" />
+                    <prob ID="13" c="1.000000" />
+                    <prob ID="14" c="1.000000" />
+                    <prob ID="15" c="1.000000" />
+                    <prob ID="16" c="1.000000" />
+                    <prob ID="17" c="1.000000" />
+                    <prob ID="18" c="1.000000" />
+                    <prob ID="19" c="1.000000" />
+                    <prob ID="20" c="1.000000" />
+                    <prob ID="21" c="1.000000" />
+                    <prob ID="22" c="1.000000" />
+                    <prob ID="23" c="1.000000" />
+                    <prob ID="24" c="1.000000" />
+                    <prob ID="25" c="1.000000" />
+                    <prob ID="26" c="1.000000" />
+                    <prob ID="27" c="1.000000" />
+                    <prob ID="28" c="1.000000" />
+                    <prob ID="29" c="1.000000" />
+                    <prob ID="30" c="1.000000" />
+                    <prob ID="31" c="1.000000" />
+                    <prob ID="32" c="1.000000" />
+                    <prob ID="33" c="1.000000" />
+                    <prob ID="34" c="1.000000" />
+                    <prob ID="35" c="1.000000" />
+                    <prob ID="36" c="1.000000" />
+                    <prob ID="37" c="1.000000" />
+                    <prob ID="38" c="1.000000" />
+                    <prob ID="39" c="1.000000" />
+                    <prob ID="40" c="1.000000" />
+                </Rule>
+            </Productions>
+        </CFG>
+    </CONTEXT_REPLACOR>
+    <FILE_OUTPUTTER filename="test" />
 </GENERATOR>

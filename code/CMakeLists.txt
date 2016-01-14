@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 project(NextGen)
-set(CMAKE_CXX_FLAGS "-Wall -std=c++11")
+set(CMAKE_CXX_FLAGS "-std=c++11")
 set(CMAKE_BUILD_TYPE Debug)
 
 # Extend the CMake module path to find the FindSFML.cmake

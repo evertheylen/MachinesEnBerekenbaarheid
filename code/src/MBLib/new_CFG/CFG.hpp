@@ -168,7 +168,7 @@ public:
 	}
 	
 	const RuleT& get_rule_c(const typename RuleT::NumT& num) const {
-		assert(m_rules.find(num) != m_rules.end());
+		if (m_rules.find(num) == m_rules.end()) std::cout << "did not find " << num << "\n";
 		return m_rules.find(num)->second;
 	}
 	
