@@ -1,12 +1,16 @@
 #!/usr/bin/python3
 
-import subprocess # call
-
 import os  # listdir, path, getcwd
+os.environ["PYTHONHASHSEED"] = "0"
+
+import subprocess # call
+import sys  # last_traceback
 import argparse
 import glob  # glob.glob
 
 import pdb  # debugging, pdb.set_trace()
+
+import traceback  # print traceback on error
 
 import copy
 import csv
@@ -14,6 +18,11 @@ import csv
 import datetime
 MAX_DATE = datetime.datetime(9999, 12, 31)
 MIN_DATE = datetime.datetime(1,1,1)
+
+import platform
+celebration = "All done!"
+if platform.system() == "Darwin":
+    celebration = chr(127866) + " All done! " + chr(127866)  # Beer glass
 
 global all_units
 # key is location!!
@@ -64,29 +73,44 @@ def rgbtext(s, f=red, b=black):
 # Logging
 
 class IndentWriter:
-    def __init__(self, debug):
+    default_imp = float('inf')
+    
+    def __init__(self, debug, tabs=True, min_imp=0):
         self.debug = debug
+        if not debug:
+            self.min_imp = min_imp
+            self.tabs = tabs
+        else:
+            self.min_imp = 0
+            self.tabs = True
         self.indent = 0
         self.byte_cache = []
+    
+    def _print(self, l, imp):
+        if imp >= self.min_imp:
+            if self.tabs:
+                print(self.indent*"  " + l)
+            else:
+                print(l)
         
-    def writeline(self, l):
+    def writeline(self, l, imp=default_imp):
         self.byte_cache.clear()
-        print(self.indent*"  " + l)
+        self._print(l, imp)
         
     
-    def debugline(self, l):
+    def debugline(self, l, imp=default_imp):
         if self.debug:
-            self.writeline("DBG: " + l)
+            self.writeline("DBG: " + l, imp)
     
-    def writebytes(self, b):
+    def writebytes(self, b, imp=default_imp):
         s = b.decode("utf-8")[:-1]
         if s.isspace() or s == "":
             self.byte_cache.append(s)
         else:
             for cs in self.byte_cache:
-                print(self.indent*"  " + cs)
+                self._print(cs, imp)
             self.byte_cache.clear()
-            print(self.indent*"  " + s)
+            self._print(s, imp)
     
     def tab(self):
         # max indent of 10 (20 spaces)
@@ -273,17 +297,17 @@ def escape_path(s):
     return news
     
 
-def call(s, writer, cwd=None):
+def call(s, writer, cwd=None, imp=float('inf')):
     writer.debugline(">> %s [cwd=%s]"%(s, cwd))
     # if shell=True, it is recommended to pass the command as a string, rather than as a list
     p = subprocess.Popen(s, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd)
     while True:
         retcode = p.poll()
-        writer.writebytes(p.stdout.readline())
+        writer.writebytes(p.stdout.readline(), imp)
         # stderr??
         if retcode is not None:
             for l in p.stdout.readlines():
-                writer.writebytes(l)
+                writer.writebytes(l, imp)
             return retcode
 
 def check_call(s, writer, todo, info="", cwd=None):
@@ -392,6 +416,9 @@ class Unit(BaseUnit):
     def __init__(self, name):
         self.name = name
         self.location = os.path.abspath(name)
+        if not os.path.isdir(self.location):
+            raise FileNotFoundError("mumble", "mumble", self.location)
+        
         # TODO set sensible defaults
         self.data = {
             "worker": "",
@@ -613,71 +640,77 @@ class Todo(Dependency):
             d.list_deps(writer)
         writer.untab()
     
+    
+    def max_dates_input_files(self, database):
+        # TODO cache
+        input_files = self.worker.input_files(self)
+        # no input files? we don't need input it appears
+        try:
+            return max(dates_from_files(input_files)) if len(input_files) > 0 else MIN_DATE
+        except FileNotFoundError:
+            return MAX_DATE
+    
+    
+    def min_dates_output_files(self, database):
+        # TODO cache
+        if self in database:
+            output_files_prev_run = database.get_row(self)
+            # no output files?
+            try:
+                return min(dates_from_files(output_files_prev_run)) if len(output_files_prev_run) > 0 else MAX_DATE
+            except FileNotFoundError:
+                return MIN_DATE
+        else:
+            # output files not in database: todo has never been executed before
+            return MIN_DATE
+    
+    
     def do(self, database, writer):       
         writer.debugline("--> do " + str(self))
         # return True if we have actually performed work
         
         # check whether we already did this one before, this run of baker.py
         if done(self.status):
-            writer.writeline(rgbtext("Already done '" + str(self)+"'", green))
+            writer.writeline(rgbtext("Already done '" + str(self)+"'", green), 50)
             return self.status
         
         rebuild = False
         if len(self.deps) > 0:
-            writer.writeline(rgbtext("Dependencies of Todo '" + str(self)+"':", cyan))
+            writer.writeline(rgbtext("Dependencies of Todo '" + str(self)+"':", cyan), 50)
             writer.tab()
             for d in self.deps:
                 writer.debugline("calling do " + str(d))
                 status = d.do(database, writer)
-                writer.debugline("sssstatus is " + str(status))
+                writer.debugline("status is " + str(status))
                 # we need to rebuild when our deps have changed
                 if status == JUST_DID:
                     assert(d.status == JUST_DID)
                     rebuild = True
-                    writer.debugline("rebuild me pleeeeease")
+                    writer.debugline("rebuild me please")
             writer.untab()
         else:
             writer.debugline("no deps apparently")
         
         # check whether our unit is a collection
         if isinstance(self.unit, CollectionUnit):
-            writer.writeline(rgbtext("No need to perform %s on the collection '%s'."%(self.action, self.unit.name), cyan))
+            writer.writeline(rgbtext("No need to perform %s on the collection '%s'."%(self.action, self.unit.name), cyan), 50)
             self.status = JUST_DID if rebuild else UNCHANGED
             return self.status
         
         if not rebuild:
-            # check whether we did this one before, during some previous run of baker.py
+            # check whether we did this one before, during some previous run of baker
             # basically, we have to redo this todo if and only if
-            #    max(dates(input_files)) > min(dates(output_files_prev_run))
-            input_files = self.worker.input_files(self)
-            if self in database:
-                writer.debugline("in database")
-                output_files_prev_run = database.get_row(self)
-                writer.debugline("input files: " + ", ".join(input_files))
-                writer.debugline("output files prev run: " + ", ".join(output_files_prev_run))
-                # no input files?
-                try:
-                    max_input = max(dates_from_files(input_files)) if len(input_files) > 0 else MIN_DATE
-                except FileNotFoundError:
-                    max_input = MAX_DATE
-                    
-                # no output files, but it is in the database? no need to redo
-                try:
-                    min_output = min(dates_from_files(output_files_prev_run)) if len(output_files_prev_run) > 0 else MAX_DATE
-                except FileNotFoundError:
-                    min_output = MIN_DATE
-                
-                writer.debugline("dates max_input = {0}, min_output = {1}".format(max_input, min_output))
-                if max_input > min_output:
-                    return self.actually_do(writer, database)
-                else:
-                    writer.writeline(rgbtext("Already (previously) done '" + str(self) +"'", green))
-                    self.status = UNCHANGED
-                    return UNCHANGED
-            else:
-                # output files not in database: todo has never been executed before
-                writer.debugline("not in database")
+            #    max(dates(input_files + DEPENDENCIES' input_files)) > min(dates(output_files_prev_run))
+            min_output = self.min_dates_output_files(database)
+            max_input = min([d.max_dates_input_files(database) for d in self.all_deps()])  # including self
+            writer.debugline("dates max_input = {0}, min_output = {1}".format(max_input, min_output))
+            if max_input >= min_output:
                 return self.actually_do(writer, database)
+            else:
+                writer.writeline(rgbtext("Already (previously) done '" + str(self) +"'", green), 50)
+                self.status = UNCHANGED
+                return UNCHANGED
+            
         else:
             # deps rebuilt, we redo this one too
             writer.debugline("deps rebuilt, we rebuilt this one too")
@@ -685,7 +718,7 @@ class Todo(Dependency):
                 
     
     def actually_do(self, writer, database):
-        writer.writeline(rgbtext("Performing Todo '" + str(self)+"'", cyan))
+        writer.writeline(rgbtext("Performing Todo '" + str(self)+"'", cyan), 100)
         output = self.worker.do(self, writer)
         writer.debugline(("output = " + ", ".join(output)) if output is not None else "output = None")
         database.set_row(self, output)
@@ -760,7 +793,7 @@ class RootTodo(Todo):
             writer.writeline("")
         
         if len(fails) == 0:
-            writer.writeline("All done!")
+            writer.writeline(celebration)
         else:
             writer.writeline("All done, but these units you specified failed: %s"%(", ".join(fails)))
 
@@ -1150,18 +1183,22 @@ project_config = None
 def main():
     # which unit to bui-- perform some action on?
     
-    parser = argparse.ArgumentParser(description="A build tool that works.")
+    parser = argparse.ArgumentParser(description="A build tool that usually works. Easy to program or extend using Python.")
     parser.add_argument("action", metavar="A", type=str, help="The action the worker should perform")
     parser.add_argument("units", metavar="U", type=str, nargs="+", help="A unit (given by relative path) to use")
     # TODO other actions
     parser.add_argument("--worker", metavar="W", type=str, help="worker to use", choices=[w.shortname for w in workers_list], default="DEFAULT_BY_ACTION")
     parser.add_argument("--list-deps", action="store_true", help="simply list the dependencies of all units concerned", default=False)
     parser.add_argument("--debug", action="store_true", help="show extra debug info", default=False)
+    parser.add_argument("--lengthy", action="store_true", help="enable tabbed and longer output (no effect when debugging)", default=False)
     parser.add_argument("--trace", action="store_true", help="python debugger set_trace()", default=False)
     
     args = parser.parse_args()
     
-    writer = IndentWriter(args.debug)
+    if args.lengthy:
+        writer = IndentWriter(args.debug)
+    else:
+        writer = IndentWriter(args.debug, False, 51)
     
     dict_project_config = {}
     if not exec_file("bake_project.py", dict_project_config):
@@ -1187,32 +1224,51 @@ def main():
     
     cmd_units = set()
     
-    for uname in args.units:   
-        u = create_unit(uname, project_config)
-        cmd_units.add(u)
-    
-    if args.list_deps:
-        for u in all_units.values():
-            u.list_deps()
-    else:
-        # already checked for 'emptiness' in argparser
-        default_worker = ""
-        if args.worker == "DEFAULT_BY_ACTION":
-            default_worker = workers[standard_workers_by_action[args.action]]
+    try:
+        for uname in args.units:   
+            u = create_unit(uname, project_config)
+            cmd_units.add(u)
+    except FileNotFoundError as e:
+        writer.writeline(rgbtext("There was a problem while parsing a unit. I couldn't find this: " + e.filename, red))
+        return
+    except Exception as e:
+        writer.writeline(rgbtext("There was a problem while parsing a unit." + str(e)))
+        if args.debug:
+            traceback.print_exception(type(e), e, sys.last_traceback())
+        return
+        
+    try:
+        if args.list_deps:
+            for u in all_units.values():
+                u.list_deps()
         else:
-            default_worker = workers[args.worker]
-        
-        default_action = args.action
-        
-        root = RootTodo(default_worker, default_action, cmd_units)
-        if (writer.debug):
-            root.list_deps(writer)
-        if (args.trace):
-            pdb.set_trace()
-        else:
-            root.do(db, writer)
-        
-        db.write()
+            # already checked for 'emptiness' in argparser
+            default_worker = ""
+            if args.worker == "DEFAULT_BY_ACTION":
+                default_worker = workers[standard_workers_by_action[args.action]]
+            else:
+                default_worker = workers[args.worker]
+            
+            default_action = args.action
+            
+            root = RootTodo(default_worker, default_action, cmd_units)
+            if (writer.debug):
+                root.list_deps(writer)
+            if (args.trace):
+                pdb.set_trace()
+            else:
+                root.do(db, writer)
+            
+            db.write()
+    except FileNotFoundError as e:
+        writer.writeline(rgbtext("There was a problem while processing Todo's. I couldn't find this: " + e.filename, red))
+        return
+    except Exception as e:
+        writer.writeline(rgbtext("There was a problem while parsing a unit: " + str(e)))
+        if args.debug:
+            traceback.print_exception(type(e), e, sys.last_traceback())
+        return
+            
         
         
 

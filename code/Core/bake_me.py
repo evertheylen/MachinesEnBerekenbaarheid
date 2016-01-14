@@ -10,7 +10,6 @@ dependencies["build_exec"] = [
     "NGLib/outputter>>build_objects",
     "NGLib/python_out>>build_objects",
     "MBLib/common>>build_objects",
-    "NGLib/teacher>>headers",
     "NGLib/teacher>>build_objects",
 ]
 

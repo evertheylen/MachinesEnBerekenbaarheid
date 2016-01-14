@@ -24,6 +24,7 @@ public:
 	ContextRule() = default;
 	
 	ContextRule(TiXmlElement* root): SimpleRule<ID_T>(root) {
+		std::cout << "this is spartaaa\n";
 // 		std::cout << "entering parse\n";
 		for (TiXmlElement* el = root->FirstChildElement(); el != nullptr; el = el->NextSiblingElement()) {
 			NumT p_num = std::stoi(el->Attribute("ID"));
@@ -45,7 +46,7 @@ public:
 			root->LinkEndChild(prob_el);
 		}
 		return root;
-	}
+	} 
 	
 	std::map<NumT, double> table;
 };

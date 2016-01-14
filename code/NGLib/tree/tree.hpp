@@ -37,7 +37,7 @@ public:
 	
 	using PathT = std::vector<unsigned int>;
 	
-	Tree() = default;
+	Tree() = default; 
 	
 	Tree(T _data): data(_data) {}
 	
