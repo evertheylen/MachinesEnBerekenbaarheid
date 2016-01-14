@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<CFG>
+	<Variables>
+        IFTE
+        <StartSymbol>E</StartSymbol>
+	</Variables>
+	<Terminals>
+	    ab01()+*
+	</Terminals>
+	<Productions>
+        <Rule LHS="I" RHS= "a|b|Ia|Ib|I0|I1"/>
+		<Rule LHS="F" RHS= "I|(E)"/>
+		<Rule LHS="T" RHS= "F|T*F"/>
+		<Rule LHS="E" RHS= "T|E+T"/>
+	</Productions>
+</CFG>

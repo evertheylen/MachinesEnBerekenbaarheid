@@ -4,33 +4,32 @@
 #include <exception>
 #include <string>
 
-class NGException: public std::exception {};
-
-class syntacticError: public NGException {
+class NGException: public std::exception {
 public:
-	virtual const char* what() const throw() {
-		return "The input XML contains syntactic errors\n";
-	}
-};
-
-class noValidFilename: public NGException {
-public:
-	virtual const char* what() const throw() {
-		return "The file is not valid or not found\n";
-	}
-};
-
-class semanticError: public NGException {
-public:
-	semanticError(const std::string& _fault, const std::string& _correct):
-		fault(_fault), correct(_correct) {}
+	NGException(const std::string& _info): info(_info) {}
 	
-	virtual const char* what() const throw() {
-		std::string error = "The inputXML contains semantic errors: " + fault + " instead of " + correct + ".\n";
-		return error.c_str();
+	const char* what() const throw() {
+		return info.c_str();
 	}
 	
 private:
-	std::string fault;
-	std::string correct;
+	std::string info;
+};
+
+class SyntacticError: public NGException {
+public:
+	SyntacticError(const std::string& _info):
+		NGException(std::string("SyntacticError: ") + _info) {}
+};
+
+class NoValidFilename: public NGException {
+public:
+	NoValidFilename(const std::string& _info):
+		NGException(_info + " isn't a valid filename") {}
+};
+
+class SemanticError: public NGException {
+public:
+	SemanticError(const std::string& fault, const std::string& correct):
+		NGException(std::string("Semantic error: ") + fault + " instead of " + correct + ".") {}
 };

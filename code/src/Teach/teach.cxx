@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
 	if (args.size() < 2) {
 		std::cout << "teach <filename>.xml <startstring> [max_depth]\n\n";
 		std::cout << "Please provide a filename and at least one start symbol.\n";
-		std::cout << "You can also provide a maximum recursion depth.\n";
+		std::cout << "You can also provide a maximum recursion depth. (but beware for infinite expressions)\n";
 		return 1;
 	}
 	
@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
 		
 		Teacher t(generator->get_replacor());
 		while (true) {
-			auto tree = t.generate(args[1]);
+			auto tree = t.generate(args[1], max_depth);
 			//std::unique_ptr<PythonOutputter> out(new PythonOutputter("output.py"));
 			//out->init();
 			//t.output(tree, out.get());

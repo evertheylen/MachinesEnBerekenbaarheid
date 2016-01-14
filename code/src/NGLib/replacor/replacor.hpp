@@ -39,6 +39,8 @@ public:
 		return cfg.get_rule_c(num).get_body();
 	}
 	
+	virtual ~Replacor() {}
+	
 protected:
 	xml_CFG<RuleT> cfg;
 };

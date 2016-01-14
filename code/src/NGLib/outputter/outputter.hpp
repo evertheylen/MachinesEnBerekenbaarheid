@@ -20,6 +20,8 @@ public:
 	virtual void close() = 0;
 	
 	virtual TiXmlElement* to_xml() = 0;
+	
+	virtual ~Outputter() {};
 };
 
 

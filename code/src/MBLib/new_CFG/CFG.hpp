@@ -48,11 +48,11 @@ public:
 	SimpleRule(TiXmlElement* root) {
 // 		try {
 			std::string num_s = std::string(root->Attribute("ID"));
-			if (num_s == "") throw syntacticError();
+			if (num_s == "") throw SyntacticError("No ID given");
 			head = std::string(root->Attribute("LHS"));
-			if (head == "") throw syntacticError();
+			if (head == "") throw SyntacticError("No head given");
 			std::string body_s = std::string(root->Attribute("RHS"));
-			if (body_s == "") throw syntacticError();
+			if (body_s == "") throw SyntacticError("No body given");
 			
 			body = split(body_s);
 			num = std::stoi(num_s);
@@ -182,7 +182,7 @@ public:
 	void add_rule(const RuleT& rule) {
 		assert(is_variable(rule.get_head()));
 		assert(m_rules.find(rule.get_num()) == m_rules.end());
-		auto m = P.find(rule.get_head());
+		//auto m = P.find(rule.get_head());
 		
 		//P.insert(std::pair<Rule_Type::ID_T, Rule_Type::NumT>(rule.get_head(), rule.get_num()));
 		P.insert({rule.get_head(), rule.get_num()});
@@ -245,20 +245,20 @@ public:
 
 	xml_CFG(TiXmlElement* root) {
 		auto vars_el = root->FirstChildElement("Variables");
-		if (vars_el == nullptr) throw syntacticError();
+		if (vars_el == nullptr) throw SyntacticError("No Variables element");
 		for (auto s: split(std::string(vars_el->GetText()))) {
 			this->V.insert(s);
 		}
 		this->S = std::string(vars_el->FirstChildElement("StartSymbol")->GetText());
 
 		auto term_el = root->FirstChildElement("Terminals");
-		if (term_el == nullptr) throw syntacticError();
+		if (term_el == nullptr) throw SyntacticError("No Terminals element");
 		for (auto s: split(std::string(term_el->GetText()))) {
 			this->T.insert(s);
 		}
 		
 		auto prod_el = root->FirstChildElement("Productions");
-		if (prod_el == nullptr) throw syntacticError();
+		if (prod_el == nullptr) throw SyntacticError("No Productions element");
 		for (TiXmlElement* rule_el = prod_el->FirstChildElement("Rule");
 				rule_el != nullptr;
 				rule_el = rule_el->NextSiblingElement("Rule")) {

@@ -35,7 +35,9 @@ public:
 	StochasticRule() = default;
 	
 	StochasticRule(TiXmlElement* root): SimpleRule<ID_T>(root) {
-		chance = std::stod(std::string(root->Attribute("chance")));
+		const char* chance_attr = root->Attribute("chance");
+		if (chance_attr == nullptr) throw SyntacticError("No chance attr");
+		chance = std::stod(std::string(chance_attr));
 	}
 	
 	StochasticRule(const ID_T& _head, const std::vector<ID_T>& _body, NumT _num, double _chance):

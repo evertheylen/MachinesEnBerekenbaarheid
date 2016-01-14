@@ -18,7 +18,8 @@ void PythonOutputter::init() {
 	// forgive its ugliness
 	Py_Initialize();
 	
-	wchar_t* argv[] = {L"NextGen"};
+	wchar_t arg1[] = L"NextGen";
+	wchar_t* argv[] = {arg1};
 	PySys_SetArgv(1, argv);
 	
 // 	std::cout << "Initialized Python\n";

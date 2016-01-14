@@ -26,10 +26,21 @@ public:
 	ContextRule(TiXmlElement* root): SimpleRule<ID_T>(root) {
 // 		std::cout << "entering parse\n";
 		for (TiXmlElement* el = root->FirstChildElement(); el != nullptr; el = el->NextSiblingElement()) {
-			NumT p_num = std::stoi(el->Attribute("ID"));
-			double chance = std::stod(el->Attribute("c"));
+			const char* num_attr = el->Attribute("ID");
+			if (num_attr == nullptr) throw SyntacticError("No ID attribute");
+			const char * p_num_attr = el->Attribute("c");
+			if (p_num_attr == nullptr) throw SyntacticError("No c attribute");
+			
+			NumT p_num = std::stoi(num_attr);
+			double chance = std::stod(p_num_attr);
 			table[p_num] = chance;
 // 			std::cout << "setting chance of " << p_num << " to " << chance << "\n";
+		}
+	}
+	
+	void fill_table(unsigned int i) {
+		if (table.find(i) == table.end()) {
+			table[i] = 1.0;
 		}
 	}
 	

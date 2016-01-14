@@ -21,7 +21,7 @@ public:
 	NormalReplacor() {};
 	
 	NormalReplacor(TiXmlElement* elem, std::random_device::result_type seed):
-			Replacor(elem->FirstChildElement()), mt(seed) {}
+			Replacor(elem->FirstChildElement()), mt(seed) {} // TODO
 	
 	typename Rule_Type::NumT replace(std::string var, std::list<typename Rule_Type::NumT>& context) {
 		std::uniform_int_distribution<int> dist(0, 99);
@@ -36,6 +36,7 @@ public:
 				prev_chance += chance;
 			}
 		}
+		return {};
 	}
 
 	bool replaceable(std::string symb) {

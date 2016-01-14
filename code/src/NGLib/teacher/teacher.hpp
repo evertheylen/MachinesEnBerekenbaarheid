@@ -34,7 +34,7 @@ public:
 
 
 	// if max_repl == -1 ==> Infinite
-	Teacher3 generate(std::string start, int max_repl = -1) {
+	Teacher3 generate(std::string start, int max_repl) {
 		Teacher3 tree({start, 0});
 		Teacher3::PathT path;
 		rec_generate(start, tree, path, max_repl);
@@ -78,7 +78,7 @@ private:
 		//std::cout << "assert " << s << " == " << tree.get_tree_by_path(path)->data.first << "\n";
 		assert(s == tree.get_tree_by_path(path)->data.first);
 		// if we haven't reached maximum replacements and s is replacable (probably variable)
-		if ((not ((max_repl != -1) and path.size() >= max_repl)) and repl->replaceable(s)) {
+		if ((not ((max_repl != -1) and int(path.size()) >= max_repl)) and repl->replaceable(s)) {
 			// replacable (probably variable)
 			
 			// build up context

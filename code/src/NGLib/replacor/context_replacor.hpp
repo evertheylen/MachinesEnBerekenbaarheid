@@ -22,7 +22,13 @@ public:
 	ContextReplacor() = default;
 	
 	ContextReplacor(TiXmlElement* elem, std::random_device::result_type seed):
-			Replacor(elem->FirstChildElement()), mt(seed) {}
+			Replacor(elem->FirstChildElement()), mt(seed) {  // TODO
+		for (auto& it: cfg.m_rules) {
+			for (auto& it_2: cfg.m_rules) {
+				it.second.fill_table(it_2.second.get_num());
+			}
+		}
+	}
 	
 	typename Rule_Type::NumT replace(std::string var, std::list<typename Rule_Type::NumT>& context) {
 // 		std::cout << "    --> replacing " << var << " with context: ";

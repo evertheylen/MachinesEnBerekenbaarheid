@@ -66,8 +66,8 @@ public:
 
 	// this function will save to an XML file
 	void saveXML(std::string filename) {
-		if (!filename.compare("")) {
-			throw noValidFilename();
+		if (filename == "") {
+			throw NoValidFilename(filename);
 		}
 		TiXmlDocument doc;
 		TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "", "");
@@ -97,8 +97,8 @@ public:
 private:
 	void rec_generate(std::string s, std::list<typename ReplacorT::Rule_Type::NumT>& context, int max_repl) {
 		//std::cout << "generating for var " << s << ", with max_repl " << max_repl << " and context.size() " << context.size() << "\n";
-		for (int i=0; i<context.size(); i++) std::cout << "  ";
-		if ((max_repl != -1) and (context.size() == max_repl)) {
+		for (unsigned int i=0; i<context.size(); i++) std::cout << "  ";
+		if ((max_repl != -1) and (int(context.size()) == max_repl)) {
 			// we have reached the maximum depth, output this symbol (variable or not)
 			//std::cout << "   --> reached max depth because context.size() >= max_repl: " << context.size() << " >= " << max_repl << "\n";
 			out->output(s);
