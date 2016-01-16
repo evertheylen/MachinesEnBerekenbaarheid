@@ -1,0 +1,192 @@
+
+#
+# $Id: scirules.in,v 1.141 2007/11/19 17:07:49 strib Exp $
+#
+
+
+SCIPAPER_LATEX {
+
+ LATEX_HEADER
+
+ SCI_ABSTRACT 
+
+ SCI_INTRO
+
+ SCI_MODEL
+
+ SCI_IMPL
+
+ SCI_EVAL
+
+ SCI_RELWORK
+
+ SCI_CONCL
+
+ LATEX_FOOTER
+
+}
+
+
+#############################################################################
+####### Titles #######
+#############################################################################
+
+SCI_TITLE_PREFIX 	SYSNAME:
+SCI_TITLE_PREFIX
+
+SCI_TITLE_POSTFIX 	using SYSNAME
+SCI_TITLE_POSTFIX 	with SYSNAME
+SCI_TITLE_POSTFIX+2
+
+SCI_TITLE SCI_TITLE_X
+SCI_TITLE_X SCI_TITLE_PREFIX SCI_ACT
+SCI_TITLE_X SCI_TITLE_PREP the SCI_ACT
+SCI_TITLE_X a SCI_ACT SCI_TITLE_POSTFIX
+SCI_TITLE_X SCI_THING SCI_TITLE_NOT considered harmful
+SCI_TITLE_X deconstructing SCI_THING SCI_TITLE_POSTFIX
+SCI_TITLE_X decoupling SCI_THING from SCI_THING in SCI_THING
+SCI_TITLE_X SCI_TITLE_PREFIX a methodology for the SCI_ACT
+SCI_TITLE_X a case for SCI_THING
+SCI_TITLE_X SCI_VERBING SCI_THING using SCI_BUZZWORD_ADJ SCI_BUZZWORD_NOUN
+SCI_TITLE_X SCI_VERBING SCI_THING and SCI_THING SCI_TITLE_POSTFIX
+SCI_TITLE_X SCI_TITLE_PREFIX SCI_BUZZWORD_ADJ_MULTI SCI_BUZZWORD_NOUN
+SCI_TITLE_X SCI_TITLE_COMPARE SCI_THING and SCI_THING SCI_TITLE_POSTFIX
+SCI_TITLE_X the SCI_TITLE_IMPACT SCI_BUZZWORD_ADJ SCI_BUZZWORD_NOUN on SCI_FIELD
+SCI_TITLE_X SCI_BUZZWORD_ADJ_MULTI SCI_BUZZWORD_NOUN for SCI_THING
+
+SCI_TITLE_NOT no longer
+SCI_TITLE_NOT+3
+
+SCI_TITLE_PREP on
+SCI_TITLE_PREP towards
+
+SCI_TITLE_COMPARE comparing
+SCI_TITLE_COMPARE contrasting
+SCI_TITLE_COMPARE the relationship between
+SCI_TITLE_COMPARE SCI_VERBING
+
+SCI_TITLE_IMPACT	impact of
+SCI_TITLE_IMPACT	effect of
+SCI_TITLE_IMPACT	influence of
+
+# ! = do not choose the same expansion twice for this rule
+AUTHOR_NAME!
+
+
+IMPL_COMPONENT client-side library
+IMPL_COMPONENT server daemon
+IMPL_COMPONENT centralized logging facility
+IMPL_COMPONENT collection of shell scripts
+IMPL_COMPONENT homegrown database
+IMPL_COMPONENT hand-optimized compiler
+IMPL_COMPONENT virtual machine monitor
+IMPL_COMPONENT hacked operating system
+IMPL_COMPONENT codebase of NONZDIGIT LANGUAGE_UM files
+
+MULTIPLE_VERBED		doubled
+MULTIPLE_VERBED		halved
+MULTIPLE_VERBED		tripled
+MULTIPLE_VERBED		quadrupled
+MULTIPLE_VERBED		reduced
+
+SCI_EFFECT	made SCI_VERBING and possibly SCI_VERBING SCI_THING a reality
+SCI_EFFECT	would allow for further study into SCI_THING
+SCI_EFFECT	paved the way for the SCI_ACT_A SCI_THING
+SCI_EFFECT	would make SCI_VERBING SCI_THING a real possibility
+
+
+
+GRAPH_TYPE_CDF1 {
+
+ graphtype cdf=1
+ curvelabel notitle
+ set ylabel "CDF"
+
+}
+
+
+GRAPH_TYPE_BARGRAPH1 {
+
+ graphtype bargraph=1
+ curvelabel notitle
+
+}
+
+GRAPH_TYPE_SCATTER1 {
+
+ graphtype scatter=1
+ curvelabel notitle
+
+}
+
+GNUPLOT {
+
+ set xlabel "GRAPH_X_AXIS"
+ set ylabel "GRAPH_Y_AXIS"
+ GRAPH_TYPE
+ GRAPH_LOG
+ GRAPH_ERRORS
+
+}
+
+#############################################################################
+######## LaTeX stuff ########
+#############################################################################
+
+LATEX_HEADER { 
+
+LATEX_DOCCLASS
+LATEX_FONTCLASS
+LATEX_CITEPACK
+\usepackage{epsfig}
+\usepackage[latin1]{inputenc}
+\begin{document}
+
+LATEX_TITLE
+LATEX_AUTHORS
+
+\date{}
+
+\maketitle
+
+}
+
+LATEX_TITLE \title{SCI_TITLE}
+LATEX_AUTHORS \author{SCIAUTHORS}
+
+LATEX_FIGURE {
+
+\begin{figure}[t]
+\centerline{\epsfig{figure=LATEX_FIG_FILENAME,width=3in}}
+\caption{\small{
+SCI_GRAPH_CAPTION
+}}
+\label{LATEX_FIG_LABEL}
+\end{figure}
+
+}
+
+BIBTEX_ENTRY+6 {
+
+ @article{CITE_LABEL_GIVEN, 
+  author = {CITE_AUTHOR_LIST},
+  title = {SCI_TITLE_X},
+  journal = {CITE_JOURNAL},
+  month = CITE_MONTH,
+  year = CITE_YEAR,
+  volume = CITE_VOLUME,
+  pages = {CITE_PAGES}}
+
+}
+
+BIBTEX_ENTRY {
+
+ @techreport{CITE_LABEL_GIVEN, 
+  author = {CITE_AUTHOR_LIST},
+  title = {SCI_TITLE_X},
+  institution = {CITE_INST},
+  number = {CITE_TRNUM},	
+  month = CITE_MONTH,
+  year = CITE_YEAR}
+
+}
