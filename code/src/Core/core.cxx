@@ -56,12 +56,12 @@ int main(int argc, char** argv) {
 	
 	
 	try {
-		std::unique_ptr<GeneratorInterface> g(loadXML(args.at(0)));
+		Generator g(args.at(0));
 		std::vector<std::string> startstring = split(args.at(1));
 		int max_depth = args.size() == 3? std::stoi(args.at(2)) : -1;
-		g->generate(startstring, max_depth);
+		g.generate(startstring, max_depth);
 		
-		g->saveXML("saveXML.xml");
+		g.saveXML("saveXML.xml");
 	} catch (boost::python::error_already_set e) {
 		std::cout << "Core crashed with Python Exception:\n";
 		PyErr_Print();

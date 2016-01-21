@@ -13,6 +13,10 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/
 file(GLOB_RECURSE LIBS libs/tinyxml/*.cpp libs/tinyxml/*.h)
 include_directories(${PROJECT_SOURCE_DIR}/libs/)
 
+# linenoise
+file(GLOB_RECURSE LIBS2 libs/linenoise/*.c libs/linenoise/*.h)
+include_directories(${PROJECT_SOURCE_DIR}/libs/)
+
 # More include stuff
 include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${PROJECT_SOURCE_DIR}/)
@@ -37,9 +41,9 @@ include_directories(${PYTHON_INCLUDE_DIRS})
 file(GLOB_RECURSE SRC src/*.cpp src/*.hpp)
 
 # The program we're compiling with the sources set above
-add_executable(Core ${SRC} ${LIBS} ${PROJECT_SOURCE_DIR}/src/Core/core.cxx)
-add_executable(Teach ${SRC} ${LIBS} ${PROJECT_SOURCE_DIR}/src/Teach/teach.cxx)
-add_executable(MBExec ${SRC} ${LIBS} ${PROJECT_SOURCE_DIR}/src/MBExec/MBExec.cxx)
+add_executable(Core ${SRC} ${LIBS} ${LIBS2} ${PROJECT_SOURCE_DIR}/src/Core/core.cxx)
+add_executable(Teach ${SRC} ${LIBS} ${LIBS2} ${PROJECT_SOURCE_DIR}/src/Teach/teach.cxx)
+add_executable(MBExec ${SRC} ${LIBS} ${LIBS2} ${PROJECT_SOURCE_DIR}/src/MBExec/MBExec.cxx)
 
 # TODO make MBExec not require python or boost
 

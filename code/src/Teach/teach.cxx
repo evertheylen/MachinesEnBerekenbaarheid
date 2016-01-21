@@ -7,6 +7,7 @@
 
 #include "boost/python.hpp"
 #include "libs/tinyxml/tinyxml.h"
+#include "libs/linenoise/linenoise.h"
 
 #include "NGLib/generator/generator.hpp"
 #include "NGLib/outputter/outputter.hpp"
@@ -34,6 +35,38 @@ std::vector<std::string> split_string(const std::string& s, char token) {
 	return result;
 }
 
+void completion(const char *buf, linenoiseCompletions *lc) {
+	switch (buf[0]) {
+		case 'b':
+			linenoiseAddCompletion(lc,"build");
+			break;
+		case 't':
+			linenoiseAddCompletion(lc,"tree");
+			break;
+		case 'p':
+			linenoiseAddCompletion(lc,"print");
+			break;
+		case 'o':
+			linenoiseAddCompletion(lc,"output");
+			break;
+		case 's':
+			linenoiseAddCompletion(lc,"score");
+			linenoiseAddCompletion(lc,"save");
+			break;
+		case 'c':
+			linenoiseAddCompletion(lc,"clear");
+			break;
+		case 'q':
+			linenoiseAddCompletion(lc, "quit");
+			break;
+		case 'h':
+			linenoiseAddCompletion(lc, "help");
+			break;
+		default:
+			break;
+	}
+}
+
 int main(int argc, char** argv) {
 	// load xml, construct a Teacher
 	
@@ -52,27 +85,29 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	
-	TiXmlDocument doc;
 	try {
-		if (not doc.LoadFile(args[0])) throw NoValidFilename(args[0]);
-		std::unique_ptr<GeneratorInterface> g(loadXML(args.at(0)));
-		Generator<ContextReplacor>* generator = dynamic_cast<Generator<ContextReplacor>*>(g.get());
-		if (generator == nullptr) {
-			// TODO work with any generator
-			throw NGException("Did not get a Context Replacor xml.");
-		}
+		Generator g(args[0]);
 		
-		Teacher t(generator->get_replacor());
+		Teacher t(g.get_replacor());
 		std::unique_ptr<Teacher::Teacher3> tree;
 		std::vector<std::string> cmds;
 		std::string input;
+		
+		linenoiseSetCompletionCallback(completion);
+		char* line;
+		
 		while (true) {
-			if (tree.get()) std::cout << "[T] ";
-			else std::cout << "[ ] ";
-			std::getline(std::cin, input);
+			if (tree.get()) line = linenoise("[T] ");
+			else line = linenoise("[ ] ");
+			
+			if (line == nullptr) continue;
+			input = std::string(line);
+			free(line);
+			
 			cmds = split_string(input, ' ');
 			
 			if (cmds.size() == 0) continue;
+			linenoiseHistoryAdd(input.c_str());
 			if (cmds[0] == "build") {
 				if (cmds.size() < 2) {
 					std::cout << "'build' requires one start symbol\n";
@@ -82,7 +117,12 @@ int main(int argc, char** argv) {
 				
 				int max_repl = -1;
 				if (cmds.size() == 3) {
-					max_repl = std::stod(cmds[2]);
+					try {
+						max_repl = std::stod(cmds[2]);
+					} catch (std::invalid_argument& e) {
+						std::cout << "Couldn't parse number\n";
+						continue;
+					}
 					// TODO proper errors?
 				}
 				
@@ -96,9 +136,9 @@ int main(int argc, char** argv) {
 				std::cout << "\n";
 			} else if (cmds[0] == "output") {
 				if (tree.get() == nullptr) continue;
-				generator->get_outputter()->init();
-				tree->leaves([&](Teacher::Element3& p) { generator->get_outputter()->output(p.first); });
-				generator->get_outputter()->close();
+				g.get_outputter()->init();
+				tree->leaves([&](Teacher::Element3& p) { g.get_outputter()->output(p.first); });
+				g.get_outputter()->close();
 			} else if (cmds[0] == "score") {
 				if (tree.get() == nullptr) continue;
 				if (cmds.size() == 1) {
@@ -110,7 +150,7 @@ int main(int argc, char** argv) {
 			} else if (cmds[0] == "clear") {
 				tree.reset(nullptr);
 			} else if (cmds[0] == "save") {
-				generator->saveXML(args[0]);
+				g.saveXML(args[0]);
 			} else if (cmds[0] == "help") {
 				std::cout << "help here\n"; // TODO
 			} else if (cmds[0] == "quit") {
@@ -122,7 +162,7 @@ int main(int argc, char** argv) {
 		}
 		
 		std::cout << "Exiting and saving to " << args[0] << " ...\n";
-		generator->saveXML(args[0]);
+		g.saveXML(args[0]);
 	} catch (boost::python::error_already_set e) {
 		std::cout << "Core crashed with Python Exception:\n";
 		PyErr_Print();

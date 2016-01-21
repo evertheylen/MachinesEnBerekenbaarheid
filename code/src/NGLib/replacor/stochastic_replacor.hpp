@@ -18,14 +18,12 @@ class StochasticReplacor: public CfgReplacor<StochasticRule> {
 public:
 // 	using RuleT = StochasticRule;
 	
-	StochasticReplacor(){};
+	StochasticReplacor() = default;
 	
 	StochasticReplacor(TiXmlElement* elem, std::random_device::result_type seed): 
 			CfgReplacor(elem->FirstChildElement()), mt(seed) {} // TODO seed
 	
 	unsigned int replace(std::string var, std::list<unsigned int>& context);
-	
-	bool replaceable(std::string symb);
 	
 	TiXmlElement* to_xml();
 	

@@ -57,10 +57,6 @@ unsigned int ContextReplacor::replace(std::string var, std::list<unsigned int>& 
 }
 
 
-bool ContextReplacor::replaceable(std::string symb) {
-	return cfg.has_rules(symb);
-}
-
 TiXmlElement* ContextReplacor::to_xml() {
 	TiXmlElement* elem = new TiXmlElement("CONTEXT_REPLACOR");
 	TiXmlElement* cfg_elem = cfg.to_xml();
@@ -69,11 +65,11 @@ TiXmlElement* ContextReplacor::to_xml() {
 }
 
 void ContextReplacor::score(Teacher::Teacher3& tree, double score_amount) {
-	std::set<Teacher::Element3> already_updated;
+	std::set<ScoreEl> already_updated;
 	score_helper(tree, score_amount, already_updated);
 }
 
-void ContextReplacor::score_helper(Teacher::Teacher3& tree, double score_amount, std::set<Teacher::Element3>& already_updated) {
+void ContextReplacor::score_helper(Teacher::Teacher3& tree, double score_amount, std::set<ScoreEl>& already_updated) {
 	// modify scores for all children of tree.
 	for (Teacher::Teacher3* child: tree.all_children()) {
 		if (child->data.second == 0) continue;

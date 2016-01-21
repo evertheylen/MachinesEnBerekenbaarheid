@@ -18,6 +18,7 @@
 class ContextReplacor: public CfgReplacor<ContextRule> {
 public:
 	using RuleT = ContextRule;
+	using ScoreEl = std::pair<unsigned int, unsigned int>;
 	
 	ContextReplacor() = default;
 	
@@ -25,14 +26,12 @@ public:
 	
 	unsigned int replace(std::string var, std::list<unsigned int>& context);
 	
-	bool replaceable(std::string symb);
-	
 	TiXmlElement* to_xml();
 	
 	void score(Teacher::Teacher3& tree, double score_amount);
 	
 private:
-	void score_helper(Teacher::Teacher3& tree, double score_amount, std::set<Teacher::Element3>& already_updated);
+	void score_helper(Teacher::Teacher3& tree, double score_amount, std::set<ScoreEl>& already_updated);
 	
 	std::mt19937 mt;
 	friend class Teacher;

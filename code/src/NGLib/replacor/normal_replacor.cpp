@@ -17,10 +17,6 @@ unsigned int NormalReplacor::replace(std::string var, std::list<unsigned int>& c
 	return {};
 }
 
-bool NormalReplacor::replaceable(std::string symb) {
-	return cfg.has_rules(symb);
-}
-
 TiXmlElement* NormalReplacor::to_xml() {
 	TiXmlElement* elem = new TiXmlElement("NORMAL_REPLACOR");
 	TiXmlElement* cfg_elem = cfg.to_xml();

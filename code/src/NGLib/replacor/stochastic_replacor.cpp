@@ -1,4 +1,4 @@
-#include "stochastics_replacor.hpp"
+#include "stochastic_replacor.hpp"
 
 unsigned int StochasticReplacor::replace(std::string var, std::list<unsigned int>& context) {
 	std::uniform_int_distribution<int> dist(0, 99);
@@ -14,10 +14,6 @@ unsigned int StochasticReplacor::replace(std::string var, std::list<unsigned int
 	}
 	
 	return {};
-}
-	
-bool StochasticReplacor::replaceable(std::string symb) {
-	return cfg.has_rules(symb);
 }
 	
 TiXmlElement* StochasticReplacor::to_xml() {

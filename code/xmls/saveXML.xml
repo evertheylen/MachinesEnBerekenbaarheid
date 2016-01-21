@@ -7,10 +7,10 @@
             </Variables>
             <Terminals>+-</Terminals>
             <Productions>
-                <Rule LHS="F" RHS="FG-" ID="1" chance="0.440000" />
-                <Rule LHS="F" RHS="F+G" ID="2" chance="0.560000" />
-                <Rule LHS="G" RHS="-F-G" ID="3" chance="0.300000" />
-                <Rule LHS="G" RHS="+F+G" ID="4" chance="0.700000" />
+                <Rule LHS="F" RHS="FG-" ID="1" chance="0.44000000000000000222" />
+                <Rule LHS="F" RHS="F+G" ID="2" chance="0.56000000000000005329" />
+                <Rule LHS="G" RHS="-F-G" ID="3" chance="0.2999999999999999889" />
+                <Rule LHS="G" RHS="+F+G" ID="4" chance="0.69999999999999995559" />
             </Productions>
         </CFG>
     </STOCHASTIC_REPLACOR>

@@ -24,8 +24,6 @@ public:
 			CfgReplacor(elem->FirstChildElement()), mt(seed) {} // TODO
 	
 	unsigned int replace(std::string var, std::list<unsigned int>& context);
-
-	bool replaceable(std::string symb);
 	
 	TiXmlElement* to_xml();
 	
