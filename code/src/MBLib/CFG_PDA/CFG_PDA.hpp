@@ -1,25 +1,8 @@
 
-/* algo to convert CFG to PDA
-
-[bake me]
-
-dependencies["headers"] = [
-	"MBLib/CFG>>headers",
-	"MBLib/PDA>>headers",
-	"MBLib/common>>headers"
-]
-
-[stop baking]
-
-*/
-
-#ifndef H_CFG_PDA
-#define H_CFG_PDA
-
+#pragma once
 
 #include "MBLib/CFG/CFG.hpp"
 #include "MBLib/PDA/PDA.hpp"
-
 
 // currently only works for strings
 template <typename CFG_T, typename PDA_T>
@@ -44,8 +27,3 @@ PDA_T CFG_to_PDA(CFG_T& G) {
 	return P;
 }
 
-
-
-
-
-#endif

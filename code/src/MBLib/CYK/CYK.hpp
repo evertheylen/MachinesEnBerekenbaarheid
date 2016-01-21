@@ -1,16 +1,5 @@
 
-#ifndef H_CYK
-#define H_CYK
-
-/* [begin baking]
-
-dependencies["headers"] = [
-	"MBLib/CFG",
-	"MBLib/common"
-]
-
-
-[stop baking] */
+#pragma once
 
 #include "MBLib/CFG/CFG.hpp"
 #include "MBLib/common/common.hpp"
@@ -181,4 +170,3 @@ bool CYK(const CFG_Type& G, typename CFG_Type::String& input, bool print=false) 
 	return f != top.end();
 }
 
-#endif
