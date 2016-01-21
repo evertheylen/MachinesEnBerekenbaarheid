@@ -5,7 +5,8 @@
 
 #include "NGLib/tree/tree.hpp"
 #include "NGLib/outputter/outputter.hpp"
-#include "NGLib/replacor/replacor.hpp"
+
+class Replacor;
 
 class Teacher {
 public:

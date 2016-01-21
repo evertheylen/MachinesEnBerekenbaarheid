@@ -1,16 +1,14 @@
-#include <utility>
-#include <iostream>
-#include <set>
-
-#include "NGLib/tree/tree.hpp"
-#include "NGLib/outputter/outputter.hpp"
-#include "NGLib/replacor/replacor.hpp"
 #include "teacher.hpp"
+
+using Teacher3 = Teacher::Teacher3;
+using Element3 = Teacher::Element3;
+
+#include "NGLib/replacor/replacor.hpp"
 
 Teacher::Teacher(Replacor* _repl):
 	repl(_repl) {}
 
-Teacher::Teacher3* generate(std::string start, int max_repl) {
+Teacher3* Teacher::generate(std::string start, int max_repl) {
 	Teacher3* tree = new Teacher3({start, 0});
 	Teacher3::PathT path;
 	rec_generate(start, *tree, path, max_repl);

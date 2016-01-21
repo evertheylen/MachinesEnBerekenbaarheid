@@ -77,7 +77,7 @@ void ContextReplacor::score_helper(Teacher::Teacher3& tree, double score_amount,
 	// modify scores for all children of tree.
 	for (Teacher::Teacher3* child: tree.all_children()) {
 		if (child->data.second == 0) continue;
-		if (already_updated.find({tree.data.second, child->data.second}) != already_updated.end()) continue;
+		if (already_updated.find({tree.data.second, child->data.second}) != already_updated.end()) continue; 
 		double result = cfg.get_rule(tree.data.second).table[child->data.second] * score_amount;
 		cfg.get_rule(tree.data.second).table[child->data.second] = result;
 		already_updated.insert({tree.data.second, child->data.second});

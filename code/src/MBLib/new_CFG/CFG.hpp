@@ -24,6 +24,8 @@ public:
 	
 	SimpleRule(const std::string& _head, const std::vector<std::string>& _body, unsigned int _num);
 	
+	const std::string& get_head() const;
+	
 	const std::vector<std::string>& get_body() const;
 	
 	unsigned int get_num() const;
