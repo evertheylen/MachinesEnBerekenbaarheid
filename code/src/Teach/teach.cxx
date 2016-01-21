@@ -152,7 +152,25 @@ int main(int argc, char** argv) {
 			} else if (cmds[0] == "save") {
 				g.saveXML(args[0]);
 			} else if (cmds[0] == "help") {
-				std::cout << "Possible commands:\n\n\nGenerate new tree:\n\tbuild [startsymbol] [recursion depth]\nPrint generated tree:\n\ttree\nPrint generated output:\n\tprint\nExport generated output to specified format:\n\toutput\nGive a score to the tree (Works only with context replacor):\n\tscore [double score]\nClear the generated tree:\n\tclear\nSave the updated xml (Saves automatically on shutdown):\n\tsave\nDisplay this help function:\n\thelp\nquit the program:\n\tquit\n";
+				std::cout << "Possible commands:\n\n"
+				<< " - Generate new tree:\n"
+					<< "\tbuild startsymbol [recursion depth]\n"
+				<< " - Print generated tree:\n"
+					<< "\ttree\n"
+				<< " - Print generated output:\n
+					<< "\tprint\n"
+				<< " - Export generated output to specified format:\n"
+					<< "\toutput\n"
+				<< " - Give a score to the tree (Works only with context replacor):\n"
+					<< "\tscore [double score]\n"
+				<< " - Clear the generated tree:\n"
+					<< "\tclear\n"
+				<< " - Save the updated xml (Saves automatically on shutdown):\n"
+					<< "\tsave\n"
+				<< " - Display this help function:\n"
+					<< "\thelp\n"
+				<< " - Quit the program:\n"
+					<< "\tquit\n";
 			} else if (cmds[0] == "quit") {
 				break;
 			} else {
