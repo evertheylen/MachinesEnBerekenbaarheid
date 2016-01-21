@@ -1,8 +1,3 @@
-
-/* [bake me]
-
-[stop baking] */
-
 #pragma once
 
 #include <vector>
@@ -29,8 +24,6 @@ std::ostream& operator<<(std::ostream& out, const Container<T>& c) { \
 } \
 
 container_ostream(std::list)
-
-
 
 template <typename T>
 class Tree {
@@ -77,7 +70,6 @@ public:
 		}
 		return l;
 	}
-	
 	
 	friend std::ostream& operator<<(std::ostream& out, const Tree& t) {
 		t.print(out);
