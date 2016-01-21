@@ -56,7 +56,9 @@ public:
 			prob_el->SetAttribute("ID", it.first);
 			// more precision for chance
 			std::stringstream morePrecision;
+			morePrecision.precision(10);
 			morePrecision << it.second;
+			//std::cout << morePrecision.str() << std::endl;
 			prob_el->SetAttribute("c", morePrecision.str());
 			root->LinkEndChild(prob_el);
 		}

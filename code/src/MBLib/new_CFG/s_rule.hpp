@@ -49,7 +49,9 @@ public:
 		TiXmlElement* root = SimpleRule<ID_T>::to_xml();
 		// more precision for chance
 		std::stringstream morePrecision;
+		morePrecision.precision(10);
 		morePrecision << chance;
+		//std::cout << morePrecision.str() << std::endl;
 		root->SetAttribute("chance", morePrecision.str());
 		return root;
 	}
