@@ -44,26 +44,3 @@ protected:
 	xml_CFG<RuleT> cfg;
 };
 
-/*
-// Dummy replacor
-class DumbReplacor: public Replacor<SimpleRule<std::string>> {
-public:
-	using Rule_Type = SimpleRule<std::string>;
-	
-	const SimpleRule<std::string>& replace(std::string var, std::list<const SimpleRule<std::string>&>& context) {
-		return SimpleRule<std::string>(var, {"(", var, ")"});
-	}
-	
-	bool replaceable(std::string symb) {
-		if (symb == "(" or symb == ")") {
-			return false;
-		}
-		return true;
-	}
-	
-	TiXmlElement* to_xml() {
-		TiXmlElement* elem = new TiXmlElement("DUMB_REPLACOR");
-		return elem;
-	}
-};
-*/
