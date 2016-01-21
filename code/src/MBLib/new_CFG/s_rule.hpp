@@ -18,6 +18,8 @@ dependencies["headers"] = [
 #include <string>
 #include <map>
 #include <vector>
+#include <iomanip>
+#include <sstream>
 
 #include <cassert>
 
@@ -45,7 +47,10 @@ public:
 	
 	TiXmlElement* to_xml() {
 		TiXmlElement* root = SimpleRule<ID_T>::to_xml();
-		root->SetAttribute("chance", std::to_string(chance));
+		// more precision for chance
+		std::stringstream morePrecision;
+		morePrecision << chance;
+		root->SetAttribute("chance", morePrecision.str());
 		return root;
 	}
 	

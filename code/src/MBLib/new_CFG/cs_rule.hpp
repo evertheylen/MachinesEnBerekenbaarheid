@@ -6,6 +6,8 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <iomanip>
+#include <sstream> 
 
 #include <cassert>
 
@@ -52,7 +54,10 @@ public:
 		for (auto it: table) {
 			TiXmlElement* prob_el = new TiXmlElement("prob");
 			prob_el->SetAttribute("ID", it.first);
-			prob_el->SetAttribute("c", to_string(it.second));
+			// more precision for chance
+			std::stringstream morePrecision;
+			morePrecision << it.second;
+			prob_el->SetAttribute("c", morePrecision.str());
 			root->LinkEndChild(prob_el);
 		}
 		return root;
