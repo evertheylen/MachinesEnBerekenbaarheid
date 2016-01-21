@@ -1,6 +1,7 @@
 #!/bin/python3
 
 import re
+import random
 
 class Var(str):
     pass
@@ -21,8 +22,13 @@ def get_s(text):
     v = varname.search(text)
     while v is not None:
         #print("match", repr(v))
-        s.append(text[:v.span()[0]])
-        s.append(Var(text[v.span()[0]:v.span()[1]]))
+        pre = text[:v.span()[0]]
+        found = text[v.span()[0]:v.span()[1]]
+        s.append(pre)
+        if found == pre:
+            s.append(found)
+        else:
+            s.append(Var(found))
         text = text[v.span()[1]:]
         v = varname.search(text)
     # done searching for variables
@@ -55,12 +61,12 @@ try:
         m = open_brace.match(l)
         if m is not None:
             var = m.group(1)
-            total = "{\n"
+            total = "" #"{\n" ?
             l = next(it)
             while close_brace.match(l) is None:
                 total += l + "\n"
                 l = next(it)
-            total += "\n}\n"
+            #total += "\n}\n" ?
             s = get_s(total)
             add_cfg(CFG, var, s)
         else:
@@ -78,5 +84,16 @@ except StopIteration:
     pass
 
 
-for (k, v) in CFG.items():
-    print(k, " --> ", repr(v))
+#for (k, v) in CFG.items():
+    #print(k, " --> ", repr(v))
+
+def generate(var):
+    print(var)
+    if not isinstance(var, Var) or var not in CFG:
+        yield var
+        return
+    
+    rule = random.choice(CFG[str(var)])
+    for i in rule:
+        yield from generate(i)
+        

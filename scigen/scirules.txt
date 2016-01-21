@@ -1,4 +1,44 @@
 
+# Own edits:
+#  - commented out some stuff that is otherwise known as variable
+#  - added some rules
+
+SYSNAME NextGen Helix
+
+SCI_AUTHORS SCI_SOURCE
+SCI_AUTHORS SCI_SOURCE, SCI_SOURCE
+SCI_AUTHORS SCI_SOURCE, SCI_SOURCE, SCI_SOURCE
+SCI_AUTHORS SCI_SOURCE, SCI_SOURCE, SCI_SOURCE, SCI_SOURCE
+
+SCI_SOURCE Anthony Hermans
+SCI_SOURCE Stijn Janssens
+SCI_SOURCE Evert Heylen
+SCI_SOURCE E. Laenens
+SCI_SOURCE T. Hofkens
+SCI_SOURCE B. Van Houdt
+
+NONZDIGIT 1
+NONZDIGIT 2
+NONZDIGIT 3
+NONZDIGIT 4
+NONZDIGIT 5
+NONZDIGIT 6
+NONZDIGIT 7
+NONZDIGIT 8
+NONZDIGIT 9
+
+DIGIT 0
+DIGIT 1
+DIGIT 2
+DIGIT 3
+DIGIT 4
+DIGIT 5
+DIGIT 6
+DIGIT 7
+DIGIT 8
+DIGIT 9
+
+
 #
 # $Id: scirules.in,v 1.141 2007/11/19 17:07:49 strib Exp $
 #
@@ -1993,12 +2033,12 @@ SCI_THING_S	e-commerce
 SCI_THING_S	IPv4
 SCI_THING_S	IPv6
 SCI_THING_S	IPv7
-SCI_THING_P	DHTs
+#SCI_THING_P	DHTs
 SCI_THING_P	robots
 SCI_THING_P	agents
 SCI_THING_P	Markov models
 SCI_THING_S	the memory bus
-SCI_THING_P	SMPs
+#SCI_THING_P	SMPs
 SCI_THING_P	kernels
 SCI_THING_P	suffix trees
 SCI_THING_P	spreadsheets
@@ -2014,7 +2054,7 @@ SCI_THING_P	online algorithms
 SCI_THING_S	extreme programming
 SCI_THING_P	object-oriented languages
 SCI_THING_S	Scheme
-SCI_THING_S	DNS
+#SCI_THING_S	DNS
 SCI_THING_S	802.11b
 SCI_THING_P	information retrieval systems
 SCI_THING_P	web browsers
@@ -2057,14 +2097,14 @@ SCI_THING_S 	rasterization
 SCI_THING_S	model checking
 SCI_THING_S	lambda calculus
 SCI_THING_S	scatter/gather I/O
-SCI_THING_S	XML
+#SCI_THING_S	XML
 SCI_THING_P	I/O automata
 SCI_THING_P	hash tables
 SCI_THING_P	red-black trees
 SCI_THING_P	linked lists
 SCI_THING_P	fiber-optic cables
 SCI_THING_S	the Ethernet
-SCI_THING_S	RAID
+#SCI_THING_S	RAID
 SCI_THING_P	802.11 mesh networks
 SCI_THING_P	access points
 SCI_THING_P	gigabit switches
@@ -2072,7 +2112,7 @@ SCI_THING_S	telephony
 SCI_THING_P	multi-processors
 SCI_THING_P	compilers
 SCI_THING_P	semaphores
-SCI_THING_P	RPCs
+#SCI_THING_P	RPCs
 SCI_THING_P	virtual machines
 SCI_THING_S	Smalltalk
 SCI_THING_S	A* search
@@ -2090,12 +2130,12 @@ SCI_THING_S	replication
 SCI_THING_S     congestion control
 SCI_THING_P	wide-area networks
 SCI_THING_P	local-area networks
-SCI_THING_S	DHCP
+#SCI_THING_S	DHCP
 SCI_THING_P	write-back caches
 SCI_THING_P	multicast SCI_SYSTEM_PL
 SCI_THING_S	write-ahead logging
 SCI_THING_S	cache coherence
-SCI_THING_P	SCSI disks
+#SCI_THING_P	SCSI disks
 SCI_THING_MOD	SCI_THING CITATION_SOMETIMES
 SCI_SYSTEM	algorithm
 SCI_SYSTEM	system
@@ -3534,7 +3574,7 @@ LATEX_BIBSTYLE
 }
 
 LATEX_TITLE \title{SCI_TITLE}
-LATEX_AUTHORS \author{SCIAUTHORS}
+LATEX_AUTHORS \author{SCI_AUTHORS}
 
 LATEX_FIGURE {
 

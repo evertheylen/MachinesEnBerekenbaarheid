@@ -9,6 +9,7 @@
 #include <memory>
 #include <iostream>
 #include <list>
+#include <functional>
 
 template <typename T, typename U>
 std::ostream& operator<<(std::ostream& out, const std::pair<T, U>& p) {
@@ -103,6 +104,16 @@ public:
 				child->_all_children(child_vec);
 			}
 			child_vec.push_back(child);
+		}
+	}
+	
+	void leaves(std::function<void(T&)> f) {
+		if (children.empty()) {
+			f(data);
+		} else {
+			for (Tree<T>* child: children) {
+				child->leaves(f);
+			}
 		}
 	}
 	

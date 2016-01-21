@@ -34,10 +34,10 @@ public:
 
 
 	// if max_repl == -1 ==> Infinite
-	Teacher3 generate(std::string start, int max_repl) {
-		Teacher3 tree({start, 0});
+	Teacher3* generate(std::string start, int max_repl) {
+		Teacher3* tree = new Teacher3({start, 0});
 		Teacher3::PathT path;
-		rec_generate(start, tree, path, max_repl);
+		rec_generate(start, *tree, path, max_repl);
 		return tree;
 	}
 	

@@ -94,6 +94,10 @@ public:
 		return repl.get();
 	}
 	
+	Outputter* get_outputter() const {
+		return out.get();
+	}
+	
 private:
 	void rec_generate(std::string s, std::list<typename ReplacorT::Rule_Type::NumT>& context, int max_repl) {
 		//std::cout << "generating for var " << s << ", with max_repl " << max_repl << " and context.size() " << context.size() << "\n";
