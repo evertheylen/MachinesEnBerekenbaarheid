@@ -70,6 +70,17 @@ void completion(const char *buf, linenoiseCompletions *lc) {
 int main(int argc, char** argv) {
 	// load xml, construct a Teacher
 	
+	std::cout
+	<< " _        _______          _________ _______  _______  _       \n"
+	<< "( (    /|(  ____ \\|\\     /|\\__   __/(  ____ \\(  ____ \\( (    /|\n"
+	<< "|  \\  ( || (    \\/( \\   / )   ) (   | (    \\/| (    \\/|  \\  ( |\n"
+	<< "|   \\ | || (__     \\ (_) /    | |   | |      | (__    |   \\ | |\n"
+	<< "| (\\ \\) ||  __)     ) _ (     | |   | | ____ |  __)   | (\\ \\) |\n"
+	<< "| | \\   || (       / ( ) \\    | |   | | \\_  )| (      | | \\   |\n"
+	<< "| )  \\  || (____/\\( /   \\ )   | |   | (___) || (____/\\| )  \\  |\n"
+	<< "|/    )_)(_______/|/     \\|   )_(   (_______)(_______/|/    )_)\n\n";
+                                                               
+	
 	// while not exited
 		// create a tree (tree = Teacher.generate(...))
 		// display it to the user (Teacher.output(tree, out))
@@ -80,7 +91,7 @@ int main(int argc, char** argv) {
 	}
 	
 	if (args.size() < 1) {
-		std::cout << "teach <filename>.xml\n\n";
+		std::cout << "NextGen <filename>.xml\n\n";
 		std::cout << "Please provide a filename.\n";
 		return 1;
 	}
@@ -157,7 +168,7 @@ int main(int argc, char** argv) {
 					<< "\tbuild startsymbol [recursion depth]\n"
 				<< " - Print generated tree:\n"
 					<< "\ttree\n"
-				<< " - Print generated output:\n
+				<< " - Print generated output:\n"
 					<< "\tprint\n"
 				<< " - Export generated output to specified format:\n"
 					<< "\toutput\n"

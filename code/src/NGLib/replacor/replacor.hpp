@@ -25,7 +25,7 @@ public:
 	
 	virtual TiXmlElement* to_xml() = 0;
 	
-	virtual void score(Teacher::Teacher3& tree, double score_amount) {}
+	virtual void score(Teacher::Teacher3& tree, double score_amount);
 	
 	virtual const std::vector<std::string>& get_body(unsigned int num) const = 0;
 	

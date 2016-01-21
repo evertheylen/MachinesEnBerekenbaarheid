@@ -42,12 +42,12 @@ file(GLOB_RECURSE SRC src/*.cpp src/*.hpp)
 
 # The program we're compiling with the sources set above
 add_executable(Core ${SRC} ${LIBS} ${LIBS2} ${PROJECT_SOURCE_DIR}/src/Core/core.cxx)
-add_executable(Teach ${SRC} ${LIBS} ${LIBS2} ${PROJECT_SOURCE_DIR}/src/Teach/teach.cxx)
+add_executable(NextGen ${SRC} ${LIBS} ${LIBS2} ${PROJECT_SOURCE_DIR}/src/NextGen/nextgen.cxx)
 add_executable(MBExec ${SRC} ${LIBS} ${LIBS2} ${PROJECT_SOURCE_DIR}/src/MBExec/MBExec.cxx)
 
 # TODO make MBExec not require python or boost
 
 target_link_libraries(Core ${PYTHON_LIBRARY} ${Boost_LIBRARIES} ${BOOST_LIBS})
-target_link_libraries(Teach ${PYTHON_LIBRARY} ${Boost_LIBRARIES} ${BOOST_LIBS})
+target_link_libraries(NextGen ${PYTHON_LIBRARY} ${Boost_LIBRARIES} ${BOOST_LIBS})
 target_link_libraries(MBExec ${PYTHON_LIBRARY} ${Boost_LIBRARIES} ${BOOST_LIBS})
 
