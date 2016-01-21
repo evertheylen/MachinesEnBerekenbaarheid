@@ -20,7 +20,6 @@ dependencies["headers"] = [
 #include <vector>
 #include <iomanip>
 #include <sstream>
-#include <limits>
 
 #include <cassert>
 
@@ -50,7 +49,7 @@ public:
 		TiXmlElement* root = SimpleRule<ID_T>::to_xml();
 		// more precision for chance
 		std::stringstream morePrecision;
-		morePrecision.precision(std::numeric_limits<double>::max());
+		morePrecision.precision(20);
 		morePrecision << chance;
 		//std::cout << morePrecision.str() << std::endl;
 		root->SetAttribute("chance", morePrecision.str());
