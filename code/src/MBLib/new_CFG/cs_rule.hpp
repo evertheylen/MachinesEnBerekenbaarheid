@@ -7,7 +7,8 @@
 #include <map>
 #include <vector>
 #include <iomanip>
-#include <sstream> 
+#include <sstream>
+#include <limits>
 
 #include <cassert>
 
@@ -56,7 +57,7 @@ public:
 			prob_el->SetAttribute("ID", it.first);
 			// more precision for chance
 			std::stringstream morePrecision;
-			morePrecision.precision(10);
+			morePrecision.precision(std::numeric_limits<double>::max());
 			morePrecision << it.second;
 			//std::cout << morePrecision.str() << std::endl;
 			prob_el->SetAttribute("c", morePrecision.str());
