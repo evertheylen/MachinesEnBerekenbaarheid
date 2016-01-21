@@ -4,11 +4,11 @@
 
 ContextReplacor::ContextReplacor(TiXmlElement* elem, std::random_device::result_type seed):
 	CfgReplacor(elem->FirstChildElement()), mt(seed) {  // TODO
-	for (auto& it: cfg.m_rules) {
-		for (auto& it_2: cfg.m_rules) {
-			it.second.fill_table(it_2.second.get_num());
-		}
-	}
+// 	for (auto& it: cfg.m_rules) {
+// 		for (auto& it_2: cfg.m_rules) {
+// 			it.second.fill_table(it_2.second.get_num());
+// 		}
+// 	}
 }
 
 unsigned int ContextReplacor::replace(std::string var, std::list<unsigned int>& context) {
@@ -29,8 +29,9 @@ unsigned int ContextReplacor::replace(std::string var, std::list<unsigned int>& 
 		// C[q] = product of all the chances of all the rules in the context
 		for (auto u: context) {
 			//std::cout << "trying to find " << q_num << " in table of " << u << "\n";
-			assert(cfg.get_rule(u).table.find(q_num) != cfg.get_rule(u).table.end());
-			C[q_num] *= cfg.get_rule(u).table.find(q_num)->second;
+			if (cfg.get_rule(u).table.find(q_num) != cfg.get_rule(u).table.end()) {
+				C[q_num] *= cfg.get_rule(u).table.find(q_num)->second;
+			}
 		}
 	}
 	
@@ -74,8 +75,12 @@ void ContextReplacor::score_helper(Teacher::Teacher3& tree, double score_amount,
 	for (Teacher::Teacher3* child: tree.all_children()) {
 		if (child->data.second == 0) continue;
 		if (already_updated.find({tree.data.second, child->data.second}) != already_updated.end()) continue; 
-		double result = cfg.get_rule(tree.data.second).table[child->data.second] * score_amount;
-		cfg.get_rule(tree.data.second).table[child->data.second] = result;
+		
+		RuleT& rule = cfg.get_rule(tree.data.second);
+		// fill in with 1.0 if it doesn't exist
+		if (rule.table.find(child->data.second) == rule.table.end()) rule.table[child->data.second] = 1.0;
+		
+		rule.table[child->data.second] *= score_amount;
 		already_updated.insert({tree.data.second, child->data.second});
 	}
 	// Call score recursively for all children

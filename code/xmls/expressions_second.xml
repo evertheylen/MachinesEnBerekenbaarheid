@@ -8,172 +8,44 @@
             <Terminals>()*+01ab</Terminals>
             <Productions>
                 <Rule LHS="E" RHS="E+T" ID="1">
-                    <prob ID="1" c="250" />
-                    <prob ID="2" c="250" />
-                    <prob ID="3" c="2500" />
-                    <prob ID="4" c="2500" />
-                    <prob ID="5" c="25" />
-                    <prob ID="6" c="25" />
-                    <prob ID="7" c="25" />
-                    <prob ID="8" c="100" />
-                    <prob ID="9" c="2500" />
-                    <prob ID="10" c="2500" />
-                    <prob ID="11" c="0.5" />
-                    <prob ID="12" c="50" />
+                    <prob ID="1" c="5" />
+                    <prob ID="2" c="5" />
+                    <prob ID="3" c="5" />
+                    <prob ID="4" c="5" />
+                    <prob ID="6" c="5" />
+                    <prob ID="11" c="5" />
+                    <prob ID="12" c="5" />
                 </Rule>
                 <Rule LHS="E" RHS="T" ID="2">
-                    <prob ID="1" c="2500" />
-                    <prob ID="2" c="2500" />
-                    <prob ID="3" c="2500" />
-                    <prob ID="4" c="0.0012500000000000002429" />
-                    <prob ID="5" c="0.0002500000000000000052" />
-                    <prob ID="6" c="0.0002500000000000000052" />
-                    <prob ID="7" c="0.0002500000000000000052" />
-                    <prob ID="8" c="250" />
-                    <prob ID="9" c="125" />
-                    <prob ID="10" c="125" />
-                    <prob ID="11" c="0.0001250000000000000026" />
-                    <prob ID="12" c="50" />
+                    <prob ID="3" c="5" />
+                    <prob ID="11" c="5" />
+                    <prob ID="12" c="5" />
                 </Rule>
                 <Rule LHS="F" RHS="(E)" ID="3">
-                    <prob ID="1" c="2500" />
-                    <prob ID="2" c="2500" />
-                    <prob ID="3" c="62500" />
-                    <prob ID="4" c="25000" />
-                    <prob ID="5" c="25" />
-                    <prob ID="6" c="25" />
-                    <prob ID="7" c="25" />
-                    <prob ID="8" c="1000" />
-                    <prob ID="9" c="25000" />
-                    <prob ID="10" c="25000" />
-                    <prob ID="11" c="12.5" />
-                    <prob ID="12" c="500" />
+                    <prob ID="1" c="5" />
+                    <prob ID="2" c="5" />
+                    <prob ID="11" c="5" />
                 </Rule>
                 <Rule LHS="F" RHS="I" ID="4">
-                    <prob ID="1" c="1" />
-                    <prob ID="2" c="1" />
-                    <prob ID="3" c="1" />
-                    <prob ID="4" c="1" />
-                    <prob ID="5" c="0.0002500000000000000052" />
-                    <prob ID="6" c="0.0002500000000000000052" />
-                    <prob ID="7" c="0.0002500000000000000052" />
-                    <prob ID="8" c="5000" />
-                    <prob ID="9" c="2500" />
-                    <prob ID="10" c="2500" />
-                    <prob ID="11" c="1" />
-                    <prob ID="12" c="1" />
-                </Rule>
-                <Rule LHS="I" RHS="I0" ID="5">
-                    <prob ID="1" c="1" />
-                    <prob ID="2" c="1" />
-                    <prob ID="3" c="1" />
-                    <prob ID="4" c="1" />
-                    <prob ID="5" c="0.0002500000000000000052" />
-                    <prob ID="6" c="0.0002500000000000000052" />
-                    <prob ID="7" c="0.0002500000000000000052" />
-                    <prob ID="8" c="5" />
-                    <prob ID="9" c="25" />
-                    <prob ID="10" c="5" />
-                    <prob ID="11" c="1" />
-                    <prob ID="12" c="1" />
-                </Rule>
-                <Rule LHS="I" RHS="I1" ID="6">
-                    <prob ID="1" c="1" />
-                    <prob ID="2" c="1" />
-                    <prob ID="3" c="1" />
-                    <prob ID="4" c="1" />
-                    <prob ID="5" c="0.0002500000000000000052" />
-                    <prob ID="6" c="0.0002500000000000000052" />
-                    <prob ID="7" c="0.0002500000000000000052" />
-                    <prob ID="8" c="5" />
-                    <prob ID="9" c="5" />
-                    <prob ID="10" c="5" />
-                    <prob ID="11" c="1" />
-                    <prob ID="12" c="1" />
-                </Rule>
-                <Rule LHS="I" RHS="Ia" ID="7">
-                    <prob ID="1" c="1" />
-                    <prob ID="2" c="1" />
-                    <prob ID="3" c="1" />
-                    <prob ID="4" c="1" />
-                    <prob ID="5" c="0.0002500000000000000052" />
                     <prob ID="6" c="5" />
-                    <prob ID="7" c="0.0002500000000000000052" />
-                    <prob ID="8" c="5" />
-                    <prob ID="9" c="5" />
-                    <prob ID="10" c="5" />
-                    <prob ID="11" c="1" />
-                    <prob ID="12" c="1" />
                 </Rule>
-                <Rule LHS="I" RHS="Ib" ID="8">
-                    <prob ID="1" c="1" />
-                    <prob ID="2" c="1" />
-                    <prob ID="3" c="1" />
-                    <prob ID="4" c="1" />
-                    <prob ID="5" c="5" />
-                    <prob ID="6" c="5" />
-                    <prob ID="7" c="5" />
-                    <prob ID="8" c="100" />
-                    <prob ID="9" c="5000" />
-                    <prob ID="10" c="2500" />
-                    <prob ID="11" c="1" />
-                    <prob ID="12" c="1" />
-                </Rule>
-                <Rule LHS="I" RHS="a" ID="9">
-                    <prob ID="1" c="1" />
-                    <prob ID="2" c="1" />
-                    <prob ID="3" c="1" />
-                    <prob ID="4" c="1" />
-                    <prob ID="5" c="1" />
-                    <prob ID="6" c="1" />
-                    <prob ID="7" c="1" />
-                    <prob ID="8" c="1" />
-                    <prob ID="9" c="1" />
-                    <prob ID="10" c="1" />
-                    <prob ID="11" c="1" />
-                    <prob ID="12" c="1" />
-                </Rule>
-                <Rule LHS="I" RHS="b" ID="10">
-                    <prob ID="1" c="1" />
-                    <prob ID="2" c="1" />
-                    <prob ID="3" c="1" />
-                    <prob ID="4" c="1" />
-                    <prob ID="5" c="1" />
-                    <prob ID="6" c="1" />
-                    <prob ID="7" c="1" />
-                    <prob ID="8" c="1" />
-                    <prob ID="9" c="1" />
-                    <prob ID="10" c="1" />
-                    <prob ID="11" c="1" />
-                    <prob ID="12" c="1" />
-                </Rule>
+                <Rule LHS="I" RHS="I0" ID="5" />
+                <Rule LHS="I" RHS="I1" ID="6" />
+                <Rule LHS="I" RHS="Ia" ID="7" />
+                <Rule LHS="I" RHS="Ib" ID="8" />
+                <Rule LHS="I" RHS="a" ID="9" />
+                <Rule LHS="I" RHS="b" ID="10" />
                 <Rule LHS="T" RHS="F" ID="11">
-                    <prob ID="1" c="0.25" />
-                    <prob ID="2" c="0.25" />
-                    <prob ID="3" c="0.25" />
-                    <prob ID="4" c="5.0000000000000009172e-05" />
-                    <prob ID="5" c="0.0002500000000000000052" />
-                    <prob ID="6" c="0.0002500000000000000052" />
-                    <prob ID="7" c="0.0002500000000000000052" />
-                    <prob ID="8" c="5" />
-                    <prob ID="9" c="2.5" />
-                    <prob ID="10" c="5" />
-                    <prob ID="11" c="0.25" />
-                    <prob ID="12" c="0.050000000000000002776" />
+                    <prob ID="4" c="5" />
+                    <prob ID="6" c="5" />
                 </Rule>
                 <Rule LHS="T" RHS="T*F" ID="12">
-                    <prob ID="1" c="500" />
-                    <prob ID="2" c="500" />
-                    <prob ID="3" c="500" />
-                    <prob ID="4" c="500" />
-                    <prob ID="5" c="5" />
-                    <prob ID="6" c="5" />
-                    <prob ID="7" c="5" />
-                    <prob ID="8" c="5000" />
-                    <prob ID="9" c="500" />
-                    <prob ID="10" c="500" />
-                    <prob ID="11" c="0.10000000000000000555" />
-                    <prob ID="12" c="50" />
+                    <prob ID="1" c="5" />
+                    <prob ID="2" c="5" />
+                    <prob ID="3" c="5" />
+                    <prob ID="4" c="5" />
+                    <prob ID="11" c="5" />
+                    <prob ID="12" c="5" />
                 </Rule>
             </Productions>
         </CFG>

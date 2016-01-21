@@ -6,7 +6,7 @@ Generator::Generator() {}
 Generator::Generator(Replacor* _repl, Outputter* _out):
 	repl(_repl), out(_out) {}
 
-Generator::Generator(const std::__cxx11::string& inputfile) {
+Generator::Generator(const std::string& inputfile) {
 	if (inputfile == "") {
 		throw NoValidFilename(inputfile);
 	}

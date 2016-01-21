@@ -1,15 +1,15 @@
 #include "stochastic_replacor.hpp"
 
 unsigned int StochasticReplacor::replace(std::string var, std::list<unsigned int>& context) {
-	std::uniform_int_distribution<int> dist(0, 99);
-	int picked_rule = dist(mt);
+	std::uniform_real_distribution<double> dist(0, 1);
+	double picked_rule = dist(mt);
 	double prev_chance = 0;
 	for (auto& it: cfg.rules(var)) {
 		double chance = cfg.get_rule(it.second).get_chance();
-		if (picked_rule - prev_chance < chance*100) {
+		if (picked_rule - prev_chance < chance) {
 			return it.second;
 		} else {
-			prev_chance += chance*100;
+			prev_chance += chance;
 		}
 	}
 	
