@@ -12,17 +12,18 @@
 #include "MBLib/new_CFG/cs_rule.hpp"
 #include "NGLib/replacor/replacor.hpp"
 #include "tinyxml/tinyxml.h"
+#include "NGLib/tree/tree.hpp"
+#include "NGLib/teacher/teacher.hpp"
 
 // ContextReplacor is short for Context-Sensitive Stochastic Replacor using tables
-class ContextReplacor: public Replacor<ContextRule<std::string>> {
+class ContextReplacor: public CfgReplacor<ContextRule> {
 public:
-	using Rule_Type = ContextRule<std::string>;
-	using NumT = typename Rule_Type::NumT;
+	using RuleT = ContextRule;
 	
 	ContextReplacor() = default;
 	
 	ContextReplacor(TiXmlElement* elem, std::random_device::result_type seed):
-			Replacor(elem->FirstChildElement()), mt(seed) {  // TODO
+			CfgReplacor(elem->FirstChildElement()), mt(seed) {  // TODO
 		for (auto& it: cfg.m_rules) {
 			for (auto& it_2: cfg.m_rules) {
 				it.second.fill_table(it_2.second.get_num());
@@ -30,7 +31,7 @@ public:
 		}
 	}
 	
-	typename Rule_Type::NumT replace(std::string var, std::list<typename Rule_Type::NumT>& context) {
+	unsigned int replace(std::string var, std::list<unsigned int>& context) {
 // 		std::cout << "    --> replacing " << var << " with context: ";
 // 		for (auto i: context) std::cout << i;
 // 		std::cout << "\n";
@@ -39,11 +40,11 @@ public:
 		// pos_r is implicitly defined in cfg->rules(var), see later
 		
 		// build up C function, defining the chance for each rule
-		std::map<NumT, double> C;
+		std::map<unsigned int, double> C;
 		
 		// for q in pos_r
 		for (auto q: cfg.rules(var)) {
-			NumT& q_num = q.second;
+			unsigned int q_num = q.second;
 			C[q_num] = 1.0;
 			// C[q] = product of all the chances of all the rules in the context
 			for (auto u: context) {
@@ -61,7 +62,7 @@ public:
 		}
 		std::uniform_real_distribution<double> dist;
 		double pick = dist(mt) * total;
-		NumT picked_rule;
+		unsigned int picked_rule;
 		double temp_total = 0;
 		for (auto& q: C) {
 			temp_total += q.second;
@@ -86,7 +87,29 @@ public:
 		return elem;
 	}
 	
+	void score(Teacher::Teacher3& tree, double score_amount) {
+		std::set<Teacher::Element3> already_updated;
+		score_helper(tree, score_amount, already_updated);
+	}
+	
 private:
+	void score_helper(Teacher::Teacher3& tree, double score_amount, std::set<Teacher::Element3>& already_updated) {
+		// modify scores for all children of tree.
+		for (Teacher::Teacher3* child: tree.all_children()) {
+			if (child->data.second == 0) continue;
+			if (already_updated.find({tree.data.second, child->data.second}) != already_updated.end()) continue; 
+			double result = cfg.get_rule(tree.data.second).table[child->data.second] * score_amount;
+			cfg.get_rule(tree.data.second).table[child->data.second] = result;
+			already_updated.insert({tree.data.second, child->data.second});
+		}
+		
+		// Call score recursively for all children
+		for (Teacher::Teacher3* child: tree.children) {
+			score_helper(*child, score_amount, already_updated);
+		}
+	}
+	
+	
 	std::mt19937 mt;
 	friend class Teacher;
 	

@@ -27,26 +27,22 @@ dependencies["headers"] = [
 #include "MBLib/common/common.hpp"
 #include "MBLib/new_CFG/CFG.hpp"
 
-template <typename ID_T>
-class StochasticRule: public SimpleRule<ID_T> {
+class StochasticRule: public SimpleRule {
 public:
-	using ID_Type = ID_T;
-	using StringT = std::vector<ID_T>;
-	using NumT = unsigned int;
 	
 	StochasticRule() = default;
 	
-	StochasticRule(TiXmlElement* root): SimpleRule<ID_T>(root) {
+	StochasticRule(TiXmlElement* root): SimpleRule(root) {
 		const char* chance_attr = root->Attribute("chance");
 		if (chance_attr == nullptr) throw SyntacticError("No chance attr");
 		chance = std::stod(std::string(chance_attr));
 	}
 	
-	StochasticRule(const ID_T& _head, const std::vector<ID_T>& _body, NumT _num, double _chance):
-		SimpleRule<ID_T>(_head, _body, _num), chance(_chance) {}
+	StochasticRule(const std::string& _head, const std::vector<std::string>& _body, unsigned int _num, double _chance):
+		SimpleRule(_head, _body, _num), chance(_chance) {}
 	
 	TiXmlElement* to_xml() {
-		TiXmlElement* root = SimpleRule<ID_T>::to_xml();
+		TiXmlElement* root = SimpleRule::to_xml();
 		// more precision for chance
 		std::stringstream morePrecision;
 		morePrecision.precision(20);

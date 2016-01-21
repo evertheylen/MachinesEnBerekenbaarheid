@@ -1,35 +1,23 @@
+
 #pragma once
-
-/* [bake me]
-
-dependencies["headers"] = [
-	"libs/tinyxml>>headers",
-	"MBLib/new_CFG>>headers",
-	"NGLib/outputter>>headers",
-	"NGLib/replacor>>headers",
-	"NGLib/exceptions>>headers",
-	"NGLib/tree>>headers",
-]
-
-[stop baking] */
 
 #include <utility>
 #include <iostream>
+#include <set>
 
-#include "NGLib/replacor/context_replacor.hpp"
 #include "NGLib/tree/tree.hpp"
 #include "NGLib/outputter/outputter.hpp"
-#include <set>
+#include "NGLib/replacor/replacor.hpp"
 
 class Teacher {
 public:
-	using Element3 = std::pair<std::string, ContextReplacor::Rule_Type::NumT>;
+	using Element3 = std::pair<std::string, unsigned int>;
 	// second doesn't matter if it has no children in the tree
 	using Teacher3 = Tree<Element3>;
 	
 	Teacher() = default;
 	
-	Teacher(ContextReplacor* _repl):
+	Teacher(Replacor* _repl):
 		repl(_repl) {}
 
 
@@ -41,7 +29,7 @@ public:
 		return tree;
 	}
 	
-	void output(Teacher3& tree, Outputter* out) {  // TODO use Outputter
+	void output(Teacher3& tree, Outputter* out) {
 		if (tree.children.empty()) {
 			out->output(tree.data.first);
 		} else {
@@ -52,25 +40,7 @@ public:
 	}
 	
 	void score(Teacher3& tree, double score_amount) {
-		std::set<std::pair<ContextReplacor::Rule_Type::NumT, ContextReplacor::Rule_Type::NumT>> already_updated;
-		score_helper(tree, score_amount, already_updated);
-	}
-	
-	void score_helper(Teacher3& tree, double score_amount, std::set<std::pair<ContextReplacor::Rule_Type::NumT, ContextReplacor::Rule_Type::NumT>>& already_updated) {
-		// modify scores for all children of tree.
-		
-		for (Teacher3* child: tree.all_children()) {
-			if (child->data.second == 0) continue;
-			if (already_updated.find({tree.data.second, child->data.second}) != already_updated.end()) continue; 
-			double result = repl->cfg.get_rule(tree.data.second).table[child->data.second] * score_amount;
-			repl->cfg.get_rule(tree.data.second).table[child->data.second] = result;
-			already_updated.insert({tree.data.second, child->data.second});
-		}
-		
-		// Call score recursively for all children
-		for (Teacher3* child: tree.children) {
-			score_helper(*child, score_amount, already_updated);
-		}
+		repl->score(tree, score_amount);
 	}
 	
 private:
@@ -82,7 +52,7 @@ private:
 			// replacable (probably variable)
 			
 			// build up context
-			std::list<typename ContextReplacor::Rule_Type::NumT> context;
+			std::list<unsigned int> context;
 			//std::cout << "path is " << path << "\n";
 			for (auto p: tree.get_list_by_path(path)) context.push_back(p.second);
 			context.pop_back();
@@ -107,6 +77,5 @@ private:
 		// other cases (max repl reached, terminal): do nothing
 	}
 	
-	// templated
-	ContextReplacor* repl;
+	Replacor* repl;
 };

@@ -36,12 +36,9 @@ dependencies["build_test_exec"] = [
 #include "MBLib/common/common.hpp"
 #include "NGLib/exceptions/exceptions.hpp"
 
-template <typename ID_T>
 class SimpleRule {
 public:
-	using ID_Type = ID_T;
-	using StringT = std::vector<ID_T>;
-	using NumT = unsigned int;
+	using StringT = std::vector<std::string>;
 	
 	SimpleRule() = default;
 	
@@ -61,18 +58,18 @@ public:
 // 		}
 	}
 	
-	SimpleRule(const ID_T& _head, const std::vector<ID_T>& _body, NumT _num):
+	SimpleRule(const std::string& _head, const std::vector<std::string>& _body, unsigned int _num):
 		head(_head), body(_body), num(_num) {}
 	
-	const ID_T& get_head() const {
+	const std::string& get_head() const {
 		return head;
 	}
 	
-	const std::vector<ID_T>& get_body() const {
+	const std::vector<std::string>& get_body() const {
 		return body;
 	}
 	
-	NumT get_num() const {
+	unsigned int get_num() const {
 		return num;
 	}
 	
@@ -84,9 +81,9 @@ public:
 		return rule_el;
 	}
 	
-	ID_T head;
-	std::vector<ID_T> body;
-	NumT num; // actually the ID lol
+	std::string head;
+	std::vector<std::string> body;
+	unsigned int num;
 };
 
 
@@ -95,10 +92,9 @@ public:
 template <typename RuleT>
 class RuleIterator {
 public:
-	using ID_T = typename RuleT::ID_Type;
-	using MapT = typename std::multimap<ID_T, typename RuleT::NumT>;
+	using MapT = typename std::multimap<std::string, unsigned int>;
 	
-	RuleIterator(const ID_T& _var, const MapT& _P):
+	RuleIterator(const std::string& _var, const MapT& _P):
 			var(_var), P(_P) {}
 	
 	typename MapT::const_iterator begin() {
@@ -114,60 +110,56 @@ public:
 	}
 	
 private:
-	const ID_T& var;
+	const std::string& var;
 	const MapT& P;
 };
 
 
 // Description of what RuleT should offer:
-//   - ID_Type type declaration
+//   - std::stringype type declaration
 //   - String type declaration
-//   - const ID_Type& get_head() method
-template <typename RuleT>
+//   - const std::stringype& get_head() method
+template <typename _RuleT>
 class CFG {
 public:
-	using Rule_Type = RuleT;
-	using ID_Type = typename RuleT::ID_Type;
-	using ID_T = ID_Type;  // legacy support :P
-	using StringT = typename RuleT::StringT;
+	using RuleT = _RuleT;
 	
-	
-	std::set<ID_T> V;								// Variables
-	std::set<ID_T> T;  								// Terminals
-	std::multimap<ID_T, typename RuleT::NumT> P;	// Productions
-	std::map<typename RuleT::NumT, RuleT> m_rules;	// store rules
-	ID_T S;											// Start symbol, \in V
+	std::set<std::string> V;								// Variables
+	std::set<std::string> T;  								// Terminals
+	std::multimap<std::string, unsigned int> P;	// Productions
+	std::map<unsigned int, RuleT> m_rules;	// store rules
+	std::string S;											// Start symbol, \in V
 	
 	CFG() {}
 	
-	CFG(std::set<ID_T> _V, std::set<ID_T> _T, ID_T _S):
+	CFG(std::set<std::string> _V, std::set<std::string> _T, std::string _S):
 			V(_V), T(_T), S(_S) {}
 	
-	bool is_epsilon(StringT s) const {
+	bool is_epsilon(const std::vector<std::string>& s) const {
 		return s.empty();
 	}
 	
-	bool is_variable(const ID_T& symbol) const {
+	bool is_variable(const std::string& symbol) const {
 		auto m = V.find(symbol);
 		return m != V.end();
 	}
 	
-	bool is_terminal(const ID_T& symbol) const {
+	bool is_terminal(const std::string& symbol) const {
 		auto m = T.find(symbol);
 		return m != T.end();
 	}
 	
-	bool has_rules(const ID_T& var) const {
+	bool has_rules(const std::string& var) const {
         return P.find(var) != P.end();
 	}
 	
 	
-	RuleT& get_rule(const typename RuleT::NumT& num) {
+	RuleT& get_rule(const unsigned int& num) {
 		assert(m_rules.find(num) != m_rules.end());
 		return m_rules.find(num)->second;
 	}
 	
-	const RuleT& get_rule_c(const typename RuleT::NumT& num) const {
+	const RuleT& get_rule_c(const unsigned int& num) const {
 		if (m_rules.find(num) == m_rules.end()) std::cout << "did not find " << num << "\n";
 		return m_rules.find(num)->second;
 	}
@@ -175,7 +167,7 @@ public:
 	template <typename Whatever>
 	friend class RuleIterator;
 	
-	RuleIterator<RuleT> rules(const ID_T& var) const {
+	RuleIterator<RuleT> rules(const std::string& var) const {
 		return RuleIterator<RuleT>(var, P);
 	}
 	
@@ -184,7 +176,7 @@ public:
 		assert(m_rules.find(rule.get_num()) == m_rules.end());
 		//auto m = P.find(rule.get_head());
 		
-		//P.insert(std::pair<Rule_Type::ID_T, Rule_Type::NumT>(rule.get_head(), rule.get_num()));
+		//P.insert(std::pair<Rule_Type::std::string, Rule_Type::NumT>(rule.get_head(), rule.get_num()));
 		P.insert({rule.get_head(), rule.get_num()});
 		m_rules[rule.get_num()] = rule;
 		
@@ -204,8 +196,8 @@ public:
 };
 
 
-template <typename ID_T>
-std::ostream& operator<< (std::ostream& out, CFG<ID_T>& G) {
+template <typename RuleT>
+std::ostream& operator<< (std::ostream& out, CFG<RuleT>& G) {
 	out << "Variables = " << G.V << "\n";
 	out << "Terminals = " << G.T << "\n";
 	
@@ -223,16 +215,13 @@ std::ostream& operator<< (std::ostream& out, CFG<ID_T>& G) {
 
 // xml_CFG requires more for RuleT:
 //   - constructor RuleT(head, body)
-//   - std::vector<ID_Type>& get_body() method
-//   - string based (Basically, ID_Type should be std::string)
-template <typename RuleT>
-class xml_CFG: public CFG<RuleT> {
+//   - std::vector<std::stringype>& get_body() method
+//   - string based (Basically, std::stringype should be std::string)
+template <typename _RuleT>
+class xml_CFG: public CFG<_RuleT> {
 public:
 	
-	using Rule_Type = RuleT;
-	using ID_Type = typename RuleT::ID_Type;
-	using ID_T = ID_Type;
-	
+	using RuleT = _RuleT;
 	using Parent = CFG<RuleT>;
 	
 	// Hi my name is Bjarne Stroustrup and fuck you 'cause there is no easy mechanism for inheriting constructors
@@ -240,7 +229,7 @@ public:
 	
 	xml_CFG() {}
 
-	xml_CFG(std::set<ID_T> _V, std::set<ID_T> _T, ID_T _S):
+	xml_CFG(std::set<std::string> _V, std::set<std::string> _T, std::string _S):
 			Parent(_V, _T, _S) {}
 
 	xml_CFG(TiXmlElement* root) {
@@ -314,7 +303,7 @@ public:
 };
 
 
-using s_CFG = xml_CFG<SimpleRule<std::string>>;
+using s_CFG = xml_CFG<SimpleRule>;
 
 #endif
 

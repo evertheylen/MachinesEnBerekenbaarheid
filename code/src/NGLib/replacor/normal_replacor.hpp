@@ -14,16 +14,16 @@
 #include "tinyxml/tinyxml.h"
 
 // Stochastic replacor
-class NormalReplacor: public Replacor<SimpleRule<std::string>> {
+class NormalReplacor: public CfgReplacor<SimpleRule> {
 public:
-	using Rule_Type = SimpleRule<std::string>;
+	using RuleT = SimpleRule;
 	
 	NormalReplacor() {};
 	
 	NormalReplacor(TiXmlElement* elem, std::random_device::result_type seed):
-			Replacor(elem->FirstChildElement()), mt(seed) {} // TODO
+			CfgReplacor(elem->FirstChildElement()), mt(seed) {} // TODO
 	
-	typename Rule_Type::NumT replace(std::string var, std::list<typename Rule_Type::NumT>& context) {
+	unsigned int replace(std::string var, std::list<unsigned int>& context) {
 		std::uniform_int_distribution<int> dist(0, 99);
 		int picked_rule = dist(mt);
 		double prev_chance = 0;

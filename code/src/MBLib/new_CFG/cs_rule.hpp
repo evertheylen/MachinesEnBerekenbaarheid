@@ -16,16 +16,12 @@
 #include "MBLib/new_CFG/CFG.hpp"
 
 
-template <typename ID_T>
-class ContextRule: public SimpleRule<ID_T> {
+class ContextRule: public SimpleRule {
 public:
-	using ID_Type = ID_T;
-	using StringT = std::vector<ID_T>;
-	using NumT = unsigned int;
 	
 	ContextRule() = default;
 	
-	ContextRule(TiXmlElement* root): SimpleRule<ID_T>(root) {
+	ContextRule(TiXmlElement* root): SimpleRule(root) {
 // 		std::cout << "entering parse\n";
 		for (TiXmlElement* el = root->FirstChildElement(); el != nullptr; el = el->NextSiblingElement()) {
 			const char* num_attr = el->Attribute("ID");
@@ -33,7 +29,7 @@ public:
 			const char * p_num_attr = el->Attribute("c");
 			if (p_num_attr == nullptr) throw SyntacticError("No c attribute");
 			
-			NumT p_num = std::stoi(num_attr);
+			unsigned int p_num = std::stoi(num_attr);
 			double chance = std::stod(p_num_attr);
 			table[p_num] = chance;
 // 			std::cout << "setting chance of " << p_num << " to " << chance << "\n";
@@ -46,11 +42,11 @@ public:
 		}
 	}
 	
-	ContextRule(const ID_T& _head, const std::vector<ID_T>& _body, NumT _num):
-			SimpleRule<ID_T>(_head, _body, _num) {}
+	ContextRule(const std::string& _head, const std::vector<std::string>& _body, unsigned int _num):
+			SimpleRule(_head, _body, _num) {}
 	
 	TiXmlElement* to_xml() {
-		TiXmlElement* root = SimpleRule<ID_T>::to_xml();
+		TiXmlElement* root = SimpleRule::to_xml();
 		for (auto it: table) {
 			TiXmlElement* prob_el = new TiXmlElement("prob");
 			prob_el->SetAttribute("ID", it.first);
@@ -65,6 +61,6 @@ public:
 		return root;
 	}
 	
-	std::map<NumT, double> table;
+	std::map<unsigned int, double> table;
 };
 

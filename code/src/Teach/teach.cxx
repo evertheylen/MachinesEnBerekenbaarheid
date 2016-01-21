@@ -135,7 +135,7 @@ int main(int argc, char** argv) {
 				std::cout << "Type 'help' for help. Obviously.\n";
 			}
 		}
-				
+		
 		std::cout << "Exiting and saving to " << args[0] << " ...\n";
 		generator->saveXML(args[0]);
 	} catch (boost::python::error_already_set e) {

@@ -1,33 +1,23 @@
 
-/* [bake me]
-
-dependencies["headers"] = [
-	"MBLib/new_CFG>>headers"
-]
-
-[stop baking] */
-
 #pragma once
 
 #include <string>
 #include <vector>
 #include <list>
 
-#include "MBLib/new_CFG/CFG.hpp"
 #include "tinyxml/tinyxml.h"
 
-template <typename RuleT>
+#include "MBLib/new_CFG/CFG.hpp"
+#include "NGLib/teacher/teacher.hpp"
+
 class Replacor {
 public:
-	using Rule_Type = RuleT;
 	
 	Replacor() = default;
 	
-	Replacor(TiXmlElement* root): cfg(root) {}
-	
 	// a list so popping and pushing is easy
 	// TODO: string refs look hackerish and error-prone
-	virtual typename RuleT::NumT replace(std::string var, std::list<typename RuleT::NumT>& context) = 0;
+	virtual typename unsigned int replace(std::string var, std::list<unsigned int>& context) = 0;
 	
 	virtual bool replaceable(std::string symb) = 0;
 	// in a CFG bounded class, this would be `return is_var(var)`
@@ -35,11 +25,20 @@ public:
 	
 	virtual TiXmlElement* to_xml() = 0;
 	
-	const std::vector<typename RuleT::ID_Type>& get_body(const typename RuleT::NumT& num) const {
-		return cfg.get_rule_c(num).get_body();
-	}
+	virtual void score(Teacher::Teacher3& tree, double score_amount) {};
+	
+	virtual const std::vector<std::string>& get_body(const unsigned int num) const;
 	
 	virtual ~Replacor() {}
+	
+};
+
+
+template <typename _RuleT>
+class CfgReplacor: public Replacor {
+	CfgReplacor(TiXmlElement* root): cfg(root) {}
+	
+	using RuleT = _RuleT;
 	
 protected:
 	xml_CFG<RuleT> cfg;

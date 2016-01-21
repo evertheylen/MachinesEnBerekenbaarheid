@@ -50,13 +50,12 @@ public:
 
 	Generator() {}
 	
-	Generator(ReplacorT* _repl):
+	Generator(Replacor* _repl):
 		repl(_repl) {}
-
 
 	// if max_repl == -1 ==> Infinite
 	void generate(std::vector<std::string> start, int max_repl = -1) {
-		std::list<typename ReplacorT::Rule_Type::NumT> context;
+		std::list<unsigned int> context;
 		out->init();
 		for (std::string& s: start) {
 			rec_generate(s, context, max_repl);
@@ -90,7 +89,7 @@ public:
 		out = std::unique_ptr<Outputter>(_out);
 	}
 	
-	ReplacorT* get_replacor() const {
+	Replacor* get_replacor() const {
 		return repl.get();
 	}
 	
@@ -99,7 +98,7 @@ public:
 	}
 	
 private:
-	void rec_generate(std::string s, std::list<typename ReplacorT::Rule_Type::NumT>& context, int max_repl) {
+	void rec_generate(std::string s, std::list<unsigned int>& context, int max_repl) {
 		//std::cout << "generating for var " << s << ", with max_repl " << max_repl << " and context.size() " << context.size() << "\n";
 		for (unsigned int i=0; i<context.size(); i++) std::cout << "  ";
 		if ((max_repl != -1) and (int(context.size()) == max_repl)) {
@@ -128,8 +127,7 @@ private:
 	
 	std::unique_ptr<Outputter> out;
 	
-	// templated
-	std::unique_ptr<ReplacorT> repl;
+	std::unique_ptr<Replacor> repl;
 };
 
 GeneratorInterface* loadXML(std::string inputfile);
