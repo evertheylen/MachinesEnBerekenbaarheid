@@ -1,27 +1,5 @@
 
-/* CFG library
-
-[bake me]
-
-dependencies["headers"] = [
-	"libs/tinyxml>>headers",
-	"MBLib/common>>headers",
-	"NGLib/exceptions>>headers"
-]
-
-# BUG in Baker :'(
-dependencies["build_test_exec"] = [
-	"libs/tinyxml>>build_objects",
-	"MBLib/common>>build_objects"
-]
-
-[stop baking]
-
-*/
-
-
-#ifndef H_CFG
-#define H_CFG
+#pragma once
 
 #include <set>
 #include <iostream>
@@ -42,44 +20,15 @@ public:
 	
 	SimpleRule() = default;
 	
-	SimpleRule(TiXmlElement* root) {
-// 		try {
-			std::string num_s = std::string(root->Attribute("ID"));
-			if (num_s == "") throw SyntacticError("No ID given");
-			head = std::string(root->Attribute("LHS"));
-			if (head == "") throw SyntacticError("No head given");
-			std::string body_s = std::string(root->Attribute("RHS"));
-			if (body_s == "") throw SyntacticError("No body given");
-			
-			body = split(body_s);
-			num = std::stoi(num_s);
-// 		} catch (std::exception& e) {
-// 			throw syntacticError();
-// 		}
-	}
+	SimpleRule(TiXmlElement* root);
 	
-	SimpleRule(const std::string& _head, const std::vector<std::string>& _body, unsigned int _num):
-		head(_head), body(_body), num(_num) {}
+	SimpleRule(const std::string& _head, const std::vector<std::string>& _body, unsigned int _num);
 	
-	const std::string& get_head() const {
-		return head;
-	}
+	const std::vector<std::string>& get_body() const;
 	
-	const std::vector<std::string>& get_body() const {
-		return body;
-	}
+	unsigned int get_num() const;
 	
-	unsigned int get_num() const {
-		return num;
-	}
-	
-	TiXmlElement* to_xml() {
-		TiXmlElement* rule_el = new TiXmlElement("Rule");
-		rule_el->SetAttribute("LHS", head);
-		rule_el->SetAttribute("RHS", to_string(body));
-		rule_el->SetAttribute("ID", to_string(num));
-		return rule_el;
-	}
+	TiXmlElement* to_xml();
 	
 	std::string head;
 	std::vector<std::string> body;
@@ -262,7 +211,7 @@ public:
 		return name;
 	}
 
-	TiXmlElement* to_xml(/*std::string filename*/) {
+	TiXmlElement* to_xml() {
 		assert(this->check_rule_correctness());
 		//TiXmlDocument doc;
 		//TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "", "");
@@ -304,6 +253,4 @@ public:
 
 
 using s_CFG = xml_CFG<SimpleRule>;
-
-#endif
 

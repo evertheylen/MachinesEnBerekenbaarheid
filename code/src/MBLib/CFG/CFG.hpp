@@ -1,20 +1,6 @@
 
-/* CFG library
 
-[bake me]
-
-dependencies["headers"] = [
-	"libs/tinyxml>>headers",
-	"MBLib/common>>headers",
-]
-
-[stop baking]
-
-*/
-
-
-#ifndef H_CFG
-#define H_CFG
+#pragma once
 
 #include <set>
 #include <iostream>
@@ -126,6 +112,4 @@ public:
 	
 	void to_xml(std::string filename);
 };
-
-#endif
 

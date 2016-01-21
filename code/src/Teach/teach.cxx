@@ -67,21 +67,6 @@ int main(int argc, char** argv) {
 		std::vector<std::string> cmds;
 		std::string input;
 		while (true) {
-// 			auto tree = t.generate(args[1], max_depth);
-// 			//std::unique_ptr<PythonOutputter> out(new PythonOutputter("output.py"));
-// 			//out->init();
-// 			//t.output(tree, out.get());
-// 			std::cout << tree << std::endl;
-// 			std::string score;
-// 			std::cout << "Please input a score for this tree:  (PRESS q TO EXIT)\n";
-// 			std::getline(std::cin, score);
-// 			if (score == "quit") {
-// 				break;
-// 			} else {
-// 				t.score(tree, std::stod(score));
-// 				generator->saveXML(args[0]);
-// 			}
-			
 			if (tree.get()) std::cout << "[T] ";
 			else std::cout << "[ ] ";
 			std::getline(std::cin, input);

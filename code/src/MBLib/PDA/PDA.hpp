@@ -1,13 +1,4 @@
 
-/* PDA Library
-
-[bake me]
-
-dependencies["headers"] = [
-	"MBLib/common>>headers"
-]
-
-[stop baking] */
 
 #ifndef H_PDA
 #define H_PDA
@@ -34,8 +25,6 @@ public:
 		}
 	}
 };
-
-
 
 
 template <typename StateT, typename GammaT>
@@ -148,12 +137,5 @@ std::ostream& operator<< (std::ostream& out, PDA<StateT, SymbolT>& P) {
 	out << "F = " << P.F << "\n";
 	return out;
 }
-
-
-
-
-
-
-
 
 #endif // H_PDA

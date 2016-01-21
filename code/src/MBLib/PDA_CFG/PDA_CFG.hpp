@@ -1,18 +1,4 @@
 
-/* algo to convert PDA to CFG
-
-[bake me]
-
-dependencies["headers"] = [
-	"MBLib/CFG>>headers",
-	"MBLib/PDA>>headers",
-	"MBLib/common>>headers"
-]
-
-[stop baking]
-
-*/
-
 #ifndef H_PDA_CFG
 #define H_PDA_CFG
 
@@ -31,33 +17,13 @@ public:
 	std::vector<unsigned int> choice;
 	unsigned int max; // max is like 10 for decimal numbers, the highest you can go is 9 per digit
 	
-	SetChoice(unsigned int _max, int length): 
-			choice(length), max(_max) {}
+	SetChoice(unsigned int _max, int length);
 	
-	bool next_choice() {
-		for (int i=0; i<choice.size(); i++) {
-			if (choice.at(i) < max-1) {
-				// we can change this!
-				choice[i]++;
-				for (int j=i-1; j >= 0; j--) {
-					choice[j] = 0;
-				}
-				return true;
-			}
-		}
-		// if we get here, reset all
-		for (int i=0; i<choice.size(); i++) choice[i] = 0;
-		return false;
-	}
+	bool next_choice();
 	
-	unsigned int size() {
-		return choice.size();
-	}
+	unsigned int size();
 	
-	unsigned int at(unsigned int i) {
-		return choice.at(i);
-	}
-	
+	unsigned int at(unsigned int i);
 	
 	template <typename T>
 	std::vector<T> pick(std::vector<T> base) {
