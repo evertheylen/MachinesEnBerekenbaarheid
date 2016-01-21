@@ -1,18 +1,6 @@
 
 #pragma once
 
-/* [bake me]
-
-dependencies["headers"] = [
-	"libs/tinyxml>>headers",
-	"MBLib/new_CFG>>headers",
-	"NGLib/outputter>>headers",
-	"NGLib/replacor>>headers",
-	"NGLib/exceptions>>headers",
-]
-
-[stop baking] */
-
 #include <list>
 #include <vector>
 #include <string>

@@ -6,11 +6,9 @@
 
 class NGException: public std::exception {
 public:
-	NGException(const std::string& _info): info(_info) {}
+	NGException(const std::string& _info);
 	
-	const char* what() const throw() {
-		return info.c_str();
-	}
+	const char* what() const throw();
 	
 private:
 	std::string info;
@@ -18,18 +16,15 @@ private:
 
 class SyntacticError: public NGException {
 public:
-	SyntacticError(const std::string& _info):
-		NGException(std::string("SyntacticError: ") + _info) {}
+	SyntacticError(const std::string& _info);
 };
 
 class NoValidFilename: public NGException {
 public:
-	NoValidFilename(const std::string& _info):
-		NGException(_info + " isn't a valid filename") {}
+	NoValidFilename(const std::string& _info);
 };
 
 class SemanticError: public NGException {
 public:
-	SemanticError(const std::string& fault, const std::string& correct):
-		NGException(std::string("Semantic error: ") + fault + " instead of " + correct + ".") {}
+	SemanticError(const std::string& fault, const std::string& correct);
 };

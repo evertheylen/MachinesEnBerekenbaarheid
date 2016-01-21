@@ -1,0 +1,51 @@
+<?xml version="1.0" ?>
+<GENERATOR>
+    <CONTEXT_REPLACOR>
+        <CFG>
+            <Variables>EFIT
+                <StartSymbol>E</StartSymbol>
+            </Variables>
+            <Terminals>()*+01ab</Terminals>
+            <Productions>
+                <Rule LHS="E" RHS="E+T" ID="1">
+            
+                </Rule>
+                <Rule LHS="E" RHS="T" ID="2">
+
+              
+                </Rule>
+                <Rule LHS="F" RHS="(E)" ID="3">
+                   
+                </Rule>
+                <Rule LHS="F" RHS="I" ID="4">
+                    
+                </Rule>
+                <Rule LHS="I" RHS="I0" ID="5">
+                 
+                </Rule>
+                <Rule LHS="I" RHS="I1" ID="6">
+                    
+                </Rule>
+                <Rule LHS="I" RHS="Ia" ID="7">
+                    
+                </Rule>
+                <Rule LHS="I" RHS="Ib" ID="8">
+                    
+                </Rule>
+                <Rule LHS="I" RHS="a" ID="9">
+                    
+                </Rule>
+                <Rule LHS="I" RHS="b" ID="10">
+                   
+                </Rule>
+                <Rule LHS="T" RHS="F" ID="11">
+                  
+                </Rule>
+                <Rule LHS="T" RHS="T*F" ID="12">
+                  
+                </Rule>
+            </Productions>
+        </CFG>
+    </CONTEXT_REPLACOR>
+    <FILE_OUTPUTTER filename="test" />
+</GENERATOR>

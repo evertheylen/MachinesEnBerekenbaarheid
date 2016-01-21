@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<GENERATOR>
+    <CONTEXT_REPLACOR>
+        <CFG>
+            <Variables>FG
+                <StartSymbol>F</StartSymbol>
+            </Variables>
+            <Terminals>+-</Terminals>
+            <Productions>
+                <Rule LHS="F" RHS="F(+F)(-F)F" ID="1">
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                </Rule>
+                <Rule LHS="F" RHS="F(-F)F" ID="2">
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                </Rule>
+                <Rule LHS="F" RHS="F(+F)F" ID="3">
+                    <prob ID="1" c="1.000000" />
+                    <prob ID="2" c="1.000000" />
+                    <prob ID="3" c="1.000000" />
+                </Rule>
+            </Productions>
+        </CFG>
+    </CONTEXT_REPLACOR>
+    <PYTHON_OUTPUTTER filename="turtle_graphics.py" />
+</GENERATOR>
