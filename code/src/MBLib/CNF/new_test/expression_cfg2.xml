@@ -1,0 +1,50 @@
+<?xml version="1.0" ?>
+<CFG>
+    <Variables>EFIT[C_0][C_1][C_2][_(][_)][_*][_+][_0][_1][_A][_B]
+        <StartSymbol>E</StartSymbol>
+    </Variables>
+    <Terminals>()*+01ab</Terminals>
+    <Productions>
+        <Rule LHS="E" RHS="E[C_0]" />
+        <Rule LHS="E" RHS="I[_0]" />
+        <Rule LHS="E" RHS="I[_1]" />
+        <Rule LHS="E" RHS="I[_A]" />
+        <Rule LHS="E" RHS="I[_B]" />
+        <Rule LHS="E" RHS="T[C_1]" />
+        <Rule LHS="E" RHS="[_(][C_2]" />
+        <Rule LHS="E" RHS="a" />
+        <Rule LHS="E" RHS="b" />
+        <Rule LHS="F" RHS="I[_0]" />
+        <Rule LHS="F" RHS="I[_1]" />
+        <Rule LHS="F" RHS="I[_A]" />
+        <Rule LHS="F" RHS="I[_B]" />
+        <Rule LHS="F" RHS="[_(][C_2]" />
+        <Rule LHS="F" RHS="a" />
+        <Rule LHS="F" RHS="b" />
+        <Rule LHS="I" RHS="I[_0]" />
+        <Rule LHS="I" RHS="I[_1]" />
+        <Rule LHS="I" RHS="I[_A]" />
+        <Rule LHS="I" RHS="I[_B]" />
+        <Rule LHS="I" RHS="a" />
+        <Rule LHS="I" RHS="b" />
+        <Rule LHS="T" RHS="I[_0]" />
+        <Rule LHS="T" RHS="I[_1]" />
+        <Rule LHS="T" RHS="I[_A]" />
+        <Rule LHS="T" RHS="I[_B]" />
+        <Rule LHS="T" RHS="T[C_1]" />
+        <Rule LHS="T" RHS="[_(][C_2]" />
+        <Rule LHS="T" RHS="a" />
+        <Rule LHS="T" RHS="b" />
+        <Rule LHS="[C_0]" RHS="[_+]T" />
+        <Rule LHS="[C_1]" RHS="[_*]F" />
+        <Rule LHS="[C_2]" RHS="E[_)]" />
+        <Rule LHS="[_(]" RHS="(" />
+        <Rule LHS="[_)]" RHS=")" />
+        <Rule LHS="[_*]" RHS="*" />
+        <Rule LHS="[_+]" RHS="+" />
+        <Rule LHS="[_0]" RHS="0" />
+        <Rule LHS="[_1]" RHS="1" />
+        <Rule LHS="[_A]" RHS="a" />
+        <Rule LHS="[_B]" RHS="b" />
+    </Productions>
+</CFG>

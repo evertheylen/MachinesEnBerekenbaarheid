@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<CFG>
+    <Variables>S[C_0][_A][_B]
+        <StartSymbol>S</StartSymbol>
+    </Variables>
+    <Terminals>ab</Terminals>
+    <Productions>
+        <Rule LHS="S" RHS="[_A][C_0]" />
+        <Rule LHS="S" RHS="b" />
+        <Rule LHS="[C_0]" RHS="S[_B]" />
+        <Rule LHS="[_A]" RHS="a" />
+        <Rule LHS="[_B]" RHS="b" />
+    </Productions>
+</CFG>

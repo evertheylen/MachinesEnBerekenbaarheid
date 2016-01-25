@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<CFG>
+    <Variables>
+        <StartSymbol></StartSymbol>
+    </Variables>
+    <Terminals></Terminals>
+    <Productions />
+</CFG>
