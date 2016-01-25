@@ -74,6 +74,7 @@ template <typename _RuleT>
 class CFG {
 public:
 	using RuleT = _RuleT;
+	using StringT = std::vector<std::string>;
 	
 	std::set<std::string> V;								// Variables
 	std::set<std::string> T;  								// Terminals

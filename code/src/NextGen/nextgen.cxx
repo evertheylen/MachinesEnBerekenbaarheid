@@ -9,12 +9,13 @@
 #include "libs/tinyxml/tinyxml.h"
 #include "libs/linenoise/linenoise.h"
 
+#include "MBLib/common/common.hpp"
+#include "MBLib/Earley/earley.hpp"
 #include "NGLib/generator/generator.hpp"
 #include "NGLib/outputter/outputter.hpp"
 #include "NGLib/python_out/python_outputter.hpp"
 #include "NGLib/replacor/replacor.hpp"
 #include "NGLib/replacor/context_replacor.hpp"
-#include "MBLib/common/common.hpp"
 #include "NGLib/teacher/teacher.hpp"
 #include "NGLib/exceptions/exceptions.hpp"
 
@@ -61,6 +62,9 @@ void completion(const char *buf, linenoiseCompletions *lc) {
 			break;
 		case 'h':
 			linenoiseAddCompletion(lc, "help");
+			break;
+		case 'e':
+			linenoiseAddCompletion(lc, "earley");
 			break;
 		default:
 			break;
@@ -158,6 +162,15 @@ int main(int argc, char** argv) {
 				}
 				double score = std::stod(cmds[1]);
 				t.score(*tree, score);
+			} else if (cmds[0] == "earley") {
+				if (cmds.size() == 1) {
+					std::cout << "'earley' needs a string.\n";
+					continue;
+				}
+				// TODO get CFG out of replacor someway (interface?)
+				// auto s = earley(..., input_string?)
+				// TODO select right tree (smallest?)
+				// set tree (if there is one)
 			} else if (cmds[0] == "clear") {
 				tree.reset(nullptr);
 			} else if (cmds[0] == "save") {
