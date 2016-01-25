@@ -1,9 +1,13 @@
 <?xml version="1.0" ?>
-<GENERATOR>
-	<NORMAL_REPLACOR>
-		<CFG>
-        <!-- CFG Input-->
-	    </CFG>
-	</NORMAL_REPLACOR>
-	<PYTHON_OUTPUTTER/>
-</GENERATOR>
+<CFG>
+	<Variables>
+        S
+        <StartSymbol>S</StartSymbol>
+	</Variables>
+	<Terminals>
+	    ab
+	</Terminals>
+	<Productions>
+        <Rule LHS="S" RHS= "aSb|b"/>
+	</Productions>
+</CFG>

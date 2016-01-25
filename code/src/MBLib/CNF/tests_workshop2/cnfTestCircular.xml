@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<CFG>
+    <Variables>A
+        <StartSymbol>A</StartSymbol>
+    </Variables>
+    <Terminals>abc</Terminals>
+    <Productions>
+        <Rule LHS="A" RHS="a" />
+        <Rule LHS="A" RHS="b" />
+        <Rule LHS="A" RHS="c" />
+    </Productions>
+</CFG>
