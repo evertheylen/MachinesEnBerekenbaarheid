@@ -9,7 +9,7 @@ std::vector<std::string> split(const std::string& s) {
 	for (char c: s) {
 		if (c == '%') {
 			if (escaped) {
-				result.push_back("%");
+				buf += '%';
 				escaped = false;
 			} else {
 				escaped = true;
@@ -18,7 +18,7 @@ std::vector<std::string> split(const std::string& s) {
 			if (c == '[' and not escaped) {
 				buf += '[';
 			} else {
-				buf += '[';
+				buf += c;
 				result.push_back(buf);
 				buf.clear();
 				escaped = false;
