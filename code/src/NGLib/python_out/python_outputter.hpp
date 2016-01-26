@@ -29,7 +29,9 @@ private:
 	std::string filename;
 	boost::python::object main_module;
 	boost::python::object main_namespace;
+	boost::python::object func;
 	
 	bool has_close = false;
+	static bool python_initialized;
 };
 
