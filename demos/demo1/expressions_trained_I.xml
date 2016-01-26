@@ -21,7 +21,7 @@
                 <Rule LHS="I" RHS="I1" ID="6">
                     <prob ID="8" c="1.5" />
                     <prob ID="9" c="7.5" />
-                    <prob ID="10" c="5.3200000000000000622" />
+                    <prob ID="10" c="5.3200000000000002842" />
                 </Rule>
                 <Rule LHS="I" RHS="Ia" ID="7">
                     <prob ID="5" c="2" />

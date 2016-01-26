@@ -138,9 +138,8 @@ CFG_Type eliminate_epsilon_productions(const CFG_Type& input_cfg) {
 				}
 			}
 		}
-}
+    }
 	return result_cfg;
-//result_cfg.T.erase(*s_CFG::EPSILON); // Remove the epsilon out of the list of terminals because WE KILLED THEM ALL ;) TODO Change if epsilon becomes an element of T
 }
 
 template<typename CFG_Type>
