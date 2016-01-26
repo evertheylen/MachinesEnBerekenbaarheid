@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<!-- CFG is empty language -->
+<CFG>
+	<Variables>
+        S
+        <StartSymbol>S</StartSymbol>
+	</Variables>
+	<Terminals>
+		whatevr
+	</Terminals>
+	<Productions>
+	</Productions>
+</CFG>

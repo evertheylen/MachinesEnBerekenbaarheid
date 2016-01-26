@@ -1,0 +1,24 @@
+test 1: Test CFG-PDA/CFG_1.xml voor de volgende strings:
+  - "": fail
+  - " ": fail
+  - "whatever": fail
+
+test 2: Test CFG-PDA/CFG_2.xml voor de volgende strings:
+  - "": success   
+
+  - " ": fail
+  - "whatever": fail
+
+test 3: Converteer de CFG-PDA/CFG_3.xml naar PDA, dan naar CFG, dan naar PDA etc...
+Totdat de resulterende CFG erg complex is. Test dan op de volgende strings:
+  - "010": success
+  - "101": success
+  - "110011": success
+  - "0": success
+  - "1": success
+  - "": success
+
+  - "100": fail
+  - "1100111": fail
+  
+

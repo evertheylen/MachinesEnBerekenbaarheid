@@ -1,0 +1,69 @@
+<?xml version="1.0" ?>
+<!-- simpele PDA, pushed lange stack string :), maar een iets creatievere test.
+
+Omzettingen van PDA naar CFG is nogal vrij kostelijk, dus de test bestaat er simpelweg uit om 
+deze PDA om te zetten naar CFG, dan terug naar PDA, dan naar CFG, etc...
+
+Meet het geheugenverbruik, en kijk hoe snel het stijgt. Elke keer dat je PDA->CFG->PDA doet
+zou de nodige ruimte maar O(n^3) hoger mogen zijn als de vorige keer (als ik de theorie nog
+goed herinner :P ). Als het geheugenverbruik sneller stijgt dan dat is er geen gebruik gemaakt
+van het 'opbreken' van regels (zie p300 hb).
+
+-->
+
+<PDA>
+	<Type>STATE</Type>
+	<Alphabet>
+	    <symbol>0</symbol>
+	    <symbol>1</symbol>
+	</Alphabet>
+	<StackAlphabet>
+	    <symbol>0</symbol>
+        <symbol>1</symbol>
+	</StackAlphabet>
+    <States>
+        <state>
+        	<name>Q0</name>
+        	<starting>yes</starting>
+        </state>
+        <state>
+        	<name>Q1</name>
+        	<accepting>no</accepting>
+        </state>
+        <state>
+        	<name>Q2</name>
+            <accepting>yes</accepting>
+        </state>
+    </States>
+    <Transitions>
+            <transition>
+                <from>Q0</from>
+                <to>Q1</to>
+				<input></input> <!-- epsilon -->
+                <stacktop>Z0</stacktop>
+                <operation>PUSH</operation>
+                <push>10101010</push>
+            </transition>
+            <transition>
+                <from>Q1</from>
+                <to>Q1</to>
+                <input>0</input>
+                <stacktop>0</stacktop>
+                <operation>POP</operation>
+            </transition>
+			<transition>
+                <from>Q1</from>
+                <to>Q1</to>
+                <input>1</input>
+                <stacktop>1</stacktop>
+                <operation>POP</operation>
+            </transition>
+            <transition>
+                <from>Q1</from>
+                <to>Q2</to>
+                <input></input>
+                <stacktop>Z0</stacktop>
+                <operation>STAY</operation>
+            </transition>
+    </Transitions>
+</PDA>

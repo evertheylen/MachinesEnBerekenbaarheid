@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<!-- CFG is contains only the empty string -->
+<CFG>
+	<Variables>
+        S
+        <StartSymbol>S</StartSymbol>
+	</Variables>
+	<Terminals>
+		whatevr
+	</Terminals>
+	<Productions>
+        <Rule LHS="S" RHS= ""/>
+	</Productions>
+</CFG>

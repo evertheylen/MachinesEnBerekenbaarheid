@@ -1,0 +1,15 @@
+graph g {
+    E0[label="E"];
+    E1[label="E"];
+    star [label="*"];
+    E2[label="E"];
+    I0[label="I"];
+    A0[label="a"];
+    E0 -- E1;
+    E0 -- star;
+    E0 -- E2;
+    E1 -- I0;
+    I0 -- A0;
+    E2 -- I;
+    I -- b;
+}
