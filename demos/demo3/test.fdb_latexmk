@@ -1,9 +1,0 @@
-# Fdb version 3
-["latex"] 1453830217 "test.tex" "test.dvi" "test" 1453830217
-  "/usr/share/texmf-dist/web2c/texmf.cnf" 1447534201 31669 df537245012f3e5f05bdc55644b7a3df ""
-  "/var/lib/texmf/web2c/pdftex/latex.fmt" 1453327765 7213965 ddbbd7e63e7ef33a8a11e4fbe63b63a7 ""
-  "test.aux" 1453830099 8 a94a2480d3289e625eea47cd1b285758 ""
-  "test.tex" 1453830152 13899 8a312b16a1858db48defdecd6a8c957a ""
-  (generated)
-  "test.log"
-  "test.dvi"

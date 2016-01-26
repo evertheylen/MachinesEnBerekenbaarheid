@@ -33,8 +33,6 @@ int main(int argc, char** argv) {
 		std::vector<std::string> startstring = split(args.at(1));
 		int max_depth = args.size() == 3? std::stoi(args.at(2)) : -1;
 		g.generate(startstring, max_depth);
-		
-		g.saveXML("saveXML.xml");
 	} catch (boost::python::error_already_set e) {
 		std::cout << "Core crashed with Python Exception:\n";
 		PyErr_Print();

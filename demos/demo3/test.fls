@@ -1,5 +1,0 @@
-PWD /Bestanden/Copy/root/Bestanden/School/MB/MachinesEnBerekenbaarheid/demos/demo3
-INPUT /usr/share/texmf-dist/web2c/texmf.cnf
-INPUT /var/lib/texmf/web2c/pdftex/latex.fmt
-INPUT test.tex
-OUTPUT test.log

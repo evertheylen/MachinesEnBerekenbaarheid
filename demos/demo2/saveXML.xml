@@ -2,10 +2,10 @@
 <GENERATOR>
     <STOCHASTIC_REPLACOR>
         <CFG>
-            <Variables>FG
+            <Variables>F
                 <StartSymbol>F</StartSymbol>
             </Variables>
-            <Terminals>+-</Terminals>
+            <Terminals>()+-</Terminals>
             <Productions>
                 <Rule LHS="F" RHS="F(+F)(-F)F" ID="1" chance="0.2000000000000000111" />
                 <Rule LHS="F" RHS="F(-F)F" ID="2" chance="0.10000000000000000555" />

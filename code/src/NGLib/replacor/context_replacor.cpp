@@ -3,7 +3,7 @@
 #include "context_replacor.hpp"
 
 ContextReplacor::ContextReplacor(TiXmlElement* elem, std::random_device::result_type seed):
-	CfgReplacor(elem->FirstChildElement()) {}
+	CfgReplacor(elem->FirstChildElement()), mt(seed) {}
 
 
 unsigned int ContextReplacor::replace(const std::string& var, std::list<unsigned int>& context) {

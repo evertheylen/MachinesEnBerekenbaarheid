@@ -41,6 +41,9 @@ template <>
 std::string to_string<std::vector<std::string>>(std::vector<std::string> input) {
 	std::string s;
 	for (std::string& p: input) {
+		if (p.size() == 1 and (p == "[" or p == "]")) {
+			s += '%';
+		}
 		s += p;
 	}
 	return s;

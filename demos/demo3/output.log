@@ -1,15 +1,15 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Arch Linux) (preloaded format=pdflatex 2016.1.20)  26 JAN 2016 18:56
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Arch Linux) (preloaded format=pdflatex 2016.1.26)  26 JAN 2016 23:04
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**test.tex
-(./test.tex
+**output.tex
+(./output.tex
 LaTeX2e <2015/10/01> patch level 2
 Babel <3.9m> and hyphenation patterns for 79 languages loaded.
 (/usr/share/texmf-dist/tex/latex/base/article.cls
 Document Class: article 2014/09/29 v1.4h Standard LaTeX document class
-(/usr/share/texmf-dist/tex/latex/base/size10.clo
-File: size10.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
+(/usr/share/texmf-dist/tex/latex/base/size11.clo
+File: size11.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
 )
 \c@part=\count79
 \c@section=\count80
@@ -76,13 +76,8 @@ Package: inputenc 2015/03/17 v1.2c Input encoding file
 
 (/usr/share/texmf-dist/tex/latex/base/latin1.def
 File: latin1.def 2015/03/17 v1.2c Input encoding file
-))
-
-LaTeX Warning: Unused global option(s):
-    [11].
-
-(./test.aux)
-\openout1 = `test.aux'.
+)) (./output.aux)
+\openout1 = `output.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 6.
 LaTeX Font Info:    ... okay on input line 6.
@@ -97,7 +92,8 @@ LaTeX Font Info:    ... okay on input line 6.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 6.
 LaTeX Font Info:    ... okay on input line 6.
 LaTeX Font Info:    Try loading font information for OT1+ptm on input line 6.
- (/usr/share/texmf-dist/tex/latex/psnfss/ot1ptm.fd
+
+(/usr/share/texmf-dist/tex/latex/psnfss/ot1ptm.fd
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 )
 (/usr/share/texmf-dist/tex/context/base/supp-pdf.mkii
@@ -170,32 +166,64 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <14.4> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 12.
 
+Underfull \hbox (badness 1314) in paragraph at lines 16--21
+\OT1/ptm/m/n/10.95 ther-more, af-ter years of ex-ten-sive re-search into
+ []
+
+
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
 
 
-]
+] [2]
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 35.
- [2] [3] [4
 
-] (./test.aux) ) 
+Underfull \hbox (badness 1496) in paragraph at lines 36--37
+\OT1/ptm/m/n/10.95 we mod-i-fied our stan-dard hard-ware as fol-lows:
+ []
+
+
+Underfull \hbox (badness 1270) in paragraph at lines 36--37
+\OT1/ptm/m/n/10.95 In-tel's net-work to dis-prove the op-por-tunis-ti-cally
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 38--39
+[]\OT1/ptm/m/n/10.95 When Karthik Lak-sh-mi-narayanan refac-tored
+ []
+
+
+Underfull \hbox (badness 4391) in paragraph at lines 38--39
+\OT1/ptm/m/n/10.95 Smalltalk, aug-mented with prov-ably repli-cated
+ []
+
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <10.95> on input line 42.
+[3]
+No file output.bbl.
+[4] (./output.aux) ) 
 Here is how much of TeX's memory you used:
- 1699 strings out of 493054
- 23772 string characters out of 6140586
- 89954 words of memory out of 5000000
- 5211 multiletter control sequences out of 15000+600000
- 15397 words of font info for 35 fonts, out of 8000000 for 9000
+ 1702 strings out of 493054
+ 23857 string characters out of 6140586
+ 88977 words of memory out of 5000000
+ 5214 multiletter control sequences out of 15000+600000
+ 16313 words of font info for 38 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 37i,7n,23p,1085b,211s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/share/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/
-texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-dist/fonts/type1/
-urw/times/utmr8a.pfb>
-Output written on test.pdf (4 pages, 44968 bytes).
+ 37i,7n,23p,1044b,211s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/share/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/sh
+are/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-dist
+/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texmf-dist/fonts/type1/pu
+blic/amsfonts/cm/cmmi8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/c
+m/cmr10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></us
+r/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texmf-d
+ist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-dist/fonts/type1/urw/tim
+es/utmr8a.pfb>
+Output written on output.pdf (4 pages, 91240 bytes).
 PDF statistics:
- 26 PDF objects out of 1000 (max. 8388607)
- 17 compressed objects within 1 object stream
+ 50 PDF objects out of 1000 (max. 8388607)
+ 35 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
