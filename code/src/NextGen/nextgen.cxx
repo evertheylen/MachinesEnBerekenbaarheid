@@ -100,7 +100,7 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	
-	//try {
+	try {
 		Generator g(args[0]);
 		
 		Teacher t(g.get_replacor());
@@ -211,14 +211,14 @@ int main(int argc, char** argv) {
 		std::cout << "Exiting and saving to " << args[0] << " ...\n";
 		g.saveXML(args[0]);
 	
-// 	} catch (boost::python::error_already_set e) {
-// 		std::cout << "NextGen crashed with Python Exception:\n";
-// 		PyErr_Print();
-// 	} catch (std::exception& e) {
-//  		std::cout << "NextGen crashed with std::exception.\n";
-//  		std::cout << e.what();
-//  		std::cout << "\n";
-//  	} catch (...) {
-//  		std::cout << "NextGen crashed with an unknown exception.\n";
-//  	}
+	} catch (boost::python::error_already_set e) {
+		std::cout << "NextGen crashed with Python Exception:\n";
+		PyErr_Print();
+	} catch (std::exception& e) {
+ 		std::cout << "NextGen crashed with std::exception.\n";
+ 		std::cout << e.what();
+ 		std::cout << "\n";
+ 	} catch (...) {
+ 		std::cout << "NextGen crashed with an unknown exception.\n";
+ 	}
 }
