@@ -1,0 +1,3 @@
+build E 10
+print
+tree

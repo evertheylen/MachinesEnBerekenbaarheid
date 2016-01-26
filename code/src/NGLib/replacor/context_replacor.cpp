@@ -3,15 +3,10 @@
 #include "context_replacor.hpp"
 
 ContextReplacor::ContextReplacor(TiXmlElement* elem, std::random_device::result_type seed):
-	CfgReplacor(elem->FirstChildElement()), mt(seed) {  // TODO
-// 	for (auto& it: cfg.m_rules) {
-// 		for (auto& it_2: cfg.m_rules) {
-// 			it.second.fill_table(it_2.second.get_num());
-// 		}
-// 	}
-}
+	CfgReplacor(elem->FirstChildElement()) {}
 
-unsigned int ContextReplacor::replace(std::string var, std::list<unsigned int>& context) {
+
+unsigned int ContextReplacor::replace(const std::string& var, std::list<unsigned int>& context) {
 //	std::cout << "    --> replacing " << var << " with context: ";
 //	for (auto i: context) std::cout << i;
 // 	std::cout << "\n";

@@ -16,8 +16,7 @@ public:
 	Replacor() = default;
 	
 	// a list so popping and pushing is easy
-	// TODO: string refs look hackerish and error-prone
-	virtual unsigned int replace(std::string var, std::list<unsigned int>& context) = 0;
+	virtual unsigned int replace(const std::string& var, std::list<unsigned int>& context) = 0;
 	
 	virtual bool replaceable(const std::string& symb) = 0;
 	// in a CFG bounded class, this would be `return is_var(var)`

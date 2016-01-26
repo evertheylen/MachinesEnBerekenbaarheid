@@ -209,7 +209,7 @@ public:
 	}
 
 	std::string create_variable(const std::string& name) {
-		assert(!this->is_variable(name)); // TODO propose other alternative instead of failing
+		assert(!this->is_variable(name));
 		this->V.insert(name);
 		return name;
 	}
