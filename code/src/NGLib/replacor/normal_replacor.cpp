@@ -1,7 +1,7 @@
 #include "normal_replacor.hpp"
 
 
-unsigned int NormalReplacor::replace(std::string var, std::list<unsigned int>& context) {
+unsigned int NormalReplacor::replace(const std::string& var, std::list<unsigned int>& context) {
 	std::uniform_int_distribution<int> dist(0, 99);
 	int picked_rule = dist(mt);
 	double prev_chance = 0;

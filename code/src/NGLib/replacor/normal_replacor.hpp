@@ -21,9 +21,9 @@ public:
 	NormalReplacor() {};
 	
 	NormalReplacor(TiXmlElement* elem, std::random_device::result_type seed):
-			CfgReplacor(elem->FirstChildElement()), mt(seed) {} // TODO
+			CfgReplacor(elem->FirstChildElement()), mt(seed) {}
 	
-	unsigned int replace(std::string var, std::list<unsigned int>& context);
+	unsigned int replace(const std::string& var, std::list<unsigned int>& context);
 	
 	TiXmlElement* to_xml();
 	

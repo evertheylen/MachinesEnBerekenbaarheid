@@ -1,6 +1,6 @@
 #include "stochastic_replacor.hpp"
 
-unsigned int StochasticReplacor::replace(std::string var, std::list<unsigned int>& context) {
+unsigned int StochasticReplacor::replace(const std::string& var, std::list<unsigned int>& context) {
 	std::uniform_real_distribution<double> dist(0, 1);
 	double picked_rule = dist(mt);
 	double prev_chance = 0;

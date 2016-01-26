@@ -24,7 +24,7 @@ public:
 	
 	ContextReplacor(TiXmlElement* elem, std::random_device::result_type seed);
 	
-	unsigned int replace(std::string var, std::list<unsigned int>& context);
+	unsigned int replace(const std::string& var, std::list<unsigned int>& context);
 	
 	TiXmlElement* to_xml();
 	

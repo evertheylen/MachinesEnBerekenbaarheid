@@ -138,7 +138,6 @@ int main(int argc, char** argv) {
 						std::cout << "Couldn't parse number\n";
 						continue;
 					}
-					// TODO proper errors?
 				}
 				
 				tree.reset(t.generate(startsymbol, max_repl));
@@ -160,7 +159,13 @@ int main(int argc, char** argv) {
 					std::cout << "'score' needs a score.\n";
 					continue;
 				}
-				double score = std::stod(cmds[1]);
+				double score;
+				try {
+					score = std::stod(cmds[1]);
+				} catch (std::invalid_argument& e) {
+					std::cout << "Couldn't parse number\n";
+					continue;
+				}
 				t.score(*tree, score);
 			} else if (cmds[0] == "earley") {
 				if (cmds.size() == 1) {
