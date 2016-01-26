@@ -5,20 +5,32 @@
 std::vector<std::string> split(const std::string& s) {
 	std::vector<std::string> result;
 	std::string buf;
+	bool escaped = false;
 	for (char c: s) {
-		if (buf.size() == 0) {
-			if (c == '[') {
+		if (c == '%') {
+			if (escaped) {
+				result.push_back("%");
+				escaped = false;
+			} else {
+				escaped = true;
+			}
+		} else if (buf.size() == 0) {
+			if (c == '[' and not escaped) {
 				buf += '[';
 			} else {
-				result.push_back(std::string(1,c));
+				buf += '[';
+				result.push_back(buf);
+				buf.clear();
+				escaped = false;
 			}
 		} else {
-			if (c == ']') {
+			if (c == ']' and not escaped) {
 				buf += ']';
 				result.push_back(buf);
 				buf.clear();
 			} else {
 				buf += c;
+				escaped = false;
 			}
 		}
 	}

@@ -194,8 +194,10 @@ public:
 
 		auto term_el = root->FirstChildElement("Terminals");
 		if (term_el == nullptr) throw SyntacticError("No Terminals element");
-		for (auto s: split(std::string(term_el->GetText()))) {
-			this->T.insert(s);
+		if (term_el->GetText() != nullptr) {
+			for (auto s: split(std::string(term_el->GetText()))) {
+				this->T.insert(s);
+			}
 		}
 		
 		auto prod_el = root->FirstChildElement("Productions");

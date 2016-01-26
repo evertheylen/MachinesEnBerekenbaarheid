@@ -84,8 +84,24 @@ except StopIteration:
     pass
 
 
-#for (k, v) in CFG.items():
-    #print(k, " --> ", repr(v))
+def print_xml():
+    print("<Variables>")
+    for var in CFG:
+        print("[" + var + "]", end="")
+    print("</Variables>\n")
+    
+    print("<Terminals></Terminals>\n")
+    
+    print("<Productions>")
+    ID = 0
+    for (k, l) in CFG.items():
+        for v in l:
+            ID += 1
+            print("<Rule LHS=\"[{var}]\" RHS=\"{string}\" ID=\"{ID}\"/>".format(var=k, ID=ID,
+                    string="".join(["[" + i + "]" if i in CFG else i for i in v]).replace('"', "&quot;")))
+    print("</Productions>\n")
+
+print_xml()
 
 def generate(var):
     print(var)
