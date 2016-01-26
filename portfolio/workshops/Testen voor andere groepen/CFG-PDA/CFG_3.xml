@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<!-- CFG is ambiguous -->
+<!-- test the resulting PDA on some strings like:
+		in language:
+			0001111000
+			00
+			11
+			1
+			0
+			
+		not in language:
+			10000
+			0011000
+	
+	If there is no algo for execution of a PDA, convert it back to CFG, then use CYK :)
+-->
+
+<CFG>
+	<Variables>
+        S
+        <StartSymbol>S</StartSymbol>
+	</Variables>
+	<Terminals>
+		01
+	</Terminals>
+	<Productions>
+		<Rule LHS="S" RHS= ""/>
+		<Rule LHS="S" RHS= "0S0|0"/>
+		<Rule LHS="S" RHS= "1S1|1"/>
+	</Productions>
+</CFG>

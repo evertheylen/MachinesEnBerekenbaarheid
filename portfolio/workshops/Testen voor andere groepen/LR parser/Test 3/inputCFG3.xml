@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<CFG>
+	<Variables>
+				S
+				C
+        <StartSymbol>S</StartSymbol>
+	</Variables>
+	<Terminals>
+	  	c
+			d
+	</Terminals>
+	<Productions>
+        <Rule LHS="S" RHS= "CC"/>
+				<Rule LHS="C" RHS= "cC"/>
+				<Rule LHS="C" RHS= "d"/>
+	</Productions>
+</CFG>

@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<CFG>
+	<Variables>
+        S
+				A
+        <StartSymbol>S</StartSymbol>
+	</Variables>
+	<Terminals>
+	    ab
+	</Terminals>
+	<Productions>
+        <Rule LHS="S" RHS= "A|a|b"/>
+				<Rule LHS="A" RHS= "epsilon"/>
+	</Productions>
+</CFG>
